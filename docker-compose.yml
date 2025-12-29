@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  rodetes-app:
+    build: .
+    container_name: rodetes_app
+    restart: always
+    ports:
+      - "8080:80"
+    environment:
+      - ADMIN_EMAIL=admin@rodetes.com
+      - ADMIN_PASSWORD=admin
+    volumes:
+      - ./data_private:/var/www/data_private
+      - ./uploads:/var/www/html/uploads
