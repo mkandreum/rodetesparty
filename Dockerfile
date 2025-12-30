@@ -8,9 +8,14 @@ RUN apt-get update && apt-get install -y \
 
 # Habilitar mod_rewrite
 RUN a2enmod rewrite
+# Fix "Could not reliably determine the server's fully qualified domain name"
+RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf
 
 # Copiar el código fuente
 COPY . /var/www/html/
+
+# Copiar configuración personalizada de PHP (Uploads limit)
+COPY uploads.ini /usr/local/etc/php/conf.d/uploads.ini
 
 # Copiar script de entrypoint y hacerlo ejecutable
 COPY docker-entrypoint.sh /docker-entrypoint.sh
