@@ -57,8 +57,7 @@ $adminEmail = isset($_SESSION['admin_email']) ? $_SESSION['admin_email'] : '';
     <title>Rodetes Party - Eventos</title>
 
     <!-- Tailwind CSS -->
-    <!-- Tailwind CSS (Static Build) -->
-    <!-- <script src="https://cdn.tailwindcss.com"></script> REMOVED FOR PERFORMANCE -->
+    <script src="https://cdn.tailwindcss.com"></script>
 
     <!-- QR Code Generator -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -74,6 +73,7 @@ $adminEmail = isset($_SESSION['admin_email']) ? $_SESSION['admin_email'] : '';
 
     <!-- Hoja de estilos principal -->
     <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css">
 
     <style>
 /* Variables para el color neón (JS las actualizará) */
