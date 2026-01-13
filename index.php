@@ -147,8 +147,16 @@ $adminEmail = isset($_SESSION['admin_email']) ? $_SESSION['admin_email'] : '';
             transition: padding-top 0.3s ease-in-out;
         }
 
+        @media (max-width: 639px) {
+            body { padding-top: 128px; }
+        }
+
         body.promo-active {
             padding-top: 120px;
+        }
+
+        @media (max-width: 639px) {
+            body.promo-active { padding-top: 168px; }
         }
 
         #secondary-nav-container {
