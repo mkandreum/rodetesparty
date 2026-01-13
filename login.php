@@ -26,6 +26,6 @@ if ($email === $validEmail && $clientHash === $validPasswordHash) {
 } else {
     http_response_code(401);
     error_log("Login Failed. Expected Hash: " . $validPasswordHash);
-    echo json_encode(['success' => false, 'message' => 'Credenciales incorrectas. DEBUG: Recibido: ' . $clientHash . ' | Esperado: ' . $validPasswordHash]);
+    echo json_encode(['success' => false, 'message' => 'Credenciales incorrectas']);
 }
 ?>
