@@ -876,8 +876,8 @@ $adminEmail = isset($_SESSION['admin_email']) ? $_SESSION['admin_email'] : '';
         window.PHP_ADMIN_EMAIL = <?php echo json_encode($adminEmail); ?>;
     </script>
 
-    <!-- App Principal (Carga diferida) -->
-    <script src="app.js" defer></script>
+    <!--  App Principal (Carga diferida) -->
+    <script src="app.js?v=<?php echo time(); ?>" defer></script>
 
 </body>
 </html>
