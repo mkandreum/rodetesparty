@@ -2216,43 +2216,46 @@ window.addEventListener('DOMContentLoaded', async () => {
 
 		// Guardar selección actual antes de limpiar
 		const previousSelectedDragId = adminMerchSelectDrag.value;
+		console.log("renderAdminMerch - Previous selection:", previousSelectedDragId);
 
-		// Poblar select de Drags ordenadas
+		// Poblar select: Placeholder + Web Merch + Drags
 		adminMerchSelectDrag.innerHTML = '<option value="">-- SELECCIONA UNA DRAG --</option>';
+
+		// PRIMERO: Añadir opción Web Merch
+		const webOption = document.createElement('option');
+		webOption.value = 'web';
+		webOption.textContent = 'RODETES OFICIAL (WEB MERCH)';
+		webOption.style.fontWeight = 'bold';
+		webOption.style.color = '#F02D7D';
+		adminMerchSelectDrag.appendChild(webOption);
+
+		// SEGUNDO: Añadir drags ordenadas
 		[...(appState.drags)]
 			.sort((a, b) => (a.name || '').localeCompare(b.name || ''))
 			.forEach(drag => {
 				const option = document.createElement('option');
 				option.value = drag.id;
-				option.textContent = drag.name || `Drag ID ${drag.id}`; // Fallback
+				option.textContent = drag.name || `Drag ID ${drag.id}`;
 				adminMerchSelectDrag.appendChild(option);
 			});
 
-		// Restaurar selección si la drag todavía existe
-		if (previousSelectedDragId && appState.drags.some(d => d.id === parseInt(previousSelectedDragId))) {
-			adminMerchSelectDrag.value = previousSelectedDragId;
-			currentAdminMerchDragId = parseInt(previousSelectedDragId); // Actualizar estado global
-		} else {
-			// Si no es web y no es drag válida, reset
-			if (previousSelectedDragId !== 'web') {
-				currentAdminMerchDragId = null;
-				adminMerchSelectDrag.value = "";
-			}
-		}
+		console.log("renderAdminMerch - Options added. Total:", adminMerchSelectDrag.options.length);
 
-		// NUEVO: Manejar selección 'web' si estaba seleccionada previamente
+		// TERCERO: Restaurar selección si es válida
 		if (previousSelectedDragId === 'web') {
 			adminMerchSelectDrag.value = 'web';
 			currentAdminMerchDragId = 'web';
+			console.log("renderAdminMerch - Restored Web Merch");
+		} else if (previousSelectedDragId && appState.drags.some(d => d.id === parseInt(previousSelectedDragId))) {
+			adminMerchSelectDrag.value = previousSelectedDragId;
+			currentAdminMerchDragId = parseInt(previousSelectedDragId);
+			console.log("renderAdminMerch - Restored drag:", currentAdminMerchDragId);
+		} else {
+			// No hay selección válida previa
+			currentAdminMerchDragId = null;
+			adminMerchSelectDrag.value = "";
+			console.log("renderAdminMerch - No valid previous selection");
 		}
-
-		// NUEVO: Añadir opción Web Merch al principio
-		const webOption = document.createElement('option');
-		webOption.value = 'web';
-		webOption.textContent = 'RODETES OFICIAL (WEB MERCH)';
-		webOption.style.fontWeight = 'bold';
-		webOption.style.color = '#F02D7D'; // Destacar
-		adminMerchSelectDrag.insertBefore(webOption, adminMerchSelectDrag.firstChild.nextSibling); // Insertar después del placeholder
 
 		// Renderizar lista de items o mensaje según la selección
 		adminMerchListContainer.innerHTML = '';
