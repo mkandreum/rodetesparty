@@ -19,13 +19,22 @@ error_log("Client Hash: '" . $clientHash . "'");
 // Calcular hash de la contraseña correcta
 $validPasswordHash = hash('sha256', $validPassword);
 
+
 if ($email === $validEmail && $clientHash === $validPasswordHash) {
     $_SESSION['is_logged_in'] = true;
     $_SESSION['admin_email'] = $email;
     echo json_encode(['success' => true]);
 } else {
     http_response_code(401);
-    error_log("Login Failed. Expected Hash: " . $validPasswordHash);
-    echo json_encode(['success' => false, 'message' => 'Credenciales incorrectas']);
+    
+    // Provide more specific error messages
+    if ($email !== $validEmail) {
+        error_log("Login Failed: Email mismatch. Got: '$email', Expected: '$validEmail'");
+        echo json_encode(['success' => false, 'message' => 'Email incorrecto']);
+    } else {
+        error_log("Login Failed: Password hash mismatch. Expected Hash: " . $validPasswordHash);
+        echo json_encode(['success' => false, 'message' => 'Contraseña incorrecta']);
+    }
 }
+
 ?>
