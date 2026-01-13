@@ -2232,8 +2232,12 @@ window.addEventListener('DOMContentLoaded', async () => {
 		if (previousSelectedDragId && appState.drags.some(d => d.id === parseInt(previousSelectedDragId))) {
 			adminMerchSelectDrag.value = previousSelectedDragId;
 			currentAdminMerchDragId = parseInt(previousSelectedDragId); // Actualizar estado global
-			currentAdminMerchDragId = null;
-			adminMerchSelectDrag.value = ""; // Asegurar que el placeholder esté seleccionado
+		} else {
+			// Si no es web y no es drag válida, reset
+			if (previousSelectedDragId !== 'web') {
+				currentAdminMerchDragId = null;
+				adminMerchSelectDrag.value = "";
+			}
 		}
 
 		// NUEVO: Manejar selección 'web' si estaba seleccionada previamente
