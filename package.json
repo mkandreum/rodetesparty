@@ -1,0 +1,12 @@
+{
+  "name": "rodetes-app",
+  "version": "1.0.0",
+  "description": "Rodetes Party Web App",
+  "scripts": {
+    "build:css": "tailwindcss -i ./style_src.css -o ./style.css --minify",
+    "watch:css": "tailwindcss -i ./style_src.css -o ./style.css --watch"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.1"
+  }
+}
