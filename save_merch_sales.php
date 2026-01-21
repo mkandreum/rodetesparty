@@ -55,6 +55,9 @@ if (file_put_contents($dataFile, json_encode($newSales, JSON_PRETTY_PRINT)) !== 
             $appStateJson = file_get_contents($appStateFile);
             $appState = json_decode($appStateJson, true);
 
+            // Obtener URL del logo de la app
+            $logoUrl = $appState['appLogoUrl'] ?? 'https://rodetesparty.com/uploads/logo.png';
+
             foreach ($newlyAddedSales as $sale) {
                 if (empty($sale['email']))
                     continue;
@@ -62,17 +65,20 @@ if (file_put_contents($dataFile, json_encode($newSales, JSON_PRETTY_PRINT)) !== 
                 $dragId = $sale['dragId'];
                 $itemName = $sale['itemName'] ?? 'Artículo';
                 $itemPrice = $sale['itemPrice'] ?? 0;
+                // NUEVO: Recuperar URL de la imagen (debe haber sido guardada desde app.js)
+                $imageUrl = $sale['imageUrl'] ?? '';
 
                 // Simular itemData para las funciones de template
                 $itemData = [
                     'name' => $itemName,
-                    'price' => $itemPrice
+                    'price' => $itemPrice,
+                    'imageUrl' => $imageUrl
                 ];
 
                 if ($dragId === 'web') {
                     // Email para Web Merch
                     $subject = "Confirmación de compra - {$itemName}";
-                    $body = generateWebMerchEmailHTML($sale, $itemData);
+                    $body = generateWebMerchEmailHTML($sale, $itemData, $logoUrl);
 
                     $result = sendEmail($sale['email'], $subject, $body);
                     if (!$result['success']) {
@@ -86,7 +92,7 @@ if (file_put_contents($dataFile, json_encode($newSales, JSON_PRETTY_PRINT)) !== 
 
                     if (!empty($rodetesEmail)) {
                         $sellerSubject = "💰 Nueva Venta Web: {$itemName}";
-                        $sellerBody = generateSellerNotificationHTML($sale, $itemData, true);
+                        $sellerBody = generateSellerNotificationHTML($sale, $itemData, true, $logoUrl);
 
                         $res = sendEmail($rodetesEmail, $sellerSubject, $sellerBody);
                         if (!$res['success']) {
@@ -123,7 +129,7 @@ if (file_put_contents($dataFile, json_encode($newSales, JSON_PRETTY_PRINT)) !== 
                         $customMessage = str_replace('{dragName}', $drag['name'], $customMessage);
 
                         $subject = "Confirmación de compra - {$itemName} de {$drag['name']}";
-                        $body = generateDragMerchEmailHTML($sale, $itemData, $drag, $customMessage);
+                        $body = generateDragMerchEmailHTML($sale, $itemData, $drag, $customMessage, $logoUrl);
 
                         $result = sendEmail($sale['email'], $subject, $body);
                         if (!$result['success']) {
@@ -135,7 +141,7 @@ if (file_put_contents($dataFile, json_encode($newSales, JSON_PRETTY_PRINT)) !== 
 
                         if (!empty($dragNotifEmail)) {
                             $sellerSubject = "💰 Nueva Venta Drag: {$itemName}";
-                            $sellerBody = generateSellerNotificationHTML($sale, $itemData, false);
+                            $sellerBody = generateSellerNotificationHTML($sale, $itemData, false, $logoUrl);
 
                             $res = sendEmail($dragNotifEmail, $sellerSubject, $sellerBody);
                             if (!$res['success']) {

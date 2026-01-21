@@ -44,6 +44,7 @@ if (!$ticket) {
 $appStateFile = '/var/www/data_private/datos_app.json';
 $appState = json_decode(file_get_contents($appStateFile), true);
 $events = $appState['events'] ?? [];
+$logoUrl = $appState['appLogoUrl'] ?? ''; // Obtener logo
 $event = null;
 
 foreach ($events as $ev) {
@@ -61,7 +62,7 @@ if (!$event) {
 
 // Generar y enviar email
 $subject = "REENVÍO: Tu entrada para {$event['name']} - Rodetes Party";
-$body = generateTicketEmailHTML($ticket, $event);
+$body = generateTicketEmailHTML($ticket, $event, $logoUrl);
 $result = sendEmail($email, $subject, $body);
 
 if ($result['success']) {

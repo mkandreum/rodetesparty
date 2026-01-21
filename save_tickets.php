@@ -54,6 +54,7 @@ if (file_put_contents($dataFile, json_encode($newTickets, JSON_PRETTY_PRINT)) !=
             $appStateJson = file_get_contents($appStateFile);
             $appState = json_decode($appStateJson, true);
             $events = $appState['events'] ?? [];
+            $logoUrl = $appState['appLogoUrl'] ?? ''; // Obtener logo
 
             foreach ($newlyAddedTickets as $ticket) {
                 // Buscar el evento correspondiente
@@ -67,7 +68,7 @@ if (file_put_contents($dataFile, json_encode($newTickets, JSON_PRETTY_PRINT)) !=
 
                 if ($event && !empty($ticket['email'])) {
                     $subject = "Tu entrada para {$event['name']} - Rodetes Party";
-                    $body = generateTicketEmailHTML($ticket, $event);
+                    $body = generateTicketEmailHTML($ticket, $event, $logoUrl); // Pasar logo
 
                     // Intentar enviar email (no bloqueante si falla)
                     $result = sendEmail($ticket['email'], $subject, $body);

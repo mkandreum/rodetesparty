@@ -68,14 +68,20 @@ function sendEmail($to, $subject, $body, $attachments = [])
     }
 }
 
+
 // Función para generar HTML del email de ticket
-function generateTicketEmailHTML($ticketData, $eventData)
+function generateTicketEmailHTML($ticketData, $eventData, $logoUrl = '')
 {
     $buyerName = htmlspecialchars($ticketData['nombre'] . ' ' . $ticketData['apellidos']);
     $eventName = htmlspecialchars($eventData['name']);
     $eventDate = date('d/m/Y H:i', strtotime($eventData['date']));
     $quantity = $ticketData['quantity'];
     $ticketId = htmlspecialchars($ticketData['ticketId']);
+
+    // Usar logo por defecto si no se pasa
+    if (empty($logoUrl)) {
+        $logoUrl = 'https://rodetesparty.com/uploads/logo.png';
+    }
 
     $html = "
     <!DOCTYPE html>
@@ -85,22 +91,23 @@ function generateTicketEmailHTML($ticketData, $eventData)
         <style>
             body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
             .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-            .header { background: #000; color: #fff; padding: 20px; text-align: center; }
+            .header-logo { text-align: center; padding-bottom: 20px; background: #000; }
+            .header-title { background: #000; color: #F02D7D; padding: 10px 20px 20px; text-align: center; }
             .content { background: #f4f4f4; padding: 30px; }
             .ticket-info { background: #fff; padding: 20px; margin: 20px 0; border: 2px solid #F02D7D; }
             .qr-container { text-align: center; margin: 20px 0; }
             .footer { text-align: center; padding: 20px; color: #666; font-size: 12px; }
-            h1 { color: #F02D7D; margin: 0; }
+            h1 { margin: 0; font-size: 24px; text-transform: uppercase; }
             .highlight { color: #F02D7D; font-weight: bold; }
         </style>
     </head>
     <body>
         <div class='container'>
-            <div class='header'>
-                <div style='margin-bottom: 10px;'>
-                     <img src='https://rodetesparty.com/uploads/logo.png' alt='Rodetes Party' style='max-height: 50px; display: block; margin: 0 auto;' onerror='this.style.display=\"none\"'>
-                </div>
-                <h1>🎉 TU ENTRADA PARA RODETES PARTY</h1>
+            <div class='header-logo'>
+                 <img src='$logoUrl' alt='Rodetes Party' style='max-height: 50px; display: block; margin: 0 auto;' onerror='this.style.display=\"none\"'>
+            </div>
+            <div class='header-title'>
+                <h1>🎉 TU ENTRADA</h1>
             </div>
             <div class='content'>
                 <p>Hola <strong>$buyerName</strong>,</p>
@@ -120,6 +127,8 @@ function generateTicketEmailHTML($ticketData, $eventData)
                 
                 <p><strong style='color: #F02D7D;'>⚠️ IMPORTANTE:</strong> Guarda este email. Necesitarás mostrar el QR en la entrada.</p>
                 
+                <p>También hemos enviado la entrada a este email: <strong>" . htmlspecialchars($ticketData['email']) . "</strong></p>
+                
                 <p style='margin-top: 30px;'>¡Te esperamos! 🎊</p>
                 <p><strong>Rodetes Party</strong></p>
             </div>
@@ -135,12 +144,25 @@ function generateTicketEmailHTML($ticketData, $eventData)
 }
 
 // Función para generar HTML del email de Web Merch
-function generateWebMerchEmailHTML($saleData, $itemData)
+function generateWebMerchEmailHTML($saleData, $itemData, $logoUrl = '')
 {
     $buyerName = htmlspecialchars($saleData['nombre'] . ' ' . $saleData['apellidos']);
     $itemName = htmlspecialchars($itemData['name']);
     $quantity = $saleData['quantity'];
     $total = number_format($saleData['quantity'] * $itemData['price'], 2);
+    $itemImage = $itemData['imageUrl'] ?? '';
+
+    if (empty($logoUrl)) {
+        $logoUrl = 'https://rodetesparty.com/uploads/logo.png';
+    }
+
+    $productImageHtml = '';
+    if (!empty($itemImage)) {
+        $productImageHtml = "
+        <div style='text-align: center; margin: 20px 0;'>
+             <img src='$itemImage' alt='$itemName' style='max-width: 200px; border: 1px solid #ddd; max-height: 200px; object-fit: contain;' onerror='this.style.display=\"none\"'>
+        </div>";
+    }
 
     $html = "
     <!DOCTYPE html>
@@ -150,22 +172,28 @@ function generateWebMerchEmailHTML($saleData, $itemData)
         <style>
             body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
             .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-            .header { background: #000; color: #fff; padding: 20px; text-align: center; }
+            .header-logo { text-align: center; padding-bottom: 20px; background: #000; }
+            .header-title { background: #000; color: #F02D7D; padding: 10px 20px 20px; text-align: center; }
             .content { background: #f4f4f4; padding: 30px; }
             .purchase-info { background: #fff; padding: 20px; margin: 20px 0; border: 2px solid #F02D7D; }
             .footer { text-align: center; padding: 20px; color: #666; font-size: 12px; }
-            h1 { color: #F02D7D; margin: 0; }
+            h1 { margin: 0; font-size: 24px; text-transform: uppercase; }
             .highlight { color: #F02D7D; font-weight: bold; }
         </style>
     </head>
     <body>
         <div class='container'>
-            <div class='header'>
+            <div class='header-logo'>
+                 <img src='$logoUrl' alt='Rodetes Party' style='max-height: 50px; display: block; margin: 0 auto;' onerror='this.style.display=\"none\"'>
+            </div>
+            <div class='header-title'>
                 <h1>✅ CONFIRMACIÓN DE COMPRA</h1>
             </div>
             <div class='content'>
                 <p>Hola <strong>$buyerName</strong>,</p>
                 <p>¡Gracias por tu compra!</p>
+                
+                $productImageHtml
                 
                 <div class='purchase-info'>
                     <p><strong>Artículo:</strong> <span class='highlight'>$itemName</span></p>
@@ -191,14 +219,27 @@ function generateWebMerchEmailHTML($saleData, $itemData)
 }
 
 // Función para generar HTML del email de Drag Merch
-function generateDragMerchEmailHTML($saleData, $itemData, $dragData, $customMessage = '')
+function generateDragMerchEmailHTML($saleData, $itemData, $dragData, $customMessage = '', $logoUrl = '')
 {
     $buyerName = htmlspecialchars($saleData['nombre'] . ' ' . $saleData['apellidos']);
     $itemName = htmlspecialchars($itemData['name']);
     $dragName = htmlspecialchars($dragData['name']);
     $quantity = $saleData['quantity'];
     $total = number_format($saleData['quantity'] * $itemData['price'], 2);
+    $itemImage = $itemData['imageUrl'] ?? '';
     $customMessageHTML = $customMessage ? "<p><em>" . nl2br(htmlspecialchars($customMessage)) . "</em></p>" : "";
+
+    if (empty($logoUrl)) {
+        $logoUrl = 'https://rodetesparty.com/uploads/logo.png';
+    }
+
+    $productImageHtml = '';
+    if (!empty($itemImage)) {
+        $productImageHtml = "
+        <div style='text-align: center; margin: 20px 0;'>
+             <img src='$itemImage' alt='$itemName' style='max-width: 200px; border: 1px solid #ddd; max-height: 200px; object-fit: contain;' onerror='this.style.display=\"none\"'>
+        </div>";
+    }
 
     $html = "
     <!DOCTYPE html>
@@ -208,24 +249,30 @@ function generateDragMerchEmailHTML($saleData, $itemData, $dragData, $customMess
         <style>
             body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
             .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-            .header { background: #000; color: #fff; padding: 20px; text-align: center; }
+            .header-logo { text-align: center; padding-bottom: 20px; background: #000; }
+            .header-title { background: #000; color: #F02D7D; padding: 10px 20px 20px; text-align: center; }
             .content { background: #f4f4f4; padding: 30px; }
             .purchase-info { background: #fff; padding: 20px; margin: 20px 0; border: 2px solid #F02D7D; }
             .custom-message { background: #fff9e6; padding: 15px; margin: 20px 0; border-left: 4px solid #F02D7D; }
             .footer { text-align: center; padding: 20px; color: #666; font-size: 12px; }
-            h1 { color: #F02D7D; margin: 0; }
+            h1 { margin: 0; font-size: 24px; text-transform: uppercase; }
             .highlight { color: #F02D7D; font-weight: bold; }
         </style>
     </head>
     <body>
         <div class='container'>
-            <div class='header'>
+            <div class='header-logo'>
+                 <img src='$logoUrl' alt='Rodetes Party' style='max-height: 50px; display: block; margin: 0 auto;' onerror='this.style.display=\"none\"'>
+            </div>
+             <div class='header-title'>
                 <h1>✅ CONFIRMACIÓN DE COMPRA</h1>
             </div>
             <div class='content'>
                 <p>Hola <strong>$buyerName</strong>,</p>
                 <p>¡Gracias por tu compra!</p>
                 
+                $productImageHtml
+
                 <div class='purchase-info'>
                     <p><strong>Artículo:</strong> <span class='highlight'>$itemName</span></p>
                     <p><strong>De:</strong> <span class='highlight'>$dragName</span></p>
@@ -253,16 +300,29 @@ function generateDragMerchEmailHTML($saleData, $itemData, $dragData, $customMess
 }
 
 // Función para generar HTML de notificación al vendedor (Rodetes o Drag)
-function generateSellerNotificationHTML($saleData, $itemData, $isWebMerch)
+function generateSellerNotificationHTML($saleData, $itemData, $isWebMerch, $logoUrl = '')
 {
     $buyerName = htmlspecialchars($saleData['nombre'] . ' ' . $saleData['apellidos']);
     $buyerEmail = htmlspecialchars($saleData['email']);
     $itemName = htmlspecialchars($itemData['name']);
     $quantity = $saleData['quantity'];
     $total = number_format($saleData['quantity'] * $itemData['price'], 2);
+    $itemImage = $itemData['imageUrl'] ?? '';
 
     $title = $isWebMerch ? "NUEVA VENTA WEB MERCH" : "¡NUEVA VENTA DE TU MERCH!";
     $color = $isWebMerch ? "#F02D7D" : "#9C27B0"; // Rosa para web, Morado para drag
+
+    if (empty($logoUrl)) {
+        $logoUrl = 'https://rodetesparty.com/uploads/logo.png';
+    }
+
+    $productImageHtml = '';
+    if (!empty($itemImage)) {
+        $productImageHtml = "
+        <div style='text-align: center; margin: 20px 0;'>
+             <img src='$itemImage' alt='$itemName' style='max-width: 200px; border: 1px solid #ddd; max-height: 200px; object-fit: contain;' onerror='this.style.display=\"none\"'>
+        </div>";
+    }
 
     $html = "
     <!DOCTYPE html>
@@ -272,23 +332,29 @@ function generateSellerNotificationHTML($saleData, $itemData, $isWebMerch)
         <style>
             body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
             .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-            .header { background: #000; color: #fff; padding: 20px; text-align: center; border-bottom: 4px solid $color; }
+            .header-logo { text-align: center; padding-bottom: 20px; background: #000; }
+            .header-title { background: #000; color: #fff; padding: 10px 20px 20px; text-align: center; border-bottom: 4px solid $color; }
             .content { background: #f4f4f4; padding: 30px; }
             .sale-info { background: #fff; padding: 20px; margin: 20px 0; border-left: 5px solid $color; }
             .buyer-info { background: #e8e8e8; padding: 15px; margin-top: 20px; border-radius: 5px; }
             .footer { text-align: center; padding: 20px; color: #666; font-size: 12px; }
-            h1 { color: #fff; margin: 0; }
+            h1 { margin: 0; font-size: 20px; }
             .highlight { color: $color; font-weight: bold; }
         </style>
     </head>
     <body>
         <div class='container'>
-            <div class='header'>
+             <div class='header-logo'>
+                 <img src='$logoUrl' alt='Rodetes Party' style='max-height: 50px; display: block; margin: 0 auto;' onerror='this.style.display=\"none\"'>
+            </div>
+            <div class='header-title'>
                 <h1>💰 $title</h1>
             </div>
             <div class='content'>
                 <p>¡Hola! Se ha registrado una nueva venta.</p>
                 
+                $productImageHtml
+
                 <div class='sale-info'>
                     <p><strong>Artículo:</strong> <span class='highlight'>$itemName</span></p>
                     <p><strong>Cantidad:</strong> $quantity</p>

@@ -1996,6 +1996,8 @@ window.addEventListener('DOMContentLoaded', async () => {
 				nombre: userName,
 				apellidos: userSurname,
 				email: userEmail,
+				// NUEVO: Guardar imagen del item para emails
+				imageUrl: item.imageUrl || '',
 				saleDate: saleDate,
 				status: 'Pending' // Estado inicial: Pendiente de entrega/pago
 			};
