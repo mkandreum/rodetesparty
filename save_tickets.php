@@ -16,27 +16,24 @@ if ($newTickets === null) {
 }
 
 // --- Protección ---
-if (!$isAdmin) {
-    $currentTicketsJson = file_exists($dataFile) ? file_get_contents($dataFile) : '[]';
-    $currentTickets = json_decode($currentTicketsJson, true) ?: [];
+// NUEVO: Detectar tickets nuevos para enviar email (Aplica a todos, incluido Admin)
+$currentTicketsJson = file_exists($dataFile) ? file_get_contents($dataFile) : '[]';
+$currentTickets = json_decode($currentTicketsJson, true) ?: [];
+$currentTicketIds = array_column($currentTickets, 'ticketId');
 
+// Encontrar tickets que son nuevos
+$newlyAddedTickets = [];
+foreach ($newTickets as $ticket) {
+    if (!in_array($ticket['ticketId'], $currentTicketIds)) {
+        $newlyAddedTickets[] = $ticket;
+    }
+}
+
+if (!$isAdmin) {
     if (count($newTickets) < count($currentTickets)) {
         http_response_code(403);
         echo json_encode(['success' => false, 'message' => 'Error: No puedes borrar entradas existentes.']);
         exit;
-    }
-
-    // NUEVO: Detectar tickets nuevos para enviar email
-    $currentTicketsJson = file_exists($dataFile) ? file_get_contents($dataFile) : '[]';
-    $currentTickets = json_decode($currentTicketsJson, true) ?: [];
-    $currentTicketIds = array_column($currentTickets, 'ticketId');
-
-    // Encontrar tickets que son nuevos
-    $newlyAddedTickets = [];
-    foreach ($newTickets as $ticket) {
-        if (!in_array($ticket['ticketId'], $currentTicketIds)) {
-            $newlyAddedTickets[] = $ticket;
-        }
     }
 }
 
@@ -47,8 +44,8 @@ if (!is_dir($dir)) {
 }
 
 if (file_put_contents($dataFile, json_encode($newTickets, JSON_PRETTY_PRINT)) !== false) {
-    // NUEVO: Enviar emails para tickets nuevos
-    if (!$isAdmin && !empty($newlyAddedTickets)) {
+    // NUEVO: Enviar emails para tickets nuevos (incluido Admin)
+    if (!empty($newlyAddedTickets)) {
         require_once __DIR__ . '/send_email.php';
 
         // Cargar eventos para obtener información
