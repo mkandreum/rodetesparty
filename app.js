@@ -1539,7 +1539,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 								<p class="text-white text-xs font-pixel truncate mb-1" title="${item.name}">${item.name}</p>
 								<p class="text-pink-500 font-bold text-sm mb-2">${price}€</p>
 								<button 
-									data-merch-id="${item.id}" 
+									data-item-id="${item.id}" 
 									data-drag-id="${drag.id}"
 									class="auto-buy-merch-btn w-full bg-white text-black text-xs font-pixel py-1 hover:bg-pink-500 hover:text-white transition-colors mt-auto rounded-none border border-gray-400">
 									COMPRAR
@@ -1689,26 +1689,63 @@ window.addEventListener('DOMContentLoaded', async () => {
 			dragsMerchListContainer.innerHTML = '<p class="text-gray-400 text-center col-span-full font-pixel">Ninguna drag tiene merch disponible aún.</p>';
 		} else {
 			dragsWithMerch.forEach(drag => {
-				// Crear tarjeta simplificada de Drag solo con botón de merch
 				const card = document.createElement('div');
-				card.className = "bg-gray-800 border border-white rounded-none p-4 flex flex-col transform transition-transform duration-300 hover:scale-[1.02]";
+				const cardColor = drag.cardColor && /^#[0-9A-F]{6}$/i.test(drag.cardColor) ? drag.cardColor : '#FFFFFF';
+				card.className = `bg-gray-900 rounded-none border overflow-hidden flex flex-col transform transition-all hover:border-gray-300 hover:shadow-white/30 duration-300`;
+				card.style.borderColor = cardColor;
 
-				const coverUrl = drag.coverImageUrl || `https://placehold.co/300x400/222/aaa?text=${encodeURIComponent(drag.name || '?')}&font=vt323`;
+				const imageUrl = drag.coverImageUrl || `https://placehold.co/400x400/000/fff?text=${encodeURIComponent(drag.name || 'Drag')}&font=vt323`;
+				const merchItems = drag.merchItems || [];
+
+				// Construcción del Carousel de Merch (Reutilizado)
+				let merchCarouselHtml = '';
+				if (merchItems.length > 0) {
+					let itemsHtml = '';
+					merchItems.forEach(item => {
+						const itemImage = item.imageUrl || `https://placehold.co/200x200/000/fff?text=${encodeURIComponent(item.name || 'Item')}&font=vt323`;
+						const price = (parseFloat(item.price) || 0).toFixed(2);
+						itemsHtml += `
+							<div class="flex-shrink-0 w-36 bg-black border border-gray-700 p-2 snap-center flex flex-col">
+								<div class="h-24 w-full bg-gray-900 mb-2 overflow-hidden flex items-center justify-center">
+									<img src="${itemImage}" alt="${item.name}" class="object-cover w-full h-full" onerror="this.src='https://placehold.co/200x200/000/fff?text=Error&font=vt323'">
+								</div>
+								<p class="text-white text-xs font-pixel truncate mb-1" title="${item.name}">${item.name}</p>
+								<p class="text-pink-500 font-bold text-sm mb-2">${price}€</p>
+								<button 
+									data-item-id="${item.id}" 
+									data-drag-id="${drag.id}"
+									class="auto-buy-merch-btn w-full bg-white text-black text-xs font-pixel py-1 hover:bg-pink-500 hover:text-white transition-colors mt-auto rounded-none border border-gray-400">
+									COMPRAR
+								</button>
+							</div>`;
+					});
+
+					merchCarouselHtml = `
+						<div class="mt-4 mb-2">
+							<h4 class="text-sm font-pixel text-pink-400 mb-2 border-b border-gray-800 pb-1">TIENDA OFICIAL:</h4>
+							<div class="flex gap-3 overflow-x-auto pb-4 snap-x scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-transparent">
+								${itemsHtml}
+							</div>
+						</div>`;
+				}
 
 				card.innerHTML = `
-					<div class="aspect-[3/4] bg-black mb-4 border border-gray-600 overflow-hidden relative group">
-						<img src="${coverUrl}" alt="${drag.name}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" onerror="this.onerror=null;this.src='https://placehold.co/300x400/222/aaa?text=Error&font=vt323';">
+					<div class="w-full bg-black border-b overflow-hidden" style="border-color: ${cardColor};">
+						<img src="${imageUrl}" alt="${drag.name || 'Drag'}" class="w-full" onerror="this.onerror=null;this.src='https://placehold.co/400x400/000/fff?text=Error&font=vt323';">
 					</div>
-					<h3 class="text-2xl font-pixel text-white mb-2 truncate text-glow-white">${drag.name}</h3>
-					<button data-drag-id="${drag.id}" class="mt-auto w-full bg-transparent border-2 border-white text-white font-pixel text-lg py-2 px-4 hover:bg-white hover:text-black transition-colors merch-view-drag-btn">
-						VER MERCH
-					</button>
+					<div class="p-6 flex flex-col flex-grow">
+						<h3 class="text-3xl font-pixel text-white text-glow-white mb-2 truncate glitch-hover">${drag.name || 'Drag'}</h3>
+						<div class="space-y-3 mt-auto">
+							<!-- Carrusel Merch -->
+							${merchCarouselHtml}
+						</div>
+					</div>
 				`;
 
 				dragsMerchListContainer.appendChild(card);
 
-				const btn = card.querySelector('.merch-view-drag-btn');
-				addTrackedListener(btn, 'click', handleShowMerch); // Reutilizamos handleShowMerch
+				// Listeners del carrusel
+				card.querySelectorAll('.auto-buy-merch-btn').forEach(btn => addTrackedListener(btn, 'click', handleMerchBuyClick));
 			});
 		}
 
