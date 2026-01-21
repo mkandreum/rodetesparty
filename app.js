@@ -360,6 +360,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 
 	// --- DOM Elements for NEW Drag Merch System ---
 	const dragMerchSelectDrag = document.getElementById('drag-merch-select-drag');
+	const addDragMerchBtn = document.getElementById('add-drag-merch-btn'); // NUEVO: Botón añadir
 	const dragMerchForm = document.getElementById('drag-merch-form');
 	const saveDragMerchBtn = document.getElementById('save-drag-merch-btn');
 	const cancelDragMerchBtn = document.getElementById('cancel-drag-merch-btn');
@@ -5909,6 +5910,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 
 	// ========== NUEVO: Listeners para Drag Merch System ==========
 	if (dragMerchSelectDrag) addTrackedListener(dragMerchSelectDrag, 'change', handleDragMerchSelectChange);
+	if (addDragMerchBtn) addTrackedListener(addDragMerchBtn, 'click', () => showDragMerchForm()); // NUEVO
 	if (dragMerchForm) addTrackedListener(dragMerchForm, 'submit', handleSaveDragMerch);
 	if (cancelDragMerchBtn) addTrackedListener(cancelDragMerchBtn, 'click', () => hideDragMerchForm());
 	if (dragMerchImageUploadInput && dragMerchImageUrlInput) addTrackedListener(dragMerchImageUploadInput, 'change', (e) => handleFileUpload(e, dragMerchImageUrlInput));
