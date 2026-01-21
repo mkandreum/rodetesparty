@@ -1423,9 +1423,9 @@ $adminEmail = isset($_SESSION['admin_email']) ? $_SESSION['admin_email'] : '';
                         <div class="w-full h-full bg-gray-200 flex items-center justify-center text-gray-500">QR</div>
                     </div>
                     <p
-                        class="text-yellow-400 font-bold text-sm font-pixel px-4 py-3 bg-yellow-900 border border-yellow-700 rounded-none leading-tight">
-                        ¡IMPORTANTE! Descarga esta imagen y pásasela por Instagram a la DRAG correspondiente para
-                        gestionar el pago y la entrega.
+                        class="text-green-400 font-bold text-sm font-pixel px-4 py-3 bg-green-900 border border-green-700 rounded-none leading-tight">
+                        ¡CONFIRMADO! Te hemos enviado un email con los detalles. La DRAG se pondrá en contacto contigo
+                        para el pago y la entrega.
                     </p>
                 </div>
             </div>
