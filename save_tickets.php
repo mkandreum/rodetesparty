@@ -52,7 +52,7 @@ if (file_put_contents($dataFile, json_encode($newTickets, JSON_PRETTY_PRINT)) !=
         require_once __DIR__ . '/send_email.php';
 
         // Cargar eventos para obtener información
-        $appStateFile = '/var/www/data_private/app_state.json';
+        $appStateFile = '/var/www/data_private/datos_app.json';
         if (file_exists($appStateFile)) {
             $appStateJson = file_get_contents($appStateFile);
             $appState = json_decode($appStateJson, true);
