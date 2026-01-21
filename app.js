@@ -1822,7 +1822,11 @@ window.addEventListener('DOMContentLoaded', async () => {
 			const userEmail = merchPurchaseForm['merch-email'].value.trim().toLowerCase();
 			const quantity = parseInt(merchPurchaseForm['merch-quantity'].value, 10);
 			const itemId = parseInt(merchPurchaseForm['merch-item-id'].value, 10);
-			const dragId = parseInt(merchPurchaseForm['merch-drag-id'].value, 10);
+			// MODIFICADO: dragId puede ser 'web' o int
+			let dragId = merchPurchaseForm['merch-drag-id'].value;
+			if (dragId !== 'web') {
+				dragId = parseInt(dragId, 10);
+			}
 
 			const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Regex simple
 
@@ -1842,12 +1846,18 @@ window.addEventListener('DOMContentLoaded', async () => {
 			if (isNaN(quantity) || quantity <= 0) {
 				showInfoModal("POR FAVOR, INTRODUCE UNA CANTIDAD MAYOR QUE CERO.", true); return;
 			}
-			if (isNaN(itemId) || isNaN(dragId)) {
+			if (isNaN(itemId) || (!dragId && dragId !== 0)) {
 				showInfoModal("Error: Artículo o Drag no identificados.", true); return; // Error interno
 			}
 
-			const drag = appState.drags.find(d => d.id === dragId);
-			const item = drag?.merchItems?.find(i => i.id === itemId);
+			let item, drag;
+			if (dragId === 'web') {
+				drag = { id: 'web', name: 'Rodetes Web' };
+				item = (appState.webMerch || []).find(i => i.id === itemId);
+			} else {
+				drag = appState.drags.find(d => d.id === dragId);
+				item = drag?.merchItems?.find(i => i.id === itemId);
+			}
 
 			if (!item) {
 				showInfoModal("Error: Artículo no encontrado.", true); return; // Podría haber sido eliminado mientras compraba
