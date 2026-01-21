@@ -97,6 +97,9 @@ function generateTicketEmailHTML($ticketData, $eventData)
     <body>
         <div class='container'>
             <div class='header'>
+                <div style='margin-bottom: 10px;'>
+                     <img src='https://rodetesparty.com/uploads/logo.png' alt='Rodetes Party' style='max-height: 50px; display: block; margin: 0 auto;' onerror="this.style.display='none'">
+                </div>
                 <h1>🎉 TU ENTRADA PARA RODETES PARTY</h1>
             </div>
             <div class='content'>
@@ -108,6 +111,11 @@ function generateTicketEmailHTML($ticketData, $eventData)
                     <p><strong>Fecha:</strong> $eventDate</p>
                     <p><strong>Cantidad:</strong> $quantity entrada(s)</p>
                     <p><strong>ID:</strong> $ticketId</p>
+                </div>
+                
+                <div class='qr-container'>
+                    <p>Muestra este código en la entrada:</p>
+                    <img src='https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=TICKET_ID:$ticketId' alt='QR Code' width='200' height='200' style='border: 4px solid #fff; outline: 2px solid #000;'>
                 </div>
                 
                 <p><strong style='color: #F02D7D;'>⚠️ IMPORTANTE:</strong> Guarda este email. Necesitarás mostrar el QR en la entrada.</p>
