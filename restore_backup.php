@@ -23,7 +23,13 @@ if ($file['error'] !== UPLOAD_ERR_OK) {
 $zip = new ZipArchive();
 if ($zip->open($file['tmp_name']) === TRUE) {
 
-    // 1. Procesar todos los archivos del ZIP
+    // 1. Preparar directorio de datos
+    $dataDir = '/var/www/data_private/';
+    if (!is_dir($dataDir)) {
+        mkdir($dataDir, 0777, true);
+    }
+
+    // 2. Procesar todos los archivos del ZIP
     for ($i = 0; $i < $zip->numFiles; $i++) {
         $filename = $zip->getNameIndex($i);
         $baseName = basename($filename);
