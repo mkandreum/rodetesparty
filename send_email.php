@@ -69,6 +69,21 @@ function sendEmail($to, $subject, $body, $attachments = [])
 }
 
 
+
+// Helper para asegurar URLs absolutas
+function ensureAbsoluteUrl($url)
+{
+    if (empty($url))
+        return '';
+    if (filter_var($url, FILTER_VALIDATE_URL))
+        return $url;
+
+    // Asumir que es una ruta relativa en uploads/
+    // Limpiar barras iniciales para evitar dobles //
+    $cleanPath = ltrim($url, '/');
+    return 'https://rodetesparty.com/' . $cleanPath;
+}
+
 // Función para generar HTML del email de ticket
 function generateTicketEmailHTML($ticketData, $eventData, $logoUrl = '')
 {
@@ -78,7 +93,7 @@ function generateTicketEmailHTML($ticketData, $eventData, $logoUrl = '')
     $quantity = $ticketData['quantity'];
     $ticketId = htmlspecialchars($ticketData['ticketId']);
 
-    // Usar logo por defecto si no se pasa
+    $logoUrl = ensureAbsoluteUrl($logoUrl);
     if (empty($logoUrl)) {
         $logoUrl = 'https://rodetesparty.com/uploads/logo.png';
     }
@@ -150,8 +165,9 @@ function generateWebMerchEmailHTML($saleData, $itemData, $logoUrl = '')
     $itemName = htmlspecialchars($itemData['name']);
     $quantity = $saleData['quantity'];
     $total = number_format($saleData['quantity'] * $itemData['price'], 2);
-    $itemImage = $itemData['imageUrl'] ?? '';
 
+    $itemImage = ensureAbsoluteUrl($itemData['imageUrl'] ?? '');
+    $logoUrl = ensureAbsoluteUrl($logoUrl);
     if (empty($logoUrl)) {
         $logoUrl = 'https://rodetesparty.com/uploads/logo.png';
     }
@@ -226,9 +242,10 @@ function generateDragMerchEmailHTML($saleData, $itemData, $dragData, $customMess
     $dragName = htmlspecialchars($dragData['name']);
     $quantity = $saleData['quantity'];
     $total = number_format($saleData['quantity'] * $itemData['price'], 2);
-    $itemImage = $itemData['imageUrl'] ?? '';
     $customMessageHTML = $customMessage ? "<p><em>" . nl2br(htmlspecialchars($customMessage)) . "</em></p>" : "";
 
+    $itemImage = ensureAbsoluteUrl($itemData['imageUrl'] ?? '');
+    $logoUrl = ensureAbsoluteUrl($logoUrl);
     if (empty($logoUrl)) {
         $logoUrl = 'https://rodetesparty.com/uploads/logo.png';
     }
@@ -307,11 +324,12 @@ function generateSellerNotificationHTML($saleData, $itemData, $isWebMerch, $logo
     $itemName = htmlspecialchars($itemData['name']);
     $quantity = $saleData['quantity'];
     $total = number_format($saleData['quantity'] * $itemData['price'], 2);
-    $itemImage = $itemData['imageUrl'] ?? '';
 
     $title = $isWebMerch ? "NUEVA VENTA WEB MERCH" : "¡NUEVA VENTA DE TU MERCH!";
     $color = $isWebMerch ? "#F02D7D" : "#9C27B0"; // Rosa para web, Morado para drag
 
+    $itemImage = ensureAbsoluteUrl($itemData['imageUrl'] ?? '');
+    $logoUrl = ensureAbsoluteUrl($logoUrl);
     if (empty($logoUrl)) {
         $logoUrl = 'https://rodetesparty.com/uploads/logo.png';
     }
