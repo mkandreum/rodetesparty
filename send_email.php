@@ -98,7 +98,7 @@ function generateTicketEmailHTML($ticketData, $eventData)
         <div class='container'>
             <div class='header'>
                 <div style='margin-bottom: 10px;'>
-                     <img src='https://rodetesparty.com/uploads/logo.png' alt='Rodetes Party' style='max-height: 50px; display: block; margin: 0 auto;' onerror='this.style.display="none"'>
+                     <img src='https://rodetesparty.com/uploads/logo.png' alt='Rodetes Party' style='max-height: 50px; display: block; margin: 0 auto;' onerror='this.style.display=\"none\"'>
                 </div>
                 <h1>🎉 TU ENTRADA PARA RODETES PARTY</h1>
             </div>
