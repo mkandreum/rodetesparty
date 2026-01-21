@@ -556,6 +556,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 				promoCustomText: appState.promoCustomText,
 				promoNeonColor: appState.promoNeonColor, // <-- AÑADIDO
 				emailNotifications: appState.emailNotifications || {}, // <-- AÑADIDO: Persistencia de notificaciones
+				webMerch: appState.webMerch || [], // <-- AÑADIDO: Persistencia de Merch Web
 				allowedDomains: appState.allowedDomains || [], // Asegurar array
 				events: (appState.events || []).map(event => {
 					// Excluir datos temporales si los hubiera
