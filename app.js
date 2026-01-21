@@ -389,7 +389,17 @@ window.addEventListener('DOMContentLoaded', async () => {
 
 	// --- Helper Functions ---
 
-	// hashString ya no es necesaria, se elimina.
+	/**
+	 * Baraja un array usando el algoritmo Fisher-Yates.
+	 */
+	function shuffleArray(array) {
+		const newArray = [...array];
+		for (let i = newArray.length - 1; i > 0; i--) {
+			const j = Math.floor(Math.random() * (i + 1));
+			[newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+		}
+		return newArray;
+	}
 
 	// --- Page Navigation (actualizada para manejar estado inicial de login) ---
 	function showPage(pageId) {
@@ -467,6 +477,9 @@ window.addEventListener('DOMContentLoaded', async () => {
 		if (pageId === 'admin') {
 			checkAdminUI(); // Función centralizada para mostrar login o panel
 		}
+
+		// --- NUEVO: Scroll al inicio al cambiar de página ---
+		window.scrollTo({ top: 0, behavior: 'instant' });
 	}
 
 	function showAdminPage(adminPageId) {
@@ -533,6 +546,9 @@ window.addEventListener('DOMContentLoaded', async () => {
 			renderWebMerchSalesSummary(); // NUEVO: Renderiza resumen ventas
 			renderDragMerchSalesSummary();
 		}
+
+		// --- NUEVO: Scroll al inicio al cambiar de pestaña admin ---
+		window.scrollTo({ top: 0, behavior: 'instant' });
 	}
 	/**
 	 * Guarda el estado principal de la aplicación (eventos, drags, config) en el servidor.
@@ -1516,8 +1532,11 @@ window.addEventListener('DOMContentLoaded', async () => {
 		const dragsNavBar = document.getElementById('drags-nav-bar');
 		if (dragsNavBar) dragsNavBar.innerHTML = ''; // Limpiar barra anterior
 
-		// Ordenar alfabéticamente por nombre
-		dragsToShow.sort((a, b) => (a.name || '').localeCompare(b.name || '')).forEach(drag => {
+		// --- MODIFICADO: Aleatoriedad ---
+		// Barajamos el array para que el orden sea distinto cada vez
+		const randomDrags = shuffleArray(dragsToShow);
+
+		randomDrags.forEach(drag => {
 			try {
 				const card = document.createElement('div');
 				const cardColor = drag.cardColor && /^#[0-9A-F]{6}$/i.test(drag.cardColor) ? drag.cardColor : '#FFFFFF'; // Validar color
