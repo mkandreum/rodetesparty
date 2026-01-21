@@ -524,14 +524,15 @@ window.addEventListener('DOMContentLoaded', async () => {
 		if (adminPageId !== 'merch' && editingMerchItemId !== null) {
 			resetMerchItemForm();
 		}
-	}
-	// NUEVO: Resetear formularios del nuevo sistema de merch
-	if (adminPageId !== 'merch') {
-		if (editingWebMerchId !== null) {
-			resetWebMerchForm();
-		}
-		if (editingDragMerchId !== null) {
-			resetDragMerchForm();
+
+		// NUEVO: Resetear formularios del nuevo sistema de merch
+		if (adminPageId !== 'merch') {
+			if (editingWebMerchId !== null) {
+				resetWebMerchForm();
+			}
+			if (editingDragMerchId !== null) {
+				resetDragMerchForm();
+			}
 		}
 	}
 	/**
