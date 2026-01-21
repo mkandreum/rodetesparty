@@ -25,6 +25,10 @@ if ($zip->open($file['tmp_name']) === TRUE) {
 
     $filesProcessed = [];
     $errors = [];
+    $dataDir = '/var/www/data_private/';
+    if (!is_dir($dataDir)) {
+        mkdir($dataDir, 0777, true);
+    }
 
     // 2. Procesar todos los archivos del ZIP
     for ($i = 0; $i < $zip->numFiles; $i++) {
