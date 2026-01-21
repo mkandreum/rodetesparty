@@ -3530,7 +3530,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 		}
 
 		try {
-			const response = await fetch('get_smtp_config.php');
+			const response = await fetch(`get_smtp_config.php?t=${Date.now()}`);
 			const result = await response.json();
 			console.log("SMTP Config Loaded:", result);
 
