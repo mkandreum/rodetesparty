@@ -1521,20 +1521,41 @@ window.addEventListener('DOMContentLoaded', async () => {
 
 				const imageUrl = drag.coverImageUrl || `https://placehold.co/400x400/000/fff?text=${encodeURIComponent(drag.name || 'Drag')}&font=vt323`;
 				const galleryCount = drag.galleryImages?.length || 0;
-				const merchCount = drag.merchItems?.length || 0;
+				const merchItems = drag.merchItems || [];
+				const merchCount = merchItems.length;
 
-				let merchBtnHtml = '';
+				// --- NUEVO: Construcción del Carousel de Merch ---
+				let merchCarouselHtml = '';
 				if (merchCount > 0) {
-					merchBtnHtml = `
-							<button data-drag-id="${drag.id}" class="drag-merch-btn w-full bg-pink-600 text-white font-pixel text-lg py-2 px-4 rounded-none border border-pink-500 hover:bg-pink-500 transition-colors duration-300">
-								MERCHANDISING (${merchCount})
-							</button>`;
-				} else {
-					merchBtnHtml = `
-							<button disabled class="w-full bg-gray-800 text-gray-500 font-pixel text-lg py-2 px-4 rounded-none border border-gray-700 cursor-not-allowed">
-								MERCHANDISING (0)
-							</button>`;
+					let itemsHtml = '';
+					merchItems.forEach(item => {
+						const itemImage = item.imageUrl || `https://placehold.co/200x200/000/fff?text=${encodeURIComponent(item.name || 'Item')}&font=vt323`;
+						const price = (parseFloat(item.price) || 0).toFixed(2);
+						itemsHtml += `
+							<div class="flex-shrink-0 w-36 bg-black border border-gray-700 p-2 snap-center flex flex-col">
+								<div class="h-24 w-full bg-gray-900 mb-2 overflow-hidden flex items-center justify-center">
+									<img src="${itemImage}" alt="${item.name}" class="object-cover w-full h-full" onerror="this.src='https://placehold.co/200x200/000/fff?text=Error&font=vt323'">
+								</div>
+								<p class="text-white text-xs font-pixel truncate mb-1" title="${item.name}">${item.name}</p>
+								<p class="text-pink-500 font-bold text-sm mb-2">${price}€</p>
+								<button 
+									data-merch-id="${item.id}" 
+									data-drag-id="${drag.id}"
+									class="auto-buy-merch-btn w-full bg-white text-black text-xs font-pixel py-1 hover:bg-pink-500 hover:text-white transition-colors mt-auto rounded-none border border-gray-400">
+									COMPRAR
+								</button>
+							</div>`;
+					});
+
+					merchCarouselHtml = `
+						<div class="mt-4 mb-2">
+							<h4 class="text-sm font-pixel text-pink-400 mb-2 border-b border-gray-800 pb-1">TIENDA OFICIAL:</h4>
+							<div class="flex gap-3 overflow-x-auto pb-4 snap-x scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-transparent">
+								${itemsHtml}
+							</div>
+						</div>`;
 				}
+				// --- FIN NUEVO ---
 
 				const instagramBtnHtml = drag.instagramHandle
 					? `<a href="https://www.instagram.com/${drag.instagramHandle}" target="_blank" rel="noopener noreferrer" class="drag-instagram-btn w-full bg-gray-700 text-white font-pixel text-lg py-2 px-4 rounded-none border border-gray-600 hover:bg-gray-600 transition-colors duration-300 flex items-center justify-center gap-2">
@@ -1551,6 +1572,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 						<div class="p-6 flex flex-col flex-grow">
 							<h3 class="text-3xl font-pixel text-white text-glow-white mb-2 truncate glitch-hover">${drag.name || 'Drag sin nombre'}</h3>
 							<p class="text-gray-400 mb-6 flex-grow">${drag.description || 'Sin descripción.'}</p>
+							
 							<div class="space-y-3">
 								<button data-drag-id="${drag.id}" class="drag-gallery-btn w-full neon-btn text-white font-pixel text-lg py-2 px-4 rounded-none ${galleryCount === 0 ? 'hidden' : ''}">
 									VER GALERÍA (${galleryCount})
@@ -1558,7 +1580,10 @@ window.addEventListener('DOMContentLoaded', async () => {
 								 <button disabled class="w-full bg-gray-800 text-gray-500 font-pixel text-lg py-2 px-4 rounded-none border border-gray-700 cursor-not-allowed ${galleryCount > 0 ? 'hidden' : ''}">
 									GALERÍA (0)
 								</button>
-								${merchBtnHtml}
+								
+								<!-- Inserto Carrusel Merch -->
+								${merchCarouselHtml}
+								
 								${instagramBtnHtml}
 							</div>
 						</div>
@@ -1575,7 +1600,10 @@ window.addEventListener('DOMContentLoaded', async () => {
 
 		// Re-adjuntar listeners
 		dragListContainer.querySelectorAll('.drag-gallery-btn').forEach(btn => addTrackedListener(btn, 'click', (e) => renderDragGalleryImages(parseInt(e.currentTarget.dataset.dragId, 10))));
-		dragListContainer.querySelectorAll('.drag-merch-btn:not([disabled])').forEach(btn => addTrackedListener(btn, 'click', handleShowMerch));
+		// NUEVO Listener para botones de compra directa en el carrusel
+		dragListContainer.querySelectorAll('.auto-buy-merch-btn').forEach(btn => addTrackedListener(btn, 'click', handleMerchBuyClick));
+
+		// Listener antiguo eliminado: .drag-merch-btn ya no existe
 		// No necesitamos listener para '.drag-instagram-btn' ya que es un <a> normal
 
 		// Iniciar animación
