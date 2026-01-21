@@ -3443,7 +3443,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 	function renderDragMerchSalesSummary() {
 		if (!dragMerchSalesSummary || !dragMerchTotalItems || !dragMerchTotalRevenue || !dragMerchViewSalesBtn || currentSelectedDragForMerch === null) return;
 
-		const salesForDrag = (allMerchSales || []).filter(s => s.dragId === currentSelectedDragForMerch);
+		const salesForDrag = (allMerchSales || []).filter(s => parseInt(s.dragId) === parseInt(currentSelectedDragForMerch));
 		const deliveredSales = salesForDrag.filter(s => s.status === 'Delivered');
 		const pendingSalesCount = salesForDrag.length - deliveredSales.length;
 
@@ -3522,18 +3522,24 @@ window.addEventListener('DOMContentLoaded', async () => {
 	 * Renderiza/Carga la configuración SMTP del servidor
 	 */
 	async function renderSMTPConfig() {
-		if (!smtpConfigForm) return;
+		// Log para debug
+		console.log("Rendering SMTP Config...");
+		if (!smtpConfigForm) {
+			console.error("SMTP Config Form not found in DOM");
+			return;
+		}
 
 		try {
 			const response = await fetch('get_smtp_config.php');
 			const result = await response.json();
+			console.log("SMTP Config Loaded:", result);
 
 			if (result.success && result.config) {
 				const config = result.config;
 				if (document.getElementById('smtp-host')) document.getElementById('smtp-host').value = config.host || '';
 				if (document.getElementById('smtp-port')) document.getElementById('smtp-port').value = config.port || '';
 				if (document.getElementById('smtp-username')) document.getElementById('smtp-username').value = config.username || '';
-				// Password no se devuelve
+				// Password no se devuelve, dejar vacío
 				if (document.getElementById('smtp-encryption')) document.getElementById('smtp-encryption').value = config.encryption || 'tls';
 				if (document.getElementById('smtp-from-email')) document.getElementById('smtp-from-email').value = config.from_email || '';
 				if (document.getElementById('smtp-from-name')) document.getElementById('smtp-from-name').value = config.from_name || '';
@@ -3541,7 +3547,6 @@ window.addEventListener('DOMContentLoaded', async () => {
 			}
 		} catch (error) {
 			console.error("Error loading SMTP config:", error);
-			// No mostrar modal intrusivo, solo log
 		}
 	}
 
