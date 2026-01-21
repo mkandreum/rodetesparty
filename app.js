@@ -5319,155 +5319,119 @@ window.addEventListener('DOMContentLoaded', async () => {
 	}
 
 	/**
-	 * Restaura el estado desde un archivo ZIP o JSON (antiguo).
-	 * Actualiza appState, allTickets, allMerchSales y guarda en servidor.
+	 * Restaura el estado desde un archivo ZIP (datos + imágenes) o JSON (antiguo).
 	 */
 	async function handleRestore(event) {
 		const file = event.target.files?.[0];
 		if (!file) return;
 
 		showLoading(true);
-		let restoredState = null;
-		let restoredTickets = null;
-		let restoredMerchSales = null;
 
 		try {
-			// --- Leer y Parsear Archivo ---
+			// --- Caso 1: Restauración Completa desde ZIP ---
 			if (file.type === 'application/zip' || file.name.endsWith('.zip')) {
-				if (typeof JSZip === 'undefined') {
-					throw new Error("Librería JSZip no cargada para leer .zip.");
+				console.log("Iniciando restauración completa desce ZIP...");
+
+				const formData = new FormData();
+				formData.append('backup_file', file);
+
+				const response = await fetch('restore_backup.php', {
+					method: 'POST',
+					body: formData
+				});
+
+				const result = await response.json();
+
+				if (result.success) {
+					showInfoModal("¡RESTAURACIÓN COMPLETA ÉXITOSA!<br>La página se recargará para aplicar los cambios.", false);
+					setTimeout(() => {
+						window.location.reload();
+					}, 2000);
+				} else {
+					throw new Error(result.message || "Error desconocido en el servidor.");
 				}
-				console.log("Restaurando desde archivo ZIP...");
-				const zipData = await readFileAsArrayBuffer(file);
-				const zip = await JSZip.loadAsync(zipData);
 
-				const appFile = zip.file("datos_app.json");
-				const ticketsFile = zip.file("entradas_db.json");
-				const merchSalesFile = zip.file("merch_vendido.json"); // Puede ser null
+				return; // Salir aquí ya que el resto es para JSON antiguo
+			}
 
-				if (!appFile || !ticketsFile) {
-					throw new Error("El ZIP debe contener 'datos_app.json' y 'entradas_db.json'.");
-				}
-
-				const appString = await appFile.async("string");
-				const ticketsString = await ticketsFile.async("string");
-				const merchSalesString = merchSalesFile ? await merchSalesFile.async("string") : '[]'; // Default a array vacío
-
-				restoredState = JSON.parse(appString);
-				restoredTickets = JSON.parse(ticketsString);
-				restoredMerchSales = JSON.parse(merchSalesString);
-
-			} else if (file.type === 'application/json') { // Soporte para JSON antiguo
+			// --- Caso 2: Restauración desde archivo JSON (formato antiguo) ---
+			if (file.type === 'application/json' || file.name.endsWith('.json')) {
 				console.log("Restaurando desde archivo JSON (formato antiguo)...");
 				const jsonString = await readFileAsText(file);
 				const oldState = JSON.parse(jsonString);
 
-				// Validar estructura básica antigua
-				if (!oldState || typeof oldState !== 'object' || !Array.isArray(oldState.events)) {
-					throw new Error("El archivo JSON antiguo no tiene el formato esperado.");
-				}
+				let restoredTickets = [];
+				let restoredMerchSales = [];
+				let restoredState = null;
 
-				// Extraer tickets del formato antiguo y limpiar events
-				restoredTickets = [];
-				if (oldState.events) {
+				// Validar estructura básica antigua
+				if (oldState && Array.isArray(oldState.events)) {
+					// Extraer tickets del formato antiguo y limpiar events
 					oldState.events.forEach(event => {
 						if (event.purchasedTickets && typeof event.purchasedTickets === 'object') {
 							Object.keys(event.purchasedTickets).forEach(email => {
 								const ticket = event.purchasedTickets[email];
-								if (ticket && ticket.ticketId && ticket.quantity) { // Validar datos ticket
+								if (ticket && ticket.ticketId && ticket.quantity) {
 									restoredTickets.push({
 										ticketId: ticket.ticketId, eventId: event.id,
 										email: email, quantity: ticket.quantity
-										// Nombre/Apellidos no existen en formato antiguo
 									});
 								}
 							});
 						}
-						delete event.purchasedTickets; // Eliminar estructura antigua
+						delete event.purchasedTickets;
 					});
+					restoredState = oldState;
+				} else {
+					// Si es un backup JSON del nuevo formato pero suelto (sin ZIP)
+					restoredState = oldState;
+					// No tenemos tickets ni merch sales en este caso, se quedarían vacíos o 
+					// podríamos intentar inferirlos si el JSON fuera entradas_db.json, pero
+					// handleRestore históricamente esperaba el appState completo.
 				}
-				console.log(`Extraídos ${restoredTickets.length} tickets del JSON antiguo.`);
 
-				restoredState = oldState; // Usar el estado parseado (sin purchasedTickets)
-				restoredMerchSales = []; // JSON antiguo no tenía ventas de merch
+				if (!restoredState || !Array.isArray(restoredState.events)) {
+					throw new Error("El archivo JSON no tiene un formato reconocido.");
+				}
+
+				// Aplicar appState
+				appState = {
+					...(restoredState || {}),
+					events: (restoredState.events || []).map(ev => ({ galleryImages: [], ...ev })),
+					drags: (restoredState.drags || []).map(drag => ({
+						description: "", coverImageUrl: "", instagramHandle: "",
+						cardColor: "#FFFFFF", galleryImages: [], merchItems: [], ...drag
+					})),
+					webMerch: restoredState.webMerch || [],
+					allowedDomains: restoredState.allowedDomains || [],
+					scannedTickets: restoredState.scannedTickets || {},
+					nextEventId: restoredState.nextEventId || 1,
+					nextDragId: restoredState.nextDragId || 1,
+					nextMerchItemId: restoredState.nextMerchItemId || 1
+				};
+
+				allTickets = restoredTickets;
+				allMerchSales = restoredMerchSales;
+
+				// Guardar en servidor
+				await Promise.all([
+					saveAppState(),
+					saveTicketState(),
+					saveMerchSalesState()
+				]);
+
+				showInfoModal("¡DATOS RESTAURADOS CON ÉXITO! (Sin imágenes)", false);
+				setTimeout(() => window.location.reload(), 1500);
 
 			} else {
 				throw new Error("Tipo de archivo no soportado. Sube un .zip o .json.");
 			}
 
-			// --- Validar Datos Restaurados ---
-			if (!restoredState || typeof restoredState !== 'object' || !Array.isArray(restoredState.events)) {
-				throw new Error("Datos de 'datos_app.json' inválidos o corruptos.");
-			}
-			if (!Array.isArray(restoredTickets)) {
-				throw new Error("Datos de 'entradas_db.json' inválidos o corruptos.");
-			}
-			if (!Array.isArray(restoredMerchSales)) {
-				throw new Error("Datos de 'merch_vendido.json' inválidos o corruptos.");
-			}
-
-			// --- Aplicar Datos Restaurados (con limpieza y defaults) ---
-			console.log("Datos restaurados validados. Aplicando...");
-			// Usar structuredClone si está disponible para deep copy seguro, sino JSON parse/stringify
-			const deepClone = typeof structuredClone === 'function' ? structuredClone : (obj => JSON.parse(JSON.stringify(obj)));
-
-			// Aplicar appState restaurado, asegurando estructura mínima
-			appState = {
-				// No ponemos defaults aquí, sobreescribimos completamente con lo restaurado
-				// pero sí aseguramos que las propiedades principales existan tras restaurar
-				...(restoredState || {}), // Copiar estado restaurado
-				// Asegurar propiedades mínimas después de copiar
-				events: (restoredState.events || []).map(ev => ({ galleryImages: [], ...ev })), // Limpiar purchasedTickets si viniera de JSON muy antiguo
-				drags: (restoredState.drags || []).map(drag => ({ // Añadir props que falten en drags antiguas
-					description: "", coverImageUrl: "", instagramHandle: "",
-					cardColor: "#FFFFFF", galleryImages: [], merchItems: [], ...drag
-				})),
-				webMerch: restoredState.webMerch || [], // Restaurar merch web
-				allowedDomains: restoredState.allowedDomains || [],
-				scannedTickets: restoredState.scannedTickets || {},
-				nextEventId: restoredState.nextEventId || 1,
-				nextDragId: restoredState.nextDragId || 1,
-				nextMerchItemId: restoredState.nextMerchItemId || 1
-			};
-			currentEvents = [...appState.events]; // Actualizar copia local
-
-			allTickets = deepClone(restoredTickets); // Aplicar tickets restaurados
-			allMerchSales = deepClone(restoredMerchSales); // Aplicar ventas restauradas
-
-			// --- Guardar Estados Restaurados en Servidor ---
-			await Promise.all([
-				saveAppState(),
-				saveTicketState(),
-				saveMerchSalesState()
-			]);
-
-			showLoading(false);
-			showInfoModal("¡DATOS RESTAURADOS Y GUARDADOS CON ÉXITO!", false);
-
-			// --- Re-renderizar Toda la UI ---
-			renderAppLogo();
-			renderBannerVideo();
-			renderPublicEvents(currentEvents);
-			renderHomeEvents(currentEvents);
-			renderGalleryEventList();
-			renderDragList();
-			renderPastGalleries(currentEvents);
-			renderNextEventPromo();
-			if (isLoggedIn) { // Solo si está logueado, recargar UI admin
-				loadContentToAdmin();
-				renderAdminEvents(currentEvents);
-				renderAdminDrags(appState.drags);
-				renderAdminMerch();
-				renderGiveawayEvents(currentEvents);
-			}
-
 		} catch (error) {
 			showLoading(false);
 			console.error("Error restoring data:", error);
-			// No revertimos cambios en memoria, el usuario debería recargar o intentar restaurar de nuevo
 			showInfoModal(`Error al restaurar: ${error.message}`, true);
 		} finally {
-			// Limpiar input file independientemente del resultado
 			if (restoreInput) restoreInput.value = '';
 		}
 	}
