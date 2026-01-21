@@ -1279,6 +1279,9 @@ $adminEmail = isset($_SESSION['admin_email']) ? $_SESSION['admin_email'] : '';
                     <p
                         class="text-yellow-400 font-bold text-sm font-pixel px-4 py-2 bg-yellow-900 border border-yellow-700 rounded-none">
                         ¡IMPORTANTE! HAZ CAPTURA O DESCARGA.</p>
+                    <p
+                        class="text-green-400 font-bold text-sm font-pixel px-4 py-2 bg-green-900 border border-green-700 rounded-none mt-2">
+                        TAMBIÉN HEMOS ENVIADO LA ENTRADA A TU EMAIL.</p>
                 </div>
             </div>
             <div class="p-4 sm:p-6 bg-gray-900 border-t border-white">
