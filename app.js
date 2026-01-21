@@ -3192,8 +3192,14 @@ window.addEventListener('DOMContentLoaded', async () => {
 				const buyerName = `${sale.nombre || ''} ${sale.apellidos || ''}`.trim() || 'Nombre N/A';
 
 				const buttonHtml = isPending
-					? `<button data-sale-id="${sale.saleId}" class="mark-merch-delivered-btn bg-green-600 hover:bg-green-500 text-white px-3 py-1 rounded-none text-sm font-pixel">MARCAR ENTREGADO</button>`
-					: `<span class="text-gray-500 px-3 py-1 text-sm font-pixel">CONFIRMADO</span>`;
+					? `<div class="flex flex-col sm:flex-row gap-2">
+						<button data-sale-id="${sale.saleId}" class="mark-merch-delivered-btn bg-green-600 hover:bg-green-500 text-white px-3 py-1 rounded-none text-sm font-pixel">MARCAR ENTREGADO</button>
+						<button data-sale-id="${sale.saleId}" class="delete-merch-order-btn bg-red-600 hover:bg-red-500 text-white px-3 py-1 rounded-none text-sm font-pixel">BORRAR</button>
+					   </div>`
+					: `<div class="flex flex-col sm:flex-row gap-2 items-center">
+						<span class="text-gray-500 px-3 py-1 text-sm font-pixel">CONFIRMADO</span>
+						<button data-sale-id="${sale.saleId}" class="delete-merch-order-btn bg-red-900 hover:bg-red-700 text-white px-3 py-1 rounded-none text-sm font-pixel text-xs">BORRAR</button>
+					   </div>`;
 
 				listHtml += `
 					<li class="p-3 bg-gray-800 border border-gray-600 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
@@ -3220,6 +3226,52 @@ window.addEventListener('DOMContentLoaded', async () => {
 		merchSalesListContent.querySelectorAll('.mark-merch-delivered-btn').forEach(btn => {
 			addTrackedListener(btn, 'click', handleMarkMerchDeliveredFromList);
 		});
+
+		// NUEVO: Listeners para borrar pedido
+		merchSalesListContent.querySelectorAll('.delete-merch-order-btn').forEach(btn => {
+			addTrackedListener(btn, 'click', handleDeleteMerchOrder); // Definir función abajo
+		});
+	}
+
+	/**
+	 * Elimina un pedido de merch (por error o cancelación)
+	 */
+	async function handleDeleteMerchOrder(e) {
+		const saleId = e.currentTarget.dataset.saleId;
+		if (!saleId || !allMerchSales) return;
+
+		if (!confirm("¿Seguro que quieres ELIMINAR este pedido permanentemente? Esta acción es irreversible.")) {
+			return;
+		}
+
+		const saleIndex = allMerchSales.findIndex(s => s.saleId === saleId);
+		if (saleIndex === -1) {
+			showInfoModal("Error: Pedido no encontrado.", true);
+			return;
+		}
+
+		showLoading(true);
+		try {
+			// Eliminar del array
+			allMerchSales.splice(saleIndex, 1);
+			await saveMerchSalesState(); // Guardar cambios
+
+			// Re-renderizar
+			if (currentSelectedDragForMerch) {
+				renderMerchSalesListForDrag(currentSelectedDragForMerch);
+				renderDragMerchSalesSummary(); // Actualizar totales
+			} else {
+				// Si por alguna razón no hay drag seleccionada (raro), recargar todo
+				renderDragMerchSalesSummary();
+			}
+
+			showInfoModal("Pedido eliminado correctamente.", false);
+		} catch (err) {
+			console.error("Error eliminando pedido:", err);
+			showInfoModal("Error al eliminar el pedido.", true);
+		} finally {
+			showLoading(false);
+		}
 	}
 
 	/**
