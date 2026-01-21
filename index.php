@@ -903,12 +903,19 @@ $adminEmail = isset($_SESSION['admin_email']) ? $_SESSION['admin_email'] : '';
                             <h3 class="text-3xl font-pixel text-white mb-6 text-glow-white">MERCH DE DRAGS</h3>
 
                             <!-- Select Drag -->
-                            <div class="mb-6">
-                                <label for="drag-merch-select-drag"
-                                    class="block text-sm font-pixel text-lg text-gray-300 mb-1">SELECCIONA DRAG</label>
-                                <select id="drag-merch-select-drag" name="drag-merch-select-drag" class="w-full">
-                                    <option value="">-- SELECCIONA UNA DRAG --</option>
-                                </select>
+                            <div class="mb-6 flex gap-4 items-end">
+                                <div class="flex-grow">
+                                    <label for="drag-merch-select-drag"
+                                        class="block text-sm font-pixel text-lg text-gray-300 mb-1">SELECCIONA
+                                        DRAG</label>
+                                    <select id="drag-merch-select-drag" name="drag-merch-select-drag" class="w-full">
+                                        <option value="">-- SELECCIONA UNA DRAG --</option>
+                                    </select>
+                                </div>
+                                <button id="add-drag-merch-btn" type="button"
+                                    class="bg-purple-600 hover:bg-purple-500 text-white font-pixel text-lg py-2 px-6 rounded-none transition-colors duration-300 whitespace-nowrap">
+                                    + AÑADIR MERCH
+                                </button>
                             </div>
 
                             <!-- Formulario Añadir/Editar Drag Merch (oculto hasta seleccionar) -->

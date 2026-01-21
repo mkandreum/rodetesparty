@@ -555,6 +555,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 				promoEnabled: appState.promoEnabled,
 				promoCustomText: appState.promoCustomText,
 				promoNeonColor: appState.promoNeonColor, // <-- AÑADIDO
+				emailNotifications: appState.emailNotifications || {}, // <-- AÑADIDO: Persistencia de notificaciones
 				allowedDomains: appState.allowedDomains || [], // Asegurar array
 				events: (appState.events || []).map(event => {
 					// Excluir datos temporales si los hubiera
