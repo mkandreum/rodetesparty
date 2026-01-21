@@ -5317,11 +5317,6 @@ window.addEventListener('DOMContentLoaded', async () => {
 			window.location.href = 'create_backup.php';
 		}, 800);
 	}
-	showLoading(false);
-	console.error("Error creating zip backup:", error);
-	showInfoModal("Error al crear el respaldo ZIP: " + error.message, true);
-}
-	}
 
 	/**
 	 * Restaura el estado desde un archivo ZIP o JSON (antiguo).
@@ -6054,144 +6049,144 @@ window.addEventListener('DOMContentLoaded', async () => {
 
 	// Cargar referencias a las páginas del DOM
 	document.querySelectorAll('[data-page]').forEach(el => pages[el.dataset.page] = el);
-document.querySelectorAll('[data-admin-page]').forEach(el => adminPages[el.dataset.adminPage] = el);
-document.querySelectorAll('[data-admin-nav]').forEach(el => adminNavLinks[el.dataset.adminNav] = el);
-document.querySelectorAll('#mobile-menu a[data-nav]').forEach(el => mobileNavLinks[el.dataset.nav] = el);
+	document.querySelectorAll('[data-admin-page]').forEach(el => adminPages[el.dataset.adminPage] = el);
+	document.querySelectorAll('[data-admin-nav]').forEach(el => adminNavLinks[el.dataset.adminNav] = el);
+	document.querySelectorAll('#mobile-menu a[data-nav]').forEach(el => mobileNavLinks[el.dataset.nav] = el);
 
-// Listener de navegación principal, móvil y secundario
-document.querySelectorAll('[data-nav]').forEach(link => {
-	addTrackedListener(link, 'click', (e) => {
-		e.preventDefault();
-		const navTarget = e.currentTarget.dataset.nav;
-		showPage(navTarget); // showPage maneja la lógica de admin/login
+	// Listener de navegación principal, móvil y secundario
+	document.querySelectorAll('[data-nav]').forEach(link => {
+		addTrackedListener(link, 'click', (e) => {
+			e.preventDefault();
+			const navTarget = e.currentTarget.dataset.nav;
+			showPage(navTarget); // showPage maneja la lógica de admin/login
+		});
 	});
-});
 
-// Listener para el logo (vuelve a home)
-const logoBtn = document.getElementById('logo-btn');
-if (logoBtn) {
-	addTrackedListener(logoBtn, 'click', (e) => { e.preventDefault(); showPage('home'); });
-}
+	// Listener para el logo (vuelve a home)
+	const logoBtn = document.getElementById('logo-btn');
+	if (logoBtn) {
+		addTrackedListener(logoBtn, 'click', (e) => { e.preventDefault(); showPage('home'); });
+	}
 
-// Listener botón "Ver todos los eventos"
-if (viewAllEventsBtn) {
-	addTrackedListener(viewAllEventsBtn, 'click', (e) => { e.preventDefault(); showPage('events'); });
-}
+	// Listener botón "Ver todos los eventos"
+	if (viewAllEventsBtn) {
+		addTrackedListener(viewAllEventsBtn, 'click', (e) => { e.preventDefault(); showPage('events'); });
+	}
 
 
-// Listener de navegación de admin (pestañas internas)
-document.querySelectorAll('[data-admin-nav]').forEach(link => {
-	addTrackedListener(link, 'click', (e) => {
-		e.preventDefault();
-		if (!isLoggedIn) return; // No hacer nada si no está logueado
-		showAdminPage(e.currentTarget.dataset.adminNav);
+	// Listener de navegación de admin (pestañas internas)
+	document.querySelectorAll('[data-admin-nav]').forEach(link => {
+		addTrackedListener(link, 'click', (e) => {
+			e.preventDefault();
+			if (!isLoggedIn) return; // No hacer nada si no está logueado
+			showAdminPage(e.currentTarget.dataset.adminNav);
+		});
 	});
-});
 
-// Listeners Formularios Admin (Eventos, Drags, Merch Items)
-if (addEventForm) addTrackedListener(addEventForm, 'submit', handleSaveEvent);
-if (clearEventFormButton) addTrackedListener(clearEventFormButton, 'click', resetEventForm);
-if (addDragForm) addTrackedListener(addDragForm, 'submit', handleSaveDrag);
-if (clearDragFormButton) addTrackedListener(clearDragFormButton, 'click', resetDragForm);
-if (addMerchItemForm) addTrackedListener(addMerchItemForm, 'submit', handleSaveMerchItem);
-if (clearMerchItemFormButton) addTrackedListener(clearMerchItemFormButton, 'click', resetMerchItemForm);
+	// Listeners Formularios Admin (Eventos, Drags, Merch Items)
+	if (addEventForm) addTrackedListener(addEventForm, 'submit', handleSaveEvent);
+	if (clearEventFormButton) addTrackedListener(clearEventFormButton, 'click', resetEventForm);
+	if (addDragForm) addTrackedListener(addDragForm, 'submit', handleSaveDrag);
+	if (clearDragFormButton) addTrackedListener(clearDragFormButton, 'click', resetDragForm);
+	if (addMerchItemForm) addTrackedListener(addMerchItemForm, 'submit', handleSaveMerchItem);
+	if (clearMerchItemFormButton) addTrackedListener(clearMerchItemFormButton, 'click', resetMerchItemForm);
 
-// Listeners Modales Generales y Navegación Imágenes
-document.querySelectorAll('[data-close-modal]').forEach(btn => {
-	addTrackedListener(btn, 'click', (e) => closeModal(e.currentTarget.dataset.closeModal));
-});
-if (imageModalPrevBtn) addTrackedListener(imageModalPrevBtn, 'click', (e) => { e.stopPropagation(); handleImageModalPrev(); });
-if (imageModalNextBtn) addTrackedListener(imageModalNextBtn, 'click', (e) => { e.stopPropagation(); handleImageModalNext(); });
+	// Listeners Modales Generales y Navegación Imágenes
+	document.querySelectorAll('[data-close-modal]').forEach(btn => {
+		addTrackedListener(btn, 'click', (e) => closeModal(e.currentTarget.dataset.closeModal));
+	});
+	if (imageModalPrevBtn) addTrackedListener(imageModalPrevBtn, 'click', (e) => { e.stopPropagation(); handleImageModalPrev(); });
+	if (imageModalNextBtn) addTrackedListener(imageModalNextBtn, 'click', (e) => { e.stopPropagation(); handleImageModalNext(); });
 
-// Listeners Merch Público (Formulario compra, botón descarga QR)
-if (merchPurchaseForm) addTrackedListener(merchPurchaseForm, 'submit', handleMerchPurchaseSubmit);
-if (downloadMerchQrBtn) addTrackedListener(downloadMerchQrBtn, 'click', handleDownloadMerchQr);
+	// Listeners Merch Público (Formulario compra, botón descarga QR)
+	if (merchPurchaseForm) addTrackedListener(merchPurchaseForm, 'submit', handleMerchPurchaseSubmit);
+	if (downloadMerchQrBtn) addTrackedListener(downloadMerchQrBtn, 'click', handleDownloadMerchQr);
 
-// Listeners Admin Merch (Select drag, botón ver lista ventas)
-if (adminMerchSelectDrag) addTrackedListener(adminMerchSelectDrag, 'change', handleAdminMerchDragSelect);
-if (adminMerchViewSalesBtn) addTrackedListener(adminMerchViewSalesBtn, 'click', handleViewMerchSales);
+	// Listeners Admin Merch (Select drag, botón ver lista ventas)
+	if (adminMerchSelectDrag) addTrackedListener(adminMerchSelectDrag, 'change', handleAdminMerchDragSelect);
+	if (adminMerchViewSalesBtn) addTrackedListener(adminMerchViewSalesBtn, 'click', handleViewMerchSales);
 
-// Listeners Subida de Archivos
-if (contentManageForm) addTrackedListener(contentManageForm, 'submit', handleSaveContent);
-if (eventPosterUploadInput && eventPosterUrlInput) addTrackedListener(eventPosterUploadInput, 'change', (e) => handleFileUpload(e, eventPosterUrlInput));
-if (appLogoUploadInput && appLogoUrlInput) addTrackedListener(appLogoUploadInput, 'change', (e) => handleFileUpload(e, appLogoUrlInput));
-if (ticketLogoUploadInput && ticketLogoUrlInput) addTrackedListener(ticketLogoUploadInput, 'change', (e) => handleFileUpload(e, ticketLogoUrlInput));
-if (bannerUploadInput && bannerUrlInput) addTrackedListener(bannerUploadInput, 'change', (e) => handleFileUpload(e, bannerUrlInput));
-if (galleryUploadInput) addTrackedListener(galleryUploadInput, 'change', (e) => handleMultipleFileUpload(e, 'gallery-urls-input', 'admin-gallery-preview-grid')); // <-- MODIFICADO
-if (dragCoverUploadInput && dragCoverUrlInput) addTrackedListener(dragCoverUploadInput, 'change', (e) => handleFileUpload(e, dragCoverUrlInput));
-if (dragGalleryUploadInput) addTrackedListener(dragGalleryUploadInput, 'change', (e) => handleMultipleFileUpload(e, 'drag-gallery-urls', 'admin-drag-gallery-preview-grid')); // <-- MODIFICADO
-// Los botones para forzar subida ya no son necesarios si se sube al seleccionar
-if (merchItemImageUploadInput && merchItemImageUrlInput) addTrackedListener(merchItemImageUploadInput, 'change', (e) => handleFileUpload(e, merchItemImageUrlInput));
+	// Listeners Subida de Archivos
+	if (contentManageForm) addTrackedListener(contentManageForm, 'submit', handleSaveContent);
+	if (eventPosterUploadInput && eventPosterUrlInput) addTrackedListener(eventPosterUploadInput, 'change', (e) => handleFileUpload(e, eventPosterUrlInput));
+	if (appLogoUploadInput && appLogoUrlInput) addTrackedListener(appLogoUploadInput, 'change', (e) => handleFileUpload(e, appLogoUrlInput));
+	if (ticketLogoUploadInput && ticketLogoUrlInput) addTrackedListener(ticketLogoUploadInput, 'change', (e) => handleFileUpload(e, ticketLogoUrlInput));
+	if (bannerUploadInput && bannerUrlInput) addTrackedListener(bannerUploadInput, 'change', (e) => handleFileUpload(e, bannerUrlInput));
+	if (galleryUploadInput) addTrackedListener(galleryUploadInput, 'change', (e) => handleMultipleFileUpload(e, 'gallery-urls-input', 'admin-gallery-preview-grid')); // <-- MODIFICADO
+	if (dragCoverUploadInput && dragCoverUrlInput) addTrackedListener(dragCoverUploadInput, 'change', (e) => handleFileUpload(e, dragCoverUrlInput));
+	if (dragGalleryUploadInput) addTrackedListener(dragGalleryUploadInput, 'change', (e) => handleMultipleFileUpload(e, 'drag-gallery-urls', 'admin-drag-gallery-preview-grid')); // <-- MODIFICADO
+	// Los botones para forzar subida ya no son necesarios si se sube al seleccionar
+	if (merchItemImageUploadInput && merchItemImageUrlInput) addTrackedListener(merchItemImageUploadInput, 'change', (e) => handleFileUpload(e, merchItemImageUrlInput));
 
-// ========== NUEVO: Listeners para Web Merch System ==========
-if (addWebMerchBtn) addTrackedListener(addWebMerchBtn, 'click', () => showWebMerchForm());
-if (webMerchForm) addTrackedListener(webMerchForm, 'submit', handleSaveWebMerch);
-if (cancelWebMerchBtn) addTrackedListener(cancelWebMerchBtn, 'click', () => hideWebMerchForm());
-if (webMerchImageUploadInput && webMerchImageUrlInput) addTrackedListener(webMerchImageUploadInput, 'change', (e) => handleFileUpload(e, webMerchImageUrlInput));
-if (webMerchViewSalesBtn) addTrackedListener(webMerchViewSalesBtn, 'click', handleViewWebMerchSales);
+	// ========== NUEVO: Listeners para Web Merch System ==========
+	if (addWebMerchBtn) addTrackedListener(addWebMerchBtn, 'click', () => showWebMerchForm());
+	if (webMerchForm) addTrackedListener(webMerchForm, 'submit', handleSaveWebMerch);
+	if (cancelWebMerchBtn) addTrackedListener(cancelWebMerchBtn, 'click', () => hideWebMerchForm());
+	if (webMerchImageUploadInput && webMerchImageUrlInput) addTrackedListener(webMerchImageUploadInput, 'change', (e) => handleFileUpload(e, webMerchImageUrlInput));
+	if (webMerchViewSalesBtn) addTrackedListener(webMerchViewSalesBtn, 'click', handleViewWebMerchSales);
 
-// ========== NUEVO: Listeners para Drag Merch System ==========
-if (dragMerchSelectDrag) addTrackedListener(dragMerchSelectDrag, 'change', handleDragMerchSelectChange);
-if (addDragMerchBtn) addTrackedListener(addDragMerchBtn, 'click', () => showDragMerchForm()); // NUEVO
-if (dragMerchForm) addTrackedListener(dragMerchForm, 'submit', handleSaveDragMerch);
-if (cancelDragMerchBtn) addTrackedListener(cancelDragMerchBtn, 'click', () => hideDragMerchForm());
-if (dragMerchImageUploadInput && dragMerchImageUrlInput) addTrackedListener(dragMerchImageUploadInput, 'change', (e) => handleFileUpload(e, dragMerchImageUrlInput));
-if (dragMerchViewSalesBtn) addTrackedListener(dragMerchViewSalesBtn, 'click', handleViewDragMerchSales);
+	// ========== NUEVO: Listeners para Drag Merch System ==========
+	if (dragMerchSelectDrag) addTrackedListener(dragMerchSelectDrag, 'change', handleDragMerchSelectChange);
+	if (addDragMerchBtn) addTrackedListener(addDragMerchBtn, 'click', () => showDragMerchForm()); // NUEVO
+	if (dragMerchForm) addTrackedListener(dragMerchForm, 'submit', handleSaveDragMerch);
+	if (cancelDragMerchBtn) addTrackedListener(cancelDragMerchBtn, 'click', () => hideDragMerchForm());
+	if (dragMerchImageUploadInput && dragMerchImageUrlInput) addTrackedListener(dragMerchImageUploadInput, 'change', (e) => handleFileUpload(e, dragMerchImageUrlInput));
+	if (dragMerchViewSalesBtn) addTrackedListener(dragMerchViewSalesBtn, 'click', handleViewDragMerchSales);
 
-// SMTP System
-if (smtpConfigForm) addTrackedListener(smtpConfigForm, 'submit', handleSaveSMTPConfig);
-if (testSMTPBtn) addTrackedListener(testSMTPBtn, 'click', testSMTPConnection);
-if (dragEmailSelect) addTrackedListener(dragEmailSelect, 'change', handleDragEmailSelect);
-if (saveDragEmailConfigBtn) addTrackedListener(saveDragEmailConfigBtn, 'click', handleSaveDragEmailConfig);
-if (saveWebMerchConfigBtn) addTrackedListener(saveWebMerchConfigBtn, 'click', saveEmailNotificationsState); // NUEVO
-if (saveWebMerchConfigBtn) addTrackedListener(saveWebMerchConfigBtn, 'click', saveEmailNotificationsState); // NUEVO
-// ========== FIN NUEVO ==========
+	// SMTP System
+	if (smtpConfigForm) addTrackedListener(smtpConfigForm, 'submit', handleSaveSMTPConfig);
+	if (testSMTPBtn) addTrackedListener(testSMTPBtn, 'click', testSMTPConnection);
+	if (dragEmailSelect) addTrackedListener(dragEmailSelect, 'change', handleDragEmailSelect);
+	if (saveDragEmailConfigBtn) addTrackedListener(saveDragEmailConfigBtn, 'click', handleSaveDragEmailConfig);
+	if (saveWebMerchConfigBtn) addTrackedListener(saveWebMerchConfigBtn, 'click', saveEmailNotificationsState); // NUEVO
+	if (saveWebMerchConfigBtn) addTrackedListener(saveWebMerchConfigBtn, 'click', saveEmailNotificationsState); // NUEVO
+	// ========== FIN NUEVO ==========
 
 
-// Listeners Admin Galerías y Backup/Restore
-if (galleryManageForm) addTrackedListener(galleryManageForm, 'submit', handleSaveGallery);
-if (galleryEventSelect) addTrackedListener(galleryEventSelect, 'change', handleGalleryEventSelect);
-if (galleryBackBtn) addTrackedListener(galleryBackBtn, 'click', (e) => { e.preventDefault(); renderGalleryEventList(); }); // Volver a lista galerías
-if (dragGalleryBackBtn) addTrackedListener(dragGalleryBackBtn, 'click', (e) => { e.preventDefault(); renderDragList(); }); // Volver a lista drags
-if (backupBtn) addTrackedListener(backupBtn, 'click', handleBackup);
-if (restoreInput) addTrackedListener(restoreInput, 'change', handleRestore);
+	// Listeners Admin Galerías y Backup/Restore
+	if (galleryManageForm) addTrackedListener(galleryManageForm, 'submit', handleSaveGallery);
+	if (galleryEventSelect) addTrackedListener(galleryEventSelect, 'change', handleGalleryEventSelect);
+	if (galleryBackBtn) addTrackedListener(galleryBackBtn, 'click', (e) => { e.preventDefault(); renderGalleryEventList(); }); // Volver a lista galerías
+	if (dragGalleryBackBtn) addTrackedListener(dragGalleryBackBtn, 'click', (e) => { e.preventDefault(); renderDragList(); }); // Volver a lista drags
+	if (backupBtn) addTrackedListener(backupBtn, 'click', handleBackup);
+	if (restoreInput) addTrackedListener(restoreInput, 'change', handleRestore);
 
-// Listeners Ticketing Público (Form email, botón descarga ticket)
-if (emailForm) addTrackedListener(emailForm, 'submit', handleEmailSubmit);
-if (downloadTicketBtn) addTrackedListener(downloadTicketBtn, 'click', handleDownloadTicket);
+	// Listeners Ticketing Público (Form email, botón descarga ticket)
+	if (emailForm) addTrackedListener(emailForm, 'submit', handleEmailSubmit);
+	if (downloadTicketBtn) addTrackedListener(downloadTicketBtn, 'click', handleDownloadTicket);
 
-// Listeners Escáner QR (Actualizado para html5-qrcode)
-if (scanQrBtn) addTrackedListener(scanQrBtn, 'click', (e) => {
-	e.preventDefault();
-	startScanner(); // La función startScanner ya maneja el cambio de vistas
-});
-if (scanBackBtn) addTrackedListener(scanBackBtn, 'click', (e) => {
-	e.preventDefault();
-	stopScanner(false); // La función stopScanner(false) ya maneja el regreso a la vista principal
-});
-if (scannerConfirmBtn) addTrackedListener(scannerConfirmBtn, 'click', handleScannerConfirm);
-if (scannerCancelBtn) addTrackedListener(scannerCancelBtn, 'click', handleScannerCancel);
+	// Listeners Escáner QR (Actualizado para html5-qrcode)
+	if (scanQrBtn) addTrackedListener(scanQrBtn, 'click', (e) => {
+		e.preventDefault();
+		startScanner(); // La función startScanner ya maneja el cambio de vistas
+	});
+	if (scanBackBtn) addTrackedListener(scanBackBtn, 'click', (e) => {
+		e.preventDefault();
+		stopScanner(false); // La función stopScanner(false) ya maneja el regreso a la vista principal
+	});
+	if (scannerConfirmBtn) addTrackedListener(scannerConfirmBtn, 'click', handleScannerConfirm);
+	if (scannerCancelBtn) addTrackedListener(scannerCancelBtn, 'click', handleScannerCancel);
 
-// --- NUEVO LISTENER AÑADIDO ---
-if (scannerCloseBtn) addTrackedListener(scannerCloseBtn, 'click', (e) => {
-	e.preventDefault();
-	// Cierra el scanner completamente y vuelve al panel, igual que el botón "Atrás"
-	stopScanner(false);
-});
-// --- FIN NUEVO LISTENER ---
+	// --- NUEVO LISTENER AÑADIDO ---
+	if (scannerCloseBtn) addTrackedListener(scannerCloseBtn, 'click', (e) => {
+		e.preventDefault();
+		// Cierra el scanner completamente y vuelve al panel, igual que el botón "Atrás"
+		stopScanner(false);
+	});
+	// --- FIN NUEVO LISTENER ---
 
-// Listeners Auth (Login, Logout, Menú Móvil para Easter Egg)
-if (loginForm) addTrackedListener(loginForm, 'submit', handleAdminLogin);
-if (logoutBtn) addTrackedListener(logoutBtn, 'click', () => handleLogout(true)); // Mostrar modal éxito por defecto
-if (mobileMenuBtn) addTrackedListener(mobileMenuBtn, 'click', (e) => {
-	e.preventDefault();
-	handleAdminMenuTap(); // Intentar revelar link Admin (Easter Egg)
-	mobileMenu?.classList.toggle('hidden'); // Siempre abrir/cerrar menú
-});
+	// Listeners Auth (Login, Logout, Menú Móvil para Easter Egg)
+	if (loginForm) addTrackedListener(loginForm, 'submit', handleAdminLogin);
+	if (logoutBtn) addTrackedListener(logoutBtn, 'click', () => handleLogout(true)); // Mostrar modal éxito por defecto
+	if (mobileMenuBtn) addTrackedListener(mobileMenuBtn, 'click', (e) => {
+		e.preventDefault();
+		handleAdminMenuTap(); // Intentar revelar link Admin (Easter Egg)
+		mobileMenu?.classList.toggle('hidden'); // Siempre abrir/cerrar menú
+	});
 
-// --- Inicialización Final ---
-checkAdminUI(); // Establecer UI correcta (login/panel) basado en estado inicial
-renderAppLogo(); // Renderizar logo inicial
-renderNextEventPromo(); // Renderizar promo inicial
-showPage('home'); // Mostrar página de inicio por defecto
+	// --- Inicialización Final ---
+	checkAdminUI(); // Establecer UI correcta (login/panel) basado en estado inicial
+	renderAppLogo(); // Renderizar logo inicial
+	renderNextEventPromo(); // Renderizar promo inicial
+	showPage('home'); // Mostrar página de inicio por defecto
 }); // Fin DOMContentLoaded
