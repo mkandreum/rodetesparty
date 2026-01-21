@@ -81,7 +81,7 @@ function ensureAbsoluteUrl($url)
     // Asumir que es una ruta relativa en uploads/
     // Limpiar barras iniciales para evitar dobles //
     $cleanPath = ltrim($url, '/');
-    return 'https://rodetesparty.com/' . $cleanPath;
+    return 'https://rodetesparty.sytes.net/' . $cleanPath;
 }
 
 // Función para generar HTML del email de ticket
@@ -95,7 +95,7 @@ function generateTicketEmailHTML($ticketData, $eventData, $logoUrl = '')
 
     $logoUrl = ensureAbsoluteUrl($logoUrl);
     if (empty($logoUrl)) {
-        $logoUrl = 'https://rodetesparty.com/uploads/logo.png';
+        $logoUrl = 'https://rodetesparty.sytes.net/uploads/logo.png';
     }
 
     $html = "
@@ -169,7 +169,7 @@ function generateWebMerchEmailHTML($saleData, $itemData, $logoUrl = '')
     $itemImage = ensureAbsoluteUrl($itemData['imageUrl'] ?? '');
     $logoUrl = ensureAbsoluteUrl($logoUrl);
     if (empty($logoUrl)) {
-        $logoUrl = 'https://rodetesparty.com/uploads/logo.png';
+        $logoUrl = 'https://rodetesparty.sytes.net/uploads/logo.png';
     }
 
     $productImageHtml = '';
@@ -247,7 +247,7 @@ function generateDragMerchEmailHTML($saleData, $itemData, $dragData, $customMess
     $itemImage = ensureAbsoluteUrl($itemData['imageUrl'] ?? '');
     $logoUrl = ensureAbsoluteUrl($logoUrl);
     if (empty($logoUrl)) {
-        $logoUrl = 'https://rodetesparty.com/uploads/logo.png';
+        $logoUrl = 'https://rodetesparty.sytes.net/uploads/logo.png';
     }
 
     $productImageHtml = '';
@@ -331,7 +331,7 @@ function generateSellerNotificationHTML($saleData, $itemData, $isWebMerch, $logo
     $itemImage = ensureAbsoluteUrl($itemData['imageUrl'] ?? '');
     $logoUrl = ensureAbsoluteUrl($logoUrl);
     if (empty($logoUrl)) {
-        $logoUrl = 'https://rodetesparty.com/uploads/logo.png';
+        $logoUrl = 'https://rodetesparty.sytes.net/uploads/logo.png';
     }
 
     $productImageHtml = '';
