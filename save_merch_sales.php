@@ -16,27 +16,25 @@ if ($newSales === null) {
 }
 
 // --- Protección ---
-if (!$isAdmin) {
-    $currentSalesJson = file_exists($dataFile) ? file_get_contents($dataFile) : '[]';
-    $currentSales = json_decode($currentSalesJson, true) ?: [];
+// --- Protección y Detección de Cambios ---
+$currentSalesJson = file_exists($dataFile) ? file_get_contents($dataFile) : '[]';
+$currentSales = json_decode($currentSalesJson, true) ?: [];
+$currentSaleIds = array_column($currentSales, 'saleId');
 
+// Detectar ventas nuevas (para enviar email) - Aplica a todos (admin y user)
+$newlyAddedSales = [];
+foreach ($newSales as $sale) {
+    if (!in_array($sale['saleId'], $currentSaleIds)) {
+        $newlyAddedSales[] = $sale;
+    }
+}
+
+// Protección contra borrado solo para NO admins
+if (!$isAdmin) {
     if (count($newSales) < count($currentSales)) {
         http_response_code(403);
         echo json_encode(['success' => false, 'message' => 'Error: No puedes borrar ventas existentes.']);
         exit;
-    }
-
-    // NUEVO: Detectar ventas nuevas para enviar email
-    $currentSalesJson = file_exists($dataFile) ? file_get_contents($dataFile) : '[]';
-    $currentSales = json_decode($currentSalesJson, true) ?: [];
-    $currentSaleIds = array_column($currentSales, 'saleId');
-
-    // Encontrar ventas que son nuevas
-    $newlyAddedSales = [];
-    foreach ($newSales as $sale) {
-        if (!in_array($sale['saleId'], $currentSaleIds)) {
-            $newlyAddedSales[] = $sale;
-        }
     }
 }
 
@@ -47,8 +45,8 @@ if (!is_dir($dir)) {
 }
 
 if (file_put_contents($dataFile, json_encode($newSales, JSON_PRETTY_PRINT)) !== false) {
-    // NUEVO: Enviar emails para ventas nuevas
-    if (!$isAdmin && !empty($newlyAddedSales)) {
+    // NUEVO: Enviar emails para ventas nuevas (incluso si es Admin probando)
+    if (!empty($newlyAddedSales)) {
         require_once __DIR__ . '/send_email.php';
 
         // Cargar app state para obtener información de merch y drags
