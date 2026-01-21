@@ -344,6 +344,46 @@ window.addEventListener('DOMContentLoaded', async () => {
 	const merchSalesListContent = document.getElementById('merch-sales-list-content');
 	// --- FIN ---
 
+	// --- DOM Elements for NEW Web Merch System ---
+	const addWebMerchBtn = document.getElementById('add-web-merch-btn');
+	const webMerchForm = document.getElementById('web-merch-form');
+	const saveWebMerchBtn = document.getElementById('save-web-merch-btn');
+	const cancelWebMerchBtn = document.getElementById('cancel-web-merch-btn');
+	const webMerchListContainer = document.getElementById('web-merch-list-container');
+	const webMerchImageUrlInput = document.getElementById('web-merch-image-url');
+	const webMerchImageUploadInput = document.getElementById('web-merch-image-upload');
+	const webMerchSalesSummary = document.getElementById('web-merch-sales-summary');
+	const webMerchTotalItems = document.getElementById('web-merch-total-items');
+	const webMerchTotalRevenue = document.getElementById('web-merch-total-revenue');
+	const webMerchViewSalesBtn = document.getElementById('web-merch-view-sales-btn');
+	// --- FIN ---
+
+	// --- DOM Elements for NEW Drag Merch System ---
+	const dragMerchSelectDrag = document.getElementById('drag-merch-select-drag');
+	const dragMerchForm = document.getElementById('drag-merch-form');
+	const saveDragMerchBtn = document.getElementById('save-drag-merch-btn');
+	const cancelDragMerchBtn = document.getElementById('cancel-drag-merch-btn');
+	const dragMerchListContainer = document.getElementById('drag-merch-list-container');
+	const dragMerchImageUrlInput = document.getElementById('drag-merch-image-url');
+	const dragMerchImageUploadInput = document.getElementById('drag-merch-image-upload');
+	const dragMerchSalesSummary = document.getElementById('drag-merch-sales-summary');
+	const dragMerchTotalItems = document.getElementById('drag-merch-total-items');
+	const dragMerchTotalRevenue = document.getElementById('drag-merch-total-revenue');
+	const dragMerchViewSalesBtn = document.getElementById('drag-merch-view-sales-btn');
+	// --- FIN ---
+
+	// --- DOM Elements for SMTP Configuration ---
+	const smtpConfigForm = document.getElementById('smtp-config-form');
+	const testSMTPBtn = document.getElementById('test-smtp-btn');
+	const webMerchNotifEmail = document.getElementById('web-merch-notif-email');
+	const webMerchBuyerTemplate = document.getElementById('web-merch-buyer-template');
+	const dragEmailSelect = document.getElementById('drag-email-select');
+	const dragEmailConfigForm = document.getElementById('drag-email-config-form');
+	const dragNotifEmail = document.getElementById('drag-notif-email');
+	const dragBuyerTemplate = document.getElementById('drag-buyer-template');
+	const saveDragEmailConfigBtn = document.getElementById('save-drag-email-config-btn');
+	// --- FIN ---
+
 
 	// --- Helper Functions ---
 
@@ -455,7 +495,18 @@ window.addEventListener('DOMContentLoaded', async () => {
 		}
 		if (adminPageId === 'merch') {
 			renderAdminMerch();
+			// NUEVO: Renderizar el nuevo sistema dual de merch
+			renderWebMerchList();
+			renderWebMerchSalesSummary();
+			renderDragMerchSelect();
+			renderDragMerchSalesSummary();
 		}
+
+		if (adminPageId === 'smtp') {
+			renderSMTPConfig();
+			renderEmailNotifications();
+		}
+
 		if (adminPageId === 'giveaway') {
 			renderGiveawayEvents(currentEvents); // Usa la variable local actualizada
 		}
@@ -472,6 +523,15 @@ window.addEventListener('DOMContentLoaded', async () => {
 		}
 		if (adminPageId !== 'merch' && editingMerchItemId !== null) {
 			resetMerchItemForm();
+		}
+	}
+	// NUEVO: Resetear formularios del nuevo sistema de merch
+	if (adminPageId !== 'merch') {
+		if (editingWebMerchId !== null) {
+			resetWebMerchForm();
+		}
+		if (editingDragMerchId !== null) {
+			resetDragMerchForm();
 		}
 	}
 	/**
@@ -2693,6 +2753,944 @@ window.addEventListener('DOMContentLoaded', async () => {
 	}
 
 
+	// ========== NUEVO SISTEMA DUAL DE MERCH ==========
+	// Variables para controlar el estado de edición en el nuevo sistema
+	let editingWebMerchId = null;
+	let editingDragMerchId = null;
+	let currentSelectedDragForMerch = null;
+
+	// ===== WEB MERCH FUNCTIONS =====
+
+	/**
+		* Muestra el formulario de Web Merch para añadir un nuevo artículo
+		*/
+	function showWebMerchForm() {
+		if (!webMerchForm) return;
+		webMerchForm.classList.remove('hidden');
+		resetWebMerchForm();
+	}
+
+	/**
+	 * Oculta y resetea el formulario de Web Merch
+	 */
+	function hideWebMerchForm() {
+		if (!webMerchForm) return;
+		webMerchForm.classList.add('hidden');
+		resetWebMerchForm();
+	}
+
+	/**
+	 * Resetea el formulario de Web Merch
+	 */
+	function resetWebMerchForm() {
+		if (!webMerchForm) return;
+		webMerchForm.reset();
+		editingWebMerchId = null;
+		const editIdInput = document.getElementById('edit-web-merch-id');
+		if (editIdInput) editIdInput.value = '';
+		const uploadInput = document.getElementById('web-merch-image-upload');
+		if (uploadInput) uploadInput.value = '';
+	}
+
+	/**
+	 * Renderiza la lista de Web Merch en el admin
+	 */
+	function renderWebMerchList() {
+		if (!webMerchListContainer || !appState || !appState.webMerch) return;
+		clearDynamicListListeners('webMerchList');
+		webMerchListContainer.innerHTML = '';
+
+		const webMerchItems = appState.webMerch || [];
+
+		if (webMerchItems.length === 0) {
+			webMerchListContainer.innerHTML = '<li class="text-gray-400 text-center font-pixel">No hay artículos de Web Merch.</li>';
+			return;
+		}
+
+		webMerchItems.forEach(item => {
+			try {
+				const li = document.createElement('li');
+				li.className = "bg-gray-800 p-4 border border-gray-500 flex flex-wrap justify-between items-center gap-4";
+				const itemImageUrl = item.imageUrl || 'https://placehold.co/60x60/333/ccc?text=?&font=vt323';
+				const price = (item.price || 0).toFixed(2);
+
+				li.innerHTML = `
+					<div class="flex items-center gap-4 flex-grow min-w-0">
+						<img src="${itemImageUrl}" alt="${item.name || 'Artículo'}" class="w-12 h-12 object-contain border border-gray-600 flex-shrink-0" onerror="this.onerror=null;this.src='https://placehold.co/60x60/333/ccc?text=ERR&font=vt323';">
+						<div class="min-w-0">
+							<span class="font-pixel text-lg text-white block truncate" title="${item.name || ''}">${item.name || 'Artículo sin nombre'}</span>
+							<span class="text-base text-blue-400 font-bold">${price}€</span>
+						</div>
+					</div>
+					<div class="flex space-x-2 flex-shrink-0">
+						<button data-web-merch-id="${item.id}" class="edit-web-merch-btn bg-blue-600 hover:bg-blue-500 text-white px-3 py-1 rounded-none text-sm font-pixel">EDITAR</button>
+						<button data-web-merch-id="${item.id}" class="delete-web-merch-btn bg-red-600 hover:bg-red-500 text-white px-3 py-1 rounded-none text-sm font-pixel">ELIMINAR</button>
+					</div>
+				`;
+				webMerchListContainer.appendChild(li);
+			} catch (e) {
+				console.error(`Error renderizando Web Merch item ${item?.id}:`, e);
+			}
+		});
+
+		// Añadir listeners
+		webMerchListContainer.querySelectorAll('.edit-web-merch-btn').forEach(btn => addTrackedListener(btn, 'click', handleEditWebMerch));
+		webMerchListContainer.querySelectorAll('.delete-web-merch-btn').forEach(btn => addTrackedListener(btn, 'click', handleDeleteWebMerch));
+	}
+
+	/**
+	 * Maneja el guardado de Web Merch (crear o editar)
+	 */
+	async function handleSaveWebMerch(e) {
+		e.preventDefault();
+		if (!webMerchForm || !appState) return;
+
+		const formData = new FormData(webMerchForm);
+		const itemName = formData.get('web-merch-name')?.trim() || '';
+		const itemPrice = parseFloat(formData.get('web-merch-price'));
+		const itemImageUrl = formData.get('web-merch-image-url')?.trim() || '';
+
+		// Validaciones
+		if (!itemName) {
+			showInfoModal("El nombre del artículo es obligatorio.", true);
+			return;
+		}
+		if (isNaN(itemPrice) || itemPrice < 0) {
+			showInfoModal("El precio debe ser un número válido (0 o mayor).", true);
+			return;
+		}
+
+		showLoading(true);
+		try {
+			if (!appState.webMerch) appState.webMerch = [];
+
+			if (editingWebMerchId !== null) {
+				// Actualizar item existente
+				const itemIndex = appState.webMerch.findIndex(item => item.id === editingWebMerchId);
+				if (itemIndex > -1) {
+					appState.webMerch[itemIndex] = {
+						...appState.webMerch[itemIndex],
+						name: itemName,
+						price: itemPrice,
+						imageUrl: itemImageUrl
+					};
+					await saveAppState();
+					showInfoModal('¡Artículo de Web Merch actualizado!', false);
+				} else {
+					throw new Error("Artículo a editar no encontrado.");
+				}
+			} else {
+				// Añadir nuevo item
+				const newItem = {
+					id: appState.nextMerchItemId++,
+					name: itemName,
+					price: itemPrice,
+					imageUrl: itemImageUrl
+				};
+				appState.webMerch.push(newItem);
+				await saveAppState();
+				showInfoModal('¡Artículo añadido a Web Merch!', false);
+			}
+
+			hideWebMerchForm();
+			renderWebMerchList();
+			renderWebMerchSalesSummary();
+			renderMerchPage(); // Re-renderizar página pública
+		} catch (error) {
+			console.error("Error saving Web Merch item:", error);
+			showInfoModal("Error al guardar el artículo: " + error.message, true);
+		} finally {
+			showLoading(false);
+		}
+	}
+
+	/**
+	 * Maneja la edición de un artículo de Web Merch
+	 */
+	function handleEditWebMerch(e) {
+		if (!appState || !webMerchForm) return;
+		const merchId = parseInt(e.currentTarget.dataset.webMerchId, 10);
+		if (isNaN(merchId)) return;
+
+		const itemToEdit = appState.webMerch?.find(item => item.id === merchId);
+		if (!itemToEdit) {
+			showInfoModal("Error: Artículo no encontrado para editar.", true);
+			return;
+		}
+
+		// Rellenar formulario
+		const editIdInput = document.getElementById('edit-web-merch-id');
+		if (editIdInput) editIdInput.value = itemToEdit.id;
+
+		const nameInput = document.getElementById('web-merch-name');
+		if (nameInput) nameInput.value = itemToEdit.name || '';
+
+		const priceInput = document.getElementById('web-merch-price');
+		if (priceInput) priceInput.value = itemToEdit.price || 0;
+
+		if (webMerchImageUrlInput) webMerchImageUrlInput.value = itemToEdit.imageUrl || '';
+
+		editingWebMerchId = itemToEdit.id;
+		webMerchForm.classList.remove('hidden');
+		webMerchForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
+	}
+
+	/**
+	 * Maneja la eliminación de un artículo de Web Merch
+	 */
+	async function handleDeleteWebMerch(e) {
+		if (!appState) return;
+		const merchId = parseInt(e.currentTarget.dataset.webMerchId, 10);
+		if (isNaN(merchId)) return;
+
+		const itemIndex = appState.webMerch?.findIndex(item => item.id === merchId);
+		if (itemIndex === undefined || itemIndex === -1) {
+			showInfoModal("Error: Artículo no encontrado.", true);
+			return;
+		}
+
+		const itemName = appState.webMerch[itemIndex].name || 'este artículo';
+
+		console.warn(`Simulando confirmación para eliminar Web Merch: ${itemName} (ID: ${merchId})`);
+		showLoading(true);
+		try {
+			appState.webMerch.splice(itemIndex, 1);
+
+			if (editingWebMerchId === merchId) {
+				resetWebMerchForm();
+			}
+
+			await saveAppState();
+			showLoading(false);
+			showInfoModal(`Artículo "${itemName}" eliminado.`, false);
+
+			renderWebMerchList();
+			renderWebMerchSalesSummary();
+			renderMerchPage();
+		} catch (error) {
+			showLoading(false);
+			console.error("Error deleting Web Merch item:", error);
+			showInfoModal("Error al eliminar el artículo: " + error.message, true);
+		}
+	}
+
+	/**
+	 * Renderiza el resumen de ventas de Web Merch
+	 */
+	function renderWebMerchSalesSummary() {
+		if (!webMerchSalesSummary || !webMerchTotalItems || !webMerchTotalRevenue || !webMerchViewSalesBtn) return;
+
+		const salesForWeb = (allMerchSales || []).filter(s => s.dragId === 'web');
+		const deliveredSales = salesForWeb.filter(s => s.status === 'Delivered');
+		const pendingSalesCount = salesForWeb.length - deliveredSales.length;
+
+		let totalItemsDelivered = 0;
+		let totalRevenueDelivered = 0;
+
+		deliveredSales.forEach(sale => {
+			totalItemsDelivered += sale.quantity || 0;
+			totalRevenueDelivered += (sale.quantity || 0) * (sale.itemPrice || 0);
+		});
+
+		webMerchTotalItems.textContent = totalItemsDelivered.toString();
+		webMerchTotalRevenue.textContent = totalRevenueDelivered.toFixed(2) + ' €';
+
+		if (salesForWeb.length > 0) {
+			webMerchViewSalesBtn.textContent = `VER LISTA PEDIDOS (${pendingSalesCount} PENDIENTES)`;
+			webMerchViewSalesBtn.disabled = false;
+		} else {
+			webMerchViewSalesBtn.textContent = `NO HAY PEDIDOS REGISTRADOS`;
+			webMerchViewSalesBtn.disabled = true;
+		}
+	}
+
+	/**
+	 * Muestra el modal con la lista de ventas de Web Merch
+	 */
+	function handleViewWebMerchSales() {
+		if (!merchSalesListModal || !merchSalesListTitle || !merchSalesListContent) return;
+
+		merchSalesListTitle.textContent = `Pedidos de Merch: RODETES OFICIAL (WEB)`;
+		renderMerchSalesListForDrag('web');
+		merchSalesListModal.classList.remove('hidden');
+	}
+
+	/**
+	 * Renderiza la lista de ventas de merch para una drag específica (o 'web')
+	 */
+	function renderMerchSalesListForDrag(dragId) {
+		if (!merchSalesListContent) return;
+
+		clearDynamicListListeners('merchSalesListForDrag');
+		merchSalesListContent.innerHTML = '';
+
+		const salesForDrag = (allMerchSales || [])
+			.filter(s => s.dragId === dragId)
+			.sort((a, b) => (b.saleDate && a.saleDate) ? new Date(b.saleDate) - new Date(a.saleDate) : 0);
+
+		if (salesForDrag.length === 0) {
+			merchSalesListContent.innerHTML = '<p class="text-gray-400 text-center font-pixel">NO HAY PEDIDOS REGISTRADOS.</p>';
+			return;
+		}
+
+		let listHtml = `<ul class="text-left space-y-4">`;
+		salesForDrag.forEach(sale => {
+			try {
+				const isPending = sale.status === 'Pending';
+				const statusText = isPending ? 'PENDIENTE' : 'ENTREGADO';
+				const statusColor = isPending ? 'text-yellow-400' : 'text-green-400';
+				const totalAmount = ((sale.itemPrice || 0) * (sale.quantity || 0)).toFixed(2);
+				const saleDateStr = sale.saleDate ? new Date(sale.saleDate).toLocaleString('es-ES', { dateStyle: 'short', timeStyle: 'short' }) : 'Fecha N/A';
+				const saleIdShort = (sale.saleId || 'N/A').substring(0, 8);
+				const buyerName = `${sale.nombre || ''} ${sale.apellidos || ''}`.trim() || 'Nombre N/A';
+
+				const buttonHtml = isPending
+					? `<button data-sale-id="${sale.saleId}" class="mark-merch-delivered-btn bg-green-600 hover:bg-green-500 text-white px-3 py-1 rounded-none text-sm font-pixel">MARCAR ENTREGADO</button>`
+					: `<span class="text-gray-500 px-3 py-1 text-sm font-pixel">CONFIRMADO</span>`;
+
+				listHtml += `
+					<li class="p-3 bg-gray-800 border border-gray-600 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+						<div class="min-w-0 flex-grow">
+							<span class="font-pixel text-lg text-white block truncate" title="${sale.itemName || ''}">${sale.itemName || 'Artículo'} x ${sale.quantity || '?'}</span>
+							<span class="text-sm ${statusColor} font-bold block">${statusText} (${totalAmount} €)</span>
+							<span class="text-xs text-gray-400 block break-words" title="${buyerName}">${buyerName}</span>
+							<span class="text-xs text-gray-500 block break-all" title="${sale.email || ''}">Email: ${sale.email || 'N/A'}</span>
+							<span class="text-xs text-gray-500 block">ID: ${saleIdShort}... (${saleDateStr})</span>
+						</div>
+						<div class="flex-shrink-0 mt-2 sm:mt-0">
+							${buttonHtml}
+						</div>
+					</li>
+				`;
+			} catch (e) {
+				console.error(`Error renderizando  venta ${sale?.saleId}:`, e);
+			}
+		});
+		listHtml += '</ul>';
+		merchSalesListContent.innerHTML = listHtml;
+
+		// Añadir listeners para botones de marcar entregado
+		merchSalesListContent.querySelectorAll('.mark-merch-delivered-btn').forEach(btn => {
+			addTrackedListener(btn, 'click', handleMarkMerchDeliveredFromList);
+		});
+	}
+
+	/**
+	 * Marca un pedido de merch como entregado desde la lista
+	 */
+	async function handleMarkMerchDeliveredFromList(e) {
+		const saleId = e.currentTarget.dataset.saleId;
+		if (!saleId || !allMerchSales) return;
+
+		const saleIndex = allMerchSales.findIndex(s => s.saleId === saleId);
+		if (saleIndex === -1) {
+			showInfoModal("Error: Pedido no encontrado.", true);
+			return;
+		}
+		if (allMerchSales[saleIndex].status === 'Delivered') {
+			showInfoModal("Este pedido ya está marcado como entregado.", false);
+			return;
+		}
+
+		console.warn(`Simulando confirmación de entrega para pedido: ${saleId}`);
+		showLoading(true);
+		try {
+			allMerchSales[saleIndex].status = 'Delivered';
+			await saveMerchSalesState();
+
+			// Re-renderizar la lista actual y los resúmenes
+			const dragId = allMerchSales[saleIndex].dragId;
+			renderMerchSalesListForDrag(dragId);
+
+			if (dragId === 'web') {
+				renderWebMerchSalesSummary();
+			} else {
+				renderDragMerchSalesSummary();
+			}
+
+			showLoading(false);
+			showInfoModal(`¡PEDIDO ${saleId.substring(0, 8)} CONFIRMADO COMO ENTREGADO!`, false);
+		} catch (error) {
+			showLoading(false);
+			console.error("Error marking merch delivered:", error);
+			allMerchSales[saleIndex].status = 'Pending'; // Revertir
+			renderMerchSalesListForDrag(allMerchSales[saleIndex].dragId);
+			showInfoModal("Error al confirmar la entrega: " + error.message, true);
+		}
+	}
+
+	// ===== DRAG MERCH FUNCTIONS =====
+
+	/**
+	 * Renderiza el selector de drags para Drag Merch
+	 */
+	function renderDragMerchSelect() {
+		if (!dragMerchSelectDrag || !appState || !appState.drags) return;
+
+		const previousSelectedDragId = dragMerchSelectDrag.value;
+
+		dragMerchSelectDrag.innerHTML = '<option value="">-- SELECCIONA UNA DRAG --</option>';
+
+		[...(appState.drags)]
+			.sort((a, b) => (a.name || '').localeCompare(b.name || ''))
+			.forEach(drag => {
+				const option = document.createElement('option');
+				option.value = drag.id;
+				option.textContent = drag.name || `Drag ID ${drag.id}`;
+				dragMerchSelectDrag.appendChild(option);
+			});
+
+		// Restaurar selección si es válida
+		if (previousSelectedDragId && appState.drags.some(d => d.id === parseInt(previousSelectedDragId))) {
+			dragMerchSelectDrag.value = previousSelectedDragId;
+			currentSelectedDragForMerch = parseInt(previousSelectedDragId);
+		} else {
+			currentSelectedDragForMerch = null;
+		}
+
+		renderDragMerchList();
+	}
+
+	/**
+	 * Maneja el cambio de selección de drag para Drag Merch
+	 */
+	function handleDragMerchSelectChange(e) {
+		const val = e.target.value;
+		if (val) {
+			currentSelectedDragForMerch = parseInt(val, 10);
+		} else {
+			currentSelectedDragForMerch = null;
+		}
+		renderDragMerchList();
+		renderDragMerchSalesSummary();
+	}
+
+	/**
+	 * Muestra el formulario de Drag Merch
+	 */
+	function showDragMerchForm() {
+		if (!dragMerchForm) return;
+		dragMerchForm.classList.remove('hidden');
+		resetDragMerchForm();
+	}
+
+	/**
+	 * Oculta y resetea el formulario de Drag Merch
+	 */
+	function hideDragMerchForm() {
+		if (!dragMerchForm) return;
+		dragMerchForm.classList.add('hidden');
+		resetDragMerchForm();
+	}
+
+	/**
+	 * Resetea el formulario de Drag Merch
+	 */
+	function resetDragMerchForm() {
+		if (!dragMerchForm) return;
+		dragMerchForm.reset();
+		editingDragMerchId = null;
+		const editIdInput = document.getElementById('edit-drag-merch-id');
+		if (editIdInput) editIdInput.value = '';
+		const uploadInput = document.getElementById('drag-merch-image-upload');
+		if (uploadInput) uploadInput.value = '';
+	}
+
+	/**
+	 * Renderiza la lista de Drag Merch según la drag seleccionada
+	 */
+	function renderDragMerchList() {
+		if (!dragMerchListContainer || !appState) return;
+		clearDynamicListListeners('dragMerchList');
+		dragMerchListContainer.innerHTML = '';
+
+		if (currentSelectedDragForMerch === null) {
+			dragMerchListContainer.innerHTML = '<li class="text-gray-400 text-center font-pixel">Selecciona una drag para ver/añadir merch.</li>';
+			if (dragMerchForm) dragMerchForm.classList.add('hidden');
+			if (dragMerchSalesSummary) dragMerchSalesSummary.classList.add('hidden');
+			return;
+		}
+
+		// Mostrar formulario y resumen cuando hay drag seleccionada
+		if (dragMerchSalesSummary) dragMerchSalesSummary.classList.remove('hidden');
+
+		const drag = appState.drags.find(d => d.id === currentSelectedDragForMerch);
+		if (!drag) {
+			dragMerchListContainer.innerHTML = '<li class="text-gray-400 text-center font-pixel">Drag no encontrada.</li>';
+			return;
+		}
+
+		const merchItems = drag.merchItems || [];
+
+		if (merchItems.length === 0) {
+			dragMerchListContainer.innerHTML = '<li class="text-gray-400 text-center font-pixel">No hay artículos de merch para esta drag.</li>';
+			return;
+		}
+
+		merchItems.forEach(item => {
+			try {
+				const li = document.createElement('li');
+				li.className = "bg-gray-800 p-4 border border-gray-500 flex flex-wrap justify-between items-center gap-4";
+				const itemImageUrl = item.imageUrl || 'https://placehold.co/60x60/333/ccc?text=?&font=vt323';
+				const price = (item.price || 0).toFixed(2);
+
+				li.innerHTML = `
+					<div class="flex items-center gap-4 flex-grow min-w-0">
+						<img src="${itemImageUrl}" alt="${item.name || 'Artículo'}" class="w-12 h-12 object-contain border border-gray-600 flex-shrink-0" onerror="this.onerror=null;this.src='https://placehold.co/60x60/333/ccc?text=ERR&font=vt323';">
+						<div class="min-w-0">
+							<span class="font-pixel text-lg text-white block truncate" title="${item.name || ''}">${item.name || 'Artículo sin nombre'}</span>
+							<span class="text-base text-blue-400 font-bold">${price}€</span>
+						</div>
+					</div>
+					<div class="flex space-x-2 flex-shrink-0">
+						<button data-drag-merch-id="${item.id}" class="edit-drag-merch-btn bg-blue-600 hover:bg-blue-500 text-white px-3 py-1 rounded-none text-sm font-pixel">EDITAR</button>
+						<button data-drag-merch-id="${item.id}" class="delete-drag-merch-btn bg-red-600 hover:bg-red-500 text-white px-3 py-1 rounded-none text-sm font-pixel">ELIMINAR</button>
+					</div>
+				`;
+				dragMerchListContainer.appendChild(li);
+			} catch (e) {
+				console.error(`Error renderizando Drag Merch item ${item?.id}:`, e);
+			}
+		});
+
+		// Añadir listeners
+		dragMerchListContainer.querySelectorAll('.edit-drag-merch-btn').forEach(btn => addTrackedListener(btn, 'click', handleEditDragMerch));
+		dragMerchListContainer.querySelectorAll('.delete-drag-merch-btn').forEach(btn => addTrackedListener(btn, 'click', handleDeleteDragMerch));
+	}
+
+	/**
+	 * Maneja el guardado de Drag Merch (crear o editar)
+	 */
+	async function handleSaveDragMerch(e) {
+		e.preventDefault();
+		if (!dragMerchForm || !appState || currentSelectedDragForMerch === null) return;
+
+		const dragIndex = appState.drags.findIndex(d => d.id === currentSelectedDragForMerch);
+		if (dragIndex === -1) {
+			showInfoModal("Error: Drag no encontrada.", true);
+			return;
+		}
+
+		const formData = new FormData(dragMerchForm);
+		const itemName = formData.get('drag-merch-name')?.trim() || '';
+		const itemPrice = parseFloat(formData.get('drag-merch-price'));
+		const itemImageUrl = formData.get('drag-merch-image-url')?.trim() || '';
+
+		// Validaciones
+		if (!itemName) {
+			showInfoModal("El nombre del artículo es obligatorio.", true);
+			return;
+		}
+		if (isNaN(itemPrice) || itemPrice < 0) {
+			showInfoModal("El precio debe ser un número válido (0 o mayor).", true);
+			return;
+		}
+
+		showLoading(true);
+		try {
+			if (!appState.drags[dragIndex].merchItems) {
+				appState.drags[dragIndex].merchItems = [];
+			}
+
+			const merchItems = appState.drags[dragIndex].merchItems;
+
+			if (editingDragMerchId !== null) {
+				// Actualizar item existente
+				const itemIndex = merchItems.findIndex(item => item.id === editingDragMerchId);
+				if (itemIndex > -1) {
+					merchItems[itemIndex] = {
+						...merchItems[itemIndex],
+						name: itemName,
+						price: itemPrice,
+						imageUrl: itemImageUrl
+					};
+					await saveAppState();
+					showInfoModal(`¡Artículo de ${appState.drags[dragIndex].name} actualizado!`, false);
+				} else {
+					throw new Error("Artículo a editar no encontrado.");
+				}
+			} else {
+				// Añadir nuevo item
+				const newItem = {
+					id: appState.nextMerchItemId++,
+					name: itemName,
+					price: itemPrice,
+					imageUrl: itemImageUrl
+				};
+				merchItems.push(newItem);
+				await saveAppState();
+				showInfoModal(`¡Artículo añadido a ${appState.drags[dragIndex].name}!`, false);
+			}
+
+			hideDragMerchForm();
+			renderDragMerchList();
+			renderDragMerchSalesSummary();
+			renderDragList(); // Actualizar contador
+			renderMerchPage(); // Re-renderizar página pública
+		} catch (error) {
+			console.error("Error saving Drag Merch item:", error);
+			showInfoModal("Error al guardar el artículo: " + error.message, true);
+		} finally {
+			showLoading(false);
+		}
+	}
+
+	/**
+	 * Maneja la edición de un artículo de Drag Merch
+	 */
+	function handleEditDragMerch(e) {
+		if (!appState || !dragMerchForm || currentSelectedDragForMerch === null) return;
+		const merchId = parseInt(e.currentTarget.dataset.dragMerchId, 10);
+		if (isNaN(merchId)) return;
+
+		const drag = appState.drags.find(d => d.id === currentSelectedDragForMerch);
+		const itemToEdit = drag?.merchItems?.find(item => item.id === merchId);
+
+		if (!itemToEdit) {
+			showInfoModal("Error: Artículo no encontrado para editar.", true);
+			return;
+		}
+
+		// Rellenar formulario
+		const editIdInput = document.getElementById('edit-drag-merch-id');
+		if (editIdInput) editIdInput.value = itemToEdit.id;
+
+		const nameInput = document.getElementById('drag-merch-name');
+		if (nameInput) nameInput.value = itemToEdit.name || '';
+
+		const priceInput = document.getElementById('drag-merch-price');
+		if (priceInput) priceInput.value = itemToEdit.price || 0;
+
+		if (dragMerchImageUrlInput) dragMerchImageUrlInput.value = itemToEdit.imageUrl || '';
+
+		editingDragMerchId = itemToEdit.id;
+		dragMerchForm.classList.remove('hidden');
+		dragMerchForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
+	}
+
+	/**
+	 * Maneja la eliminación de un artículo de Drag Merch
+	 */
+	async function handleDeleteDragMerch(e) {
+		if (!appState || currentSelectedDragForMerch === null) return;
+		const merchId = parseInt(e.currentTarget.dataset.dragMerchId, 10);
+		if (isNaN(merchId)) return;
+
+		const dragIndex = appState.drags.findIndex(d => d.id === currentSelectedDragForMerch);
+		if (dragIndex === -1) return;
+
+		const merchItems = appState.drags[dragIndex].merchItems || [];
+		const itemIndex = merchItems.findIndex(item => item.id === merchId);
+
+		if (itemIndex === -1) {
+			showInfoModal("Error: Artículo no encontrado.", true);
+			return;
+		}
+
+		const itemName = merchItems[itemIndex].name || 'este artículo';
+
+		console.warn(`Simulando confirmación para eliminar Drag Merch: ${itemName} (ID: ${merchId})`);
+		showLoading(true);
+		try {
+			merchItems.splice(itemIndex, 1);
+
+			if (editingDragMerchId === merchId) {
+				resetDragMerchForm();
+			}
+
+			await saveAppState();
+			showLoading(false);
+			showInfoModal(`Artículo "${itemName}" eliminado.`, false);
+
+			renderDragMerchList();
+			renderDragMerchSalesSummary();
+			renderDragList();
+			renderMerchPage();
+		} catch (error) {
+			showLoading(false);
+			console.error("Error deleting Drag Merch item:", error);
+			showInfoModal("Error al eliminar el artículo: " + error.message, true);
+		}
+	}
+
+	/**
+	 * Renderiza el resumen de ventas de Drag Merch
+	 */
+	function renderDragMerchSalesSummary() {
+		if (!dragMerchSalesSummary || !dragMerchTotalItems || !dragMerchTotalRevenue || !dragMerchViewSalesBtn || currentSelectedDragForMerch === null) return;
+
+		const salesForDrag = (allMerchSales || []).filter(s => s.dragId === currentSelectedDragForMerch);
+		const deliveredSales = salesForDrag.filter(s => s.status === 'Delivered');
+		const pendingSalesCount = salesForDrag.length - deliveredSales.length;
+
+		let totalItemsDelivered = 0;
+		let totalRevenueDelivered = 0;
+
+		deliveredSales.forEach(sale => {
+			totalItemsDelivered += sale.quantity || 0;
+			totalRevenueDelivered += (sale.quantity || 0) * (sale.itemPrice || 0);
+		});
+
+		dragMerchTotalItems.textContent = totalItemsDelivered.toString();
+		dragMerchTotalRevenue.textContent = totalRevenueDelivered.toFixed(2) + ' €';
+
+		if (salesForDrag.length > 0) {
+			dragMerchViewSalesBtn.textContent = `VER LISTA PEDIDOS (${pendingSalesCount} PENDIENTES)`;
+			dragMerchViewSalesBtn.disabled = false;
+		} else {
+			dragMerchViewSalesBtn.textContent = `NO HAY PEDIDOS REGISTRADOS`;
+			dragMerchViewSalesBtn.disabled = true;
+		}
+	}
+
+	/**
+	 * Muestra el modal con la lista de ventas de Drag Merch
+	 */
+	function handleViewDragMerchSales() {
+		if (!merchSalesListModal || !merchSalesListTitle || !merchSalesListContent || currentSelectedDragForMerch === null || !appState) return;
+
+		const drag = appState.drags.find(d => d.id === currentSelectedDragForMerch);
+		if (!drag) {
+			showInfoModal("Error: Drag no encontrada.", true);
+			return;
+		}
+
+		merchSalesListTitle.textContent = `Pedidos de Merch: ${drag.name || 'Drag'}`;
+		renderMerchSalesListForDrag(currentSelectedDragForMerch);
+		merchSalesListModal.classList.remove('hidden');
+	}
+
+	// ========== FIN NUEVO SISTEMA DUAL DE MERCH ==========
+
+	// ========== SMTP CONFIGURATION FUNCTIONS ==========
+
+	/**
+	 * Renderiza el formulario de configuración SMTP con los valores actuales
+	 */
+	async function renderSMTPConfig() {
+		if (!smtpConfigForm) return;
+
+		showLoading(true);
+		try {
+			const response = await fetch('get_smtp_config.php');
+			const data = await response.json();
+
+			if (data.success && data.config) {
+				const config = data.config;
+				if (document.getElementById('smtp-host')) document.getElementById('smtp-host').value = config.host || '';
+				if (document.getElementById('smtp-port')) document.getElementById('smtp-port').value = config.port || '';
+				if (document.getElementById('smtp-username')) document.getElementById('smtp-username').value = config.username || '';
+				// Password security: don't fill it
+				if (document.getElementById('smtp-encryption')) document.getElementById('smtp-encryption').value = config.encryption || 'tls';
+				if (document.getElementById('smtp-from-email')) document.getElementById('smtp-from-email').value = config.from_email || '';
+				if (document.getElementById('smtp-from-name')) document.getElementById('smtp-from-name').value = config.from_name || '';
+				if (document.getElementById('smtp-enabled')) document.getElementById('smtp-enabled').checked = !!config.enabled;
+			}
+		} catch (error) {
+			console.error("Error loading SMTP config:", error);
+			showInfoModal("Error al cargar configuración SMTP", true);
+		} finally {
+			showLoading(false);
+		}
+	}
+
+	/**
+	 * Maneja el guardado de la configuración SMTP
+	 */
+	async function handleSaveSMTPConfig(e) {
+		e.preventDefault();
+		if (!smtpConfigForm) return;
+
+		const formData = new FormData(smtpConfigForm);
+		const config = {
+			host: formData.get('smtp-host'),
+			port: parseInt(formData.get('smtp-port')),
+			username: formData.get('smtp-username'),
+			password: formData.get('smtp-password'),
+			encryption: formData.get('smtp-encryption'),
+			from_email: formData.get('smtp-from-email'),
+			from_name: formData.get('smtp-from-name'),
+			enabled: formData.get('smtp-enabled') === 'on'
+		};
+
+		// Validaciones básicas
+		if (!config.host || !config.port || !config.username || !config.encryption) {
+			showInfoModal("Por favor rellena todos los campos obligatorios (*)", true);
+			return;
+		}
+
+		// Si el password está vacío, no lo enviamos (asumimos que no cambió)
+		// Pero para la primera vez es obligatorio. El backend lo validará si falta lo requerido.
+		if (!config.password) {
+			// Si es edición y ya existe, el backend podría manejarlo, pero aquí lo enviamos tal cual
+			// El PHP requerirá password si es archivo nuevo.
+		}
+
+		showLoading(true);
+		try {
+			const response = await fetch('save_smtp_config.php', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify(config)
+			});
+			const result = await response.json();
+
+			if (result.success) {
+				showInfoModal("Configuración SMTP guardada correctamente", false);
+			} else {
+				throw new Error(result.message || "Error desconocido");
+			}
+		} catch (error) {
+			console.error("Error saving SMTP config:", error);
+			showInfoModal("Error al guardar: " + error.message, true);
+		} finally {
+			showLoading(false);
+		}
+	}
+
+	/**
+	 * Prueba la conexión SMTP
+	 */
+	async function testSMTPConnection() {
+		const username = document.getElementById('smtp-username').value;
+		if (!username) {
+			showInfoModal("Guarda primero la configuración o introduce un usuario válido.", true);
+			return;
+		}
+
+		if (!confirm(`Se enviará un email de prueba a ${username}. ¿Continuar?`)) return;
+
+		showLoading(true);
+		try {
+			// Usamos send_email.php (que ya recibe to, subject, body) o creamos uno simple de test.
+			// Reutilizamos el endpoint existente o creamos uno ad-hoc?
+			// Como send_email.php es una librería, no un endpoint directo (es require_once),
+			// necesitamos un endpoint para testear.
+			// Por simplicidad, podemos llamar a una función backend específica o...
+			// ERROR: send_email.php no es un endpoint ejecutable directamente vía fetch si solo define funciones.
+			// Crearemos un archivo PHP temporal o usaremos un truco.
+			// O mejor: send_email.php debería tener modo de ejecución si se llama directamente? No, es librería.
+			// Solución: Crear un endpoint test_smtp.php rápido ahora.
+			const response = await fetch('test_smtp.php', { // Asumiendo que lo creamos
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ email: username })
+			});
+			// Nota: Debemos crear test_smtp.php
+
+			const result = await response.json();
+			if (result.success) {
+				showInfoModal("✅ ¡Conexión Exitosa! Email enviado.", false);
+			} else {
+				showInfoModal("❌ Error de conexión: " + result.message, true);
+			}
+
+		} catch (error) {
+			showInfoModal("Error al probar conexión: No se pudo contactar con servidor de prueba", true);
+		} finally {
+			showLoading(false);
+		}
+	}
+
+	/**
+	 * Renderiza la configuración de notificaciones (Web Merch y Drags)
+	 */
+	function renderEmailNotifications() {
+		if (!appState) return;
+
+		// Cargar configuración de Web Merch
+		const emailNotifs = appState.emailNotifications || {};
+		const webMerchConfig = emailNotifs.webMerch || {};
+
+		if (webMerchNotifEmail) webMerchNotifEmail.value = webMerchConfig.notificationEmail || '';
+		if (webMerchBuyerTemplate) webMerchBuyerTemplate.value = webMerchConfig.buyerTemplate || '';
+
+		// Cargar select de drags
+		if (dragEmailSelect && appState.drags) {
+			dragEmailSelect.innerHTML = '<option value="">-- SELECCIONA UNA DRAG --</option>';
+			appState.drags.sort((a, b) => (a.name || '').localeCompare(b.name || '')).forEach(drag => {
+				const option = document.createElement('option');
+				option.value = drag.id;
+				option.textContent = drag.name;
+				dragEmailSelect.appendChild(option);
+			});
+		}
+
+		// Listener para cambio en Web Merch (auto guardado con debounce o botón global? 
+		// No hay botón global en esa sección. Deberíamos añadir uno o usar listeners 'change'.
+		// Vamos a añadir listeners 'change' para Web Merch y guardar appState.
+		if (webMerchNotifEmail) webMerchNotifEmail.onchange = saveEmailNotificationsState;
+		if (webMerchBuyerTemplate) webMerchBuyerTemplate.onchange = saveEmailNotificationsState;
+	}
+
+	/**
+	 * Maneja la selección de drag para configurar email
+	 */
+	function handleDragEmailSelect(e) {
+		const dragId = parseInt(e.target.value);
+		if (!dragId || isNaN(dragId)) {
+			if (dragEmailConfigForm) dragEmailConfigForm.classList.add('hidden');
+			return;
+		}
+
+		if (dragEmailConfigForm) dragEmailConfigForm.classList.remove('hidden');
+
+		// Buscar config actual
+		const emailNotifs = appState.emailNotifications || {};
+		const dragsConfig = emailNotifs.drags || [];
+		const currentConfig = dragsConfig.find(c => c.dragId === dragId) || {};
+
+		if (dragNotifEmail) dragNotifEmail.value = currentConfig.notificationEmail || '';
+		if (dragBuyerTemplate) dragBuyerTemplate.value = currentConfig.buyerTemplate || '';
+	}
+
+	/**
+	 * Guarda la configuración de email de la drag seleccionada
+	 */
+	async function handleSaveDragEmailConfig() {
+		if (!dragEmailSelect || !appState) return;
+		const dragId = parseInt(dragEmailSelect.value);
+		if (!dragId) return;
+
+		if (!appState.emailNotifications) appState.emailNotifications = {};
+		if (!appState.emailNotifications.drags) appState.emailNotifications.drags = [];
+
+		const notifEmail = dragNotifEmail ? dragNotifEmail.value : '';
+		const buyerMsg = dragBuyerTemplate ? dragBuyerTemplate.value : '';
+
+		// Actualizar array
+		const existingIndex = appState.emailNotifications.drags.findIndex(c => c.dragId === dragId);
+		const newConfig = { dragId, notificationEmail: notifEmail, buyerTemplate: buyerMsg };
+
+		if (existingIndex > -1) {
+			appState.emailNotifications.drags[existingIndex] = newConfig;
+		} else {
+			appState.emailNotifications.drags.push(newConfig);
+		}
+
+		await saveAppState(); // Persistir en servidor (app_state.json)
+		showInfoModal("Configuración de notificaciones de drag guardada.", false);
+	}
+
+	/**
+	 * Guarda estado general de notificaciones (para Web Merch)
+	 */
+	async function saveEmailNotificationsState() {
+		if (!appState) return;
+		if (!appState.emailNotifications) appState.emailNotifications = {};
+
+		appState.emailNotifications.webMerch = {
+			notificationEmail: webMerchNotifEmail ? webMerchNotifEmail.value : '',
+			buyerTemplate: webMerchBuyerTemplate ? webMerchBuyerTemplate.value : ''
+		};
+
+		await saveAppState();
+		// Opcional: mostrar toast pequeño
+	}
+
+	// ========== FIN SMTP CONFIGURATION ==========
+
+
 	// --- FIN ---
 	// (renderAdminEvents, handleViewTickets, etc. empiezan en la siguiente parte)
 	/**
@@ -4900,6 +5898,27 @@ window.addEventListener('DOMContentLoaded', async () => {
 	if (dragGalleryUploadInput) addTrackedListener(dragGalleryUploadInput, 'change', (e) => handleMultipleFileUpload(e, 'drag-gallery-urls', 'admin-drag-gallery-preview-grid')); // <-- MODIFICADO
 	// Los botones para forzar subida ya no son necesarios si se sube al seleccionar
 	if (merchItemImageUploadInput && merchItemImageUrlInput) addTrackedListener(merchItemImageUploadInput, 'change', (e) => handleFileUpload(e, merchItemImageUrlInput));
+
+	// ========== NUEVO: Listeners para Web Merch System ==========
+	if (addWebMerchBtn) addTrackedListener(addWebMerchBtn, 'click', () => showWebMerchForm());
+	if (webMerchForm) addTrackedListener(webMerchForm, 'submit', handleSaveWebMerch);
+	if (cancelWebMerchBtn) addTrackedListener(cancelWebMerchBtn, 'click', () => hideWebMerchForm());
+	if (webMerchImageUploadInput && webMerchImageUrlInput) addTrackedListener(webMerchImageUploadInput, 'change', (e) => handleFileUpload(e, webMerchImageUrlInput));
+	if (webMerchViewSalesBtn) addTrackedListener(webMerchViewSalesBtn, 'click', handleViewWebMerchSales);
+
+	// ========== NUEVO: Listeners para Drag Merch System ==========
+	if (dragMerchSelectDrag) addTrackedListener(dragMerchSelectDrag, 'change', handleDragMerchSelectChange);
+	if (dragMerchForm) addTrackedListener(dragMerchForm, 'submit', handleSaveDragMerch);
+	if (cancelDragMerchBtn) addTrackedListener(cancelDragMerchBtn, 'click', () => hideDragMerchForm());
+	if (dragMerchImageUploadInput && dragMerchImageUrlInput) addTrackedListener(dragMerchImageUploadInput, 'change', (e) => handleFileUpload(e, dragMerchImageUrlInput));
+	if (dragMerchViewSalesBtn) addTrackedListener(dragMerchViewSalesBtn, 'click', handleViewDragMerchSales);
+
+	// SMTP System
+	if (smtpConfigForm) addTrackedListener(smtpConfigForm, 'submit', handleSaveSMTPConfig);
+	if (testSMTPBtn) addTrackedListener(testSMTPBtn, 'click', testSMTPConnection);
+	if (dragEmailSelect) addTrackedListener(dragEmailSelect, 'change', handleDragEmailSelect);
+	if (saveDragEmailConfigBtn) addTrackedListener(saveDragEmailConfigBtn, 'click', handleSaveDragEmailConfig);
+	// ========== FIN NUEVO ==========
 
 
 	// Listeners Admin Galerías y Backup/Restore

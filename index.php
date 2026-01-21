@@ -420,6 +420,7 @@ $adminEmail = isset($_SESSION['admin_email']) ? $_SESSION['admin_email'] : '';
                     <button data-admin-nav="drags" class="admin-nav-btn font-pixel text-lg px-4 py-2 rounded-none transition-colors duration-200">DRAGS</button>
                     <button data-admin-nav="merch" class="admin-nav-btn font-pixel text-lg px-4 py-2 rounded-none transition-colors duration-200">MERCH</button>
                     <button data-admin-nav="giveaway" class="admin-nav-btn font-pixel text-lg px-4 py-2 rounded-none transition-colors duration-200">SORTEO</button>
+                    <button data-admin-nav="smtp" class="admin-nav-btn font-pixel text-lg px-4 py-2 rounded-none transition-colors duration-200">SMTP</button>
                 </div>
 
                 <!-- Contenedor de Vistas de Admin -->
@@ -736,6 +737,136 @@ $adminEmail = isset($_SESSION['admin_email']) ? $_SESSION['admin_email'] : '';
                             <ul id="giveaway-events-list-ul" class="space-y-3"><li class="text-gray-400 text-center font-pixel">Cargando eventos...</li></ul>
                         </div>
                     </div>
+<!-- Admin: SMTP Configuration -->
+<div id="admin-page-smtp" data-admin-page="smtp" class="hidden space-y-10">
+
+    <!-- Configuración SMTP -->
+    <div class="bg-gray-900 p-6 sm:p-8 border border-white">
+        <h3 class="text-3xl font-pixel text-white mb-6 text-glow-white">CONFIGURACIÓN SMTP</h3>
+        <form id="smtp-config-form" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label for="smtp-host" class="block text-sm font-pixel text-lg text-gray-300 mb-1">HOST
+                        SMTP*</label>
+                    <input type="text" id="smtp-host" name="smtp-host" required class="w-full"
+                        placeholder="smtp.gmail.com">
+                    <p class="text-xs text-gray-400 mt-1">Para Gmail: smtp.gmail.com</p>
+                </div>
+                <div>
+                    <label for="smtp-port" class="block text-sm font-pixel text-lg text-gray-300 mb-1">PUERTO*</label>
+                    <input type="number" id="smtp-port" name="smtp-port" required class="w-full" placeholder="587">
+                    <p class="text-xs text-gray-400 mt-1">TLS: 587, SSL: 465</p>
+                </div>
+                <div>
+                    <label for="smtp-username" class="block text-sm font-pixel text-lg text-gray-300 mb-1">USERNAME
+                        (EMAIL)*</label>
+                    <input type="email" id="smtp-username" name="smtp-username" required class="w-full"
+                        placeholder="tu-email@gmail.com">
+                </div>
+                <div>
+                    <label for="smtp-password" class="block text-sm font-pixel text-lg text-gray-300 mb-1">PASSWORD /
+                        APP SECRET*</label>
+                    <input type="password" id="smtp-password" name="smtp-password" required class="w-full"
+                        placeholder="••••••••••••••••">
+                    <p class="text-xs text-gray-400 mt-1">Contraseña de aplicación de Google</p>
+                </div>
+                <div>
+                    <label for="smtp-encryption"
+                        class="block text-sm font-pixel text-lg text-gray-300 mb-1">ENCRIPTACIÓN*</label>
+                    <select id="smtp-encryption" name="smtp-encryption" required class="w-full">
+                        <option value="tls">TLS</option>
+                        <option value="ssl">SSL</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="smtp-from-email" class="block text-sm font-pixel text-lg text-gray-300 mb-1">EMAIL
+                        REMITENTE (FROM)</label>
+                    <input type="email" id="smtp-from-email" name="smtp-from-email" class="w-full"
+                        placeholder="noreply@rodetesparty.com">
+                    <p class="text-xs text-gray-400 mt-1">Opcional, por defecto usa el username</p>
+                </div>
+                <div class="md:col-span-2">
+                    <label for="smtp-from-name" class="block text-sm font-pixel text-lg text-gray-300 mb-1">NOMBRE
+                        REMITENTE</label>
+                    <input type="text" id="smtp-from-name" name="smtp-from-name" class="w-full"
+                        placeholder="Rodetes Party">
+                </div>
+                <div class="md:col-span-2 flex items-center">
+                    <input type="checkbox" id="smtp-enabled" name="smtp-enabled" class="mr-3">
+                    <label for="smtp-enabled" class="text-sm font-pixel text-lg text-gray-300">HABILITAR ENVÍO DE
+                        EMAILS</label>
+                </div>
+            </div>
+
+            <div class="flex gap-4">
+                <button type="submit"
+                    class="flex-1 bg-white text-black font-pixel text-xl py-2 px-4 rounded-none border border-gray-400 hover:bg-gray-300 transition-colors duration-300">GUARDAR
+                    CONFIG SMTP</button>
+                <button type="button" id="test-smtp-btn"
+                    class="flex-1 bg-green-700 hover:bg-green-600 text-white font-pixel text-lg py-2 px-4 rounded-none transition-colors duration-300">PROBAR
+                    CONEXIÓN</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Configuración de Notificaciones por Email -->
+    <div class="bg-gray-900 p-6 sm:p-8 border border-white space-y-6">
+        <h3 class="text-3xl font-pixel text-white mb-6 text-glow-white">CONFIGURACIÓN DE NOTIFICACIONES</h3>
+
+        <!-- Web Merch Email Config -->
+        <div class="bg-gray-800 p-6 border border-gray-600 space-y-4">
+            <h4 class="text-2xl font-pixel text-white text-glow-white">MERCH WEB (RODETES OFICIAL)</h4>
+            <div>
+                <label for="web-merch-notif-email" class="block text-sm font-pixel text-lg text-gray-300 mb-1">EMAIL
+                    NOTIFICACIÓN</label>
+                <input type="email" id="web-merch-notif-email" name="web-merch-notif-email" class="w-full"
+                    placeholder="rodetes@example.com">
+                <p class="text-xs text-gray-400 mt-1">Email donde se notificarán las ventas de merch web</p>
+            </div>
+            <div>
+                <label for="web-merch-buyer-template"
+                    class="block text-sm font-pixel text-lg text-gray-300 mb-1">MENSAJE PARA COMPRADOR</label>
+                <textarea id="web-merch-buyer-template" name="web-merch-buyer-template" rows="3" class="w-full"
+                    placeholder="El equipo de Rodetes se pondrá en contacto contigo próximamente..."></textarea>
+                <p class="text-xs text-gray-400 mt-1">Este mensaje se incluirá en el email al comprador</p>
+            </div>
+        </div>
+
+        <!-- Drag Merch Email Config -->
+        <div class="bg-gray-800 p-6 border border-gray-600 space-y-4">
+            <h4 class="text-2xl font-pixel text-white text-glow-white">MERCH DE DRAGS</h4>
+            <div>
+                <label for="drag-email-select" class="block text-sm font-pixel text-lg text-gray-300 mb-1">SELECCIONA
+                    DRAG</label>
+                <select id="drag-email-select" name="drag-email-select" class="w-full">
+                    <option value="">-- SELECCIONA UNA DRAG --</option>
+                </select>
+            </div>
+
+            <div id="drag-email-config-form" class="hidden space-y-4 pt-4 border-t border-gray-700">
+                <div>
+                    <label for="drag-notif-email" class="block text-sm font-pixel text-lg text-gray-300 mb-1">EMAIL
+                        NOTIFICACIÓN DRAG</label>
+                    <input type="email" id="drag-notif-email" name="drag-notif-email" class="w-full"
+                        placeholder="drag@instagram.com">
+                    <p class="text-xs text-gray-400 mt-1">Email donde se notificarán las ventas de merch de esta drag
+                    </p>
+                </div>
+                <div>
+                    <label for="drag-buyer-template" class="block text-sm font-pixel text-lg text-gray-300 mb-1">MENSAJE
+                        PERSONALIZADO PARA COMPRADOR</label>
+                    <textarea id="drag-buyer-template" name="drag-buyer-template" rows="4" class="w-full"
+                        placeholder="{dragName} se pondrá en contacto contigo próximamente...&#10;&#10;Puedes contactarme por Instagram: @drag_username"></textarea>
+                    <p class="text-xs text-gray-400 mt-1">Usa {dragName} para insertar el nombre de la drag
+                        automáticamente</p>
+                </div>
+                <button type="button" id="save-drag-email-config-btn"
+                    class="w-full bg-white text-black font-pixel text-xl py-2 px-4 rounded-none border border-gray-400 hover:bg-gray-300 transition-colors duration-300">GUARDAR
+                    CONFIG DRAG</button>
+            </div>
+        </div>
+    </div>
+</div>
                 </div>
 
                 <!-- Vista de Escáner QR -->

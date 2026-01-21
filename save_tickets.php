@@ -19,11 +19,24 @@ if ($newTickets === null) {
 if (!$isAdmin) {
     $currentTicketsJson = file_exists($dataFile) ? file_get_contents($dataFile) : '[]';
     $currentTickets = json_decode($currentTicketsJson, true) ?: [];
-    
+
     if (count($newTickets) < count($currentTickets)) {
         http_response_code(403);
         echo json_encode(['success' => false, 'message' => 'Error: No puedes borrar entradas existentes.']);
         exit;
+    }
+
+    // NUEVO: Detectar tickets nuevos para enviar email
+    $currentTicketsJson = file_exists($dataFile) ? file_get_contents($dataFile) : '[]';
+    $currentTickets = json_decode($currentTicketsJson, true) ?: [];
+    $currentTicketIds = array_column($currentTickets, 'ticketId');
+
+    // Encontrar tickets que son nuevos
+    $newlyAddedTickets = [];
+    foreach ($newTickets as $ticket) {
+        if (!in_array($ticket['ticketId'], $currentTicketIds)) {
+            $newlyAddedTickets[] = $ticket;
+        }
     }
 }
 
@@ -34,6 +47,41 @@ if (!is_dir($dir)) {
 }
 
 if (file_put_contents($dataFile, json_encode($newTickets, JSON_PRETTY_PRINT)) !== false) {
+    // NUEVO: Enviar emails para tickets nuevos
+    if (!$isAdmin && !empty($newlyAddedTickets)) {
+        require_once __DIR__ . '/send_email.php';
+
+        // Cargar eventos para obtener información
+        $appStateFile = '/var/www/data_private/app_state.json';
+        if (file_exists($appStateFile)) {
+            $appStateJson = file_get_contents($appStateFile);
+            $appState = json_decode($appStateJson, true);
+            $events = $appState['events'] ?? [];
+
+            foreach ($newlyAddedTickets as $ticket) {
+                // Buscar el evento correspondiente
+                $event = null;
+                foreach ($events as $ev) {
+                    if ($ev['id'] == $ticket['eventId']) {
+                        $event = $ev;
+                        break;
+                    }
+                }
+
+                if ($event && !empty($ticket['email'])) {
+                    $subject = "Tu entrada para {$event['name']} - Rodetes Party";
+                    $body = generateTicketEmailHTML($ticket, $event);
+
+                    // Intentar enviar email (no bloqueante si falla)
+                    $result = sendEmail($ticket['email'], $subject, $body);
+                    if (!$result['success']) {
+                        error_log("Failed to send ticket email: " . $result['message']);
+                    }
+                }
+            }
+        }
+    }
+
     echo json_encode(['success' => true]);
 } else {
     http_response_code(500);
