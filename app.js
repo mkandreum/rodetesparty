@@ -505,7 +505,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 		}
 
 		if (adminPageId === 'smtp') {
-			renderSMTPConfig();
+			renderSMTPConfig(); // Cargar configuración del servidor
 			renderEmailNotifications();
 		}
 
@@ -3495,6 +3495,33 @@ window.addEventListener('DOMContentLoaded', async () => {
 			showInfoModal("Error al cargar configuración SMTP", true);
 		} finally {
 			showLoading(false);
+		}
+	}
+
+	/**
+	 * Renderiza/Carga la configuración SMTP del servidor
+	 */
+	async function renderSMTPConfig() {
+		if (!smtpConfigForm) return;
+
+		try {
+			const response = await fetch('get_smtp_config.php');
+			const result = await response.json();
+
+			if (result.success && result.config) {
+				const config = result.config;
+				if (document.getElementById('smtp-host')) document.getElementById('smtp-host').value = config.host || '';
+				if (document.getElementById('smtp-port')) document.getElementById('smtp-port').value = config.port || '';
+				if (document.getElementById('smtp-username')) document.getElementById('smtp-username').value = config.username || '';
+				// Password no se devuelve
+				if (document.getElementById('smtp-encryption')) document.getElementById('smtp-encryption').value = config.encryption || 'tls';
+				if (document.getElementById('smtp-from-email')) document.getElementById('smtp-from-email').value = config.from_email || '';
+				if (document.getElementById('smtp-from-name')) document.getElementById('smtp-from-name').value = config.from_name || '';
+				if (document.getElementById('smtp-enabled')) document.getElementById('smtp-enabled').checked = !!config.enabled;
+			}
+		} catch (error) {
+			console.error("Error loading SMTP config:", error);
+			// No mostrar modal intrusivo, solo log
 		}
 	}
 

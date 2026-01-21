@@ -20,14 +20,30 @@ if ($config === null) {
     exit;
 }
 
-// Validar campos obligatorios
-$requiredFields = ['host', 'port', 'username', 'password', 'encryption'];
+// Validar campos obligatorios (password es opcional si ya existe config previa, pero obligatorio si es nueva)
+$requiredFields = ['host', 'port', 'username', 'encryption'];
 foreach ($requiredFields as $field) {
     if (empty($config[$field])) {
         http_response_code(400);
         echo json_encode(['success' => false, 'message' => "Campo obligatorio faltante: $field"]);
         exit;
     }
+}
+
+// Si la password viene vacía, intentamos mantener la anterior
+if (empty($config['password'])) {
+    if (file_exists($dataFile)) {
+        $oldConfig = json_decode(file_get_contents($dataFile), true);
+        if ($oldConfig && isset($oldConfig['password'])) {
+            $config['password'] = $oldConfig['password'];
+        }
+    }
+}
+
+// Si sigue vacía (y es nueva config), error (a menos que quieran guardar sin pass, poco probable para SMTP auth)
+if (empty($config['password'])) {
+    // Podríamos permitirlo si el servidor no requiere auth, pero lo normal es que sí.
+    // Dejamos pasar si el usuario lo deja vacío explícitamente sabiendo que fallará si require auth.
 }
 
 // Asegurar directorio
