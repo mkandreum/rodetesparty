@@ -1511,6 +1511,11 @@ window.addEventListener('DOMContentLoaded', async () => {
 			return;
 		}
 
+
+		// --- NUEVO: Referencia a la Barra de Navegación ---
+		const dragsNavBar = document.getElementById('drags-nav-bar');
+		if (dragsNavBar) dragsNavBar.innerHTML = ''; // Limpiar barra anterior
+
 		// Ordenar alfabéticamente por nombre
 		dragsToShow.sort((a, b) => (a.name || '').localeCompare(b.name || '')).forEach(drag => {
 			try {
@@ -1518,6 +1523,41 @@ window.addEventListener('DOMContentLoaded', async () => {
 				const cardColor = drag.cardColor && /^#[0-9A-F]{6}$/i.test(drag.cardColor) ? drag.cardColor : '#FFFFFF'; // Validar color
 				card.className = `bg-gray-900 rounded-none border overflow-hidden flex flex-col transform transition-all hover:border-gray-300 hover:shadow-white/30 duration-300`;
 				card.style.borderColor = cardColor;
+
+				// ID ÚNICO PARA SCROLL
+				const cardId = `drag-card-${drag.id}`;
+				card.id = cardId;
+
+				// --- NUEVO: Crear Chip de Navegación ---
+				if (dragsNavBar) {
+					const navChip = document.createElement('button');
+					navChip.textContent = drag.name || 'Drag';
+					navChip.className = "font-pixel text-sm px-3 py-1 bg-transparent border-2 text-white transition-all duration-300 hover:text-black hover:scale-105";
+					navChip.style.borderColor = cardColor;
+
+					// Efecto Hover: Rellenar con color de la drag
+					navChip.addEventListener('mouseenter', () => {
+						navChip.style.backgroundColor = cardColor;
+						// Ajuste de contraste simple: si es muy oscuro, texto blanco, si no negro. (Aproximación simple: asumimos negro para colores vibrantes de drag)
+						navChip.style.color = '#000';
+					});
+					navChip.addEventListener('mouseleave', () => {
+						navChip.style.backgroundColor = 'transparent';
+						navChip.style.color = '#fff';
+					});
+
+					// Scroll al hacer click
+					navChip.onclick = () => {
+						const targetCard = document.getElementById(cardId);
+						if (targetCard) {
+							targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+							// Efecto visual de "focus" temporal
+							targetCard.classList.add('ring-2', 'ring-white');
+							setTimeout(() => targetCard.classList.remove('ring-2', 'ring-white'), 1500);
+						}
+					};
+					dragsNavBar.appendChild(navChip);
+				}
 
 				const imageUrl = drag.coverImageUrl || `https://placehold.co/400x400/000/fff?text=${encodeURIComponent(drag.name || 'Drag')}&font=vt323`;
 				const galleryCount = drag.galleryImages?.length || 0;
@@ -1600,11 +1640,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 
 		// Re-adjuntar listeners
 		dragListContainer.querySelectorAll('.drag-gallery-btn').forEach(btn => addTrackedListener(btn, 'click', (e) => renderDragGalleryImages(parseInt(e.currentTarget.dataset.dragId, 10))));
-		// NUEVO Listener para botones de compra directa en el carrusel
 		dragListContainer.querySelectorAll('.auto-buy-merch-btn').forEach(btn => addTrackedListener(btn, 'click', handleMerchBuyClick));
-
-		// Listener antiguo eliminado: .drag-merch-btn ya no existe
-		// No necesitamos listener para '.drag-instagram-btn' ya que es un <a> normal
 
 		// Iniciar animación
 		observeRevealElements();

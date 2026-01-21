@@ -437,6 +437,10 @@ $adminEmail = isset($_SESSION['admin_email']) ? $_SESSION['admin_email'] : '';
         <div id="page-drags" data-page="drags" class="hidden">
             <h2 class="text-3xl sm:text-4xl md:text-5xl font-pixel text-white mb-8 text-center text-glow-white glitch-hover"
                 data-text="DRAGS">DRAGS</h2>
+
+            <!-- Barra de Navegación de Drags (Chips) -->
+            <div id="drags-nav-bar" class="mb-8 flex flex-wrap justify-center gap-4 px-2"></div>
+
             <!-- Lista de Drags -->
             <div id="drag-list-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 <p class="text-gray-400 text-center col-span-full font-pixel">Cargando drags...</p>
