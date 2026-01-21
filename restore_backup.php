@@ -23,30 +23,40 @@ if ($file['error'] !== UPLOAD_ERR_OK) {
 $zip = new ZipArchive();
 if ($zip->open($file['tmp_name']) === TRUE) {
 
-    // 1. Restaurar Datos Privados (JSON)
-    $dataDir = '/var/www/data_private/';
-    if (!is_dir($dataDir)) {
-        mkdir($dataDir, 0777, true);
-    }
-
-    // Buscar archivos en la carpeta 'data/' del ZIP
+    // 1. Procesar todos los archivos del ZIP
     for ($i = 0; $i < $zip->numFiles; $i++) {
         $filename = $zip->getNameIndex($i);
+        $baseName = basename($filename);
+        if (empty($baseName))
+            continue; // Saltar directorios
 
-        // Si el archivo está dentro de data/ y termina en .json
-        if (strpos($filename, 'data/') === 0 && substr($filename, -5) === '.json') {
-            $baseName = basename($filename);
+        // --- Caso A: Archivos JSON (Datos) ---
+        if (substr($filename, -5) === '.json') {
+            // Compatibilidad: aceptar tanto en data/ como en la raíz
             copy("zip://" . $file['tmp_name'] . "#" . $filename, $dataDir . $baseName);
         }
 
-        // 2. Restaurar Imágenes (uploads/)
-        if (strpos($filename, 'uploads/') === 0 && !empty(basename($filename))) {
+        // --- Caso B: Imágenes y Vídeos (uploads/) ---
+        $isMedia = preg_match('/\.(jpg|jpeg|png|gif|webp|svg|mp4|webm|ogv)$/i', $filename);
+
+        if ($isMedia) {
             $uploadsDir = __DIR__ . '/uploads/';
             if (!is_dir($uploadsDir)) {
                 mkdir($uploadsDir, 0777, true);
             }
 
-            $relativePath = substr($filename, strlen('uploads/'));
+            // Si el archivo viene dentro de una carpeta 'uploads/' en el ZIP, mantenemos la estructura interna
+            if (strpos($filename, 'uploads/') === 0) {
+                $relativePath = substr($filename, strlen('uploads/'));
+            } else {
+                // Si es un backup plano (sin carpetas), lo ponemos directo en uploads/
+                // NOTA: Esto ayuda a que coincida con las rutas 'uploads/archivo.png' guardadas en el JSON
+                $relativePath = $filename;
+            }
+
+            if (empty($relativePath))
+                continue;
+
             $targetPath = $uploadsDir . $relativePath;
 
             // Asegurar que existan subdirectorios si los hubiera
