@@ -1884,8 +1884,28 @@ window.addEventListener('DOMContentLoaded', async () => {
 			allMerchSales.push(newSale);
 			await saveMerchSalesState(); // Guardar en el servidor (sin esperar confirmación visual aquí)
 
-			// MODIFICADO: Pasar nombre completo al modal QR
-			showMerchQrModal(drag, item, newSale, fullName); // Mostrar el QR con los datos de la venta
+			// MODIFICADO: Mostrar popup de confirmación en lugar de QR
+			// showMerchQrModal(drag, item, newSale, fullName); 
+
+			let message = "";
+			if (drag.id === 'web') {
+				message = `
+					<h3 class="text-2xl font-pixel text-white mb-4">¡PEDIDO CONFIRMADO! 🚀</h3>
+					<p class="text-gray-300 mb-2">Hemos enviado un email a <b>Rodetes Party</b> con tu pedido.</p>
+					<p class="text-gray-300">En breve nos pondremos en contacto contigo al email facilitado (<b>${userEmail}</b>) para gestionar el pago y el envío.</p>
+					<p class="text-green-400 font-bold mt-4 text-sm">También te hemos enviado un correo de confirmación.</p>
+				`;
+			} else {
+				message = `
+					<h3 class="text-2xl font-pixel text-white mb-4">¡PEDIDO CONFIRMADO! 👑</h3>
+					<p class="text-gray-300 mb-2">Hemos enviado un email a <b>${drag.name}</b> con tu pedido.</p>
+					<p class="text-gray-300">Se pondrá en contacto contigo pronto al email facilitado (<b>${userEmail}</b>) para el pago y la entrega.</p>
+					<p class="text-green-400 font-bold mt-4 text-sm">También te hemos enviado un correo de confirmación.</p>
+				`;
+			}
+
+			// Usar el modal info existente pero con HTML custom
+			showInfoModal(message, false);
 
 			// Actualizar resumen si el admin está viendo esa sección
 			if (isLoggedIn && adminPages['merch'] && !adminPages['merch'].classList.contains('hidden') && currentAdminMerchDragId === drag.id) {
