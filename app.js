@@ -1777,11 +1777,25 @@ window.addEventListener('DOMContentLoaded', async () => {
 	 */
 	function handleMerchBuyClick(e) {
 		const itemId = parseInt(e.currentTarget.dataset.itemId, 10);
-		const dragId = parseInt(e.currentTarget.dataset.dragId, 10);
-		if (isNaN(itemId) || isNaN(dragId) || !appState || !appState.drags) return;
+		// MODIFICADO: dragId puede ser 'web' (string) o un ID (int)
+		let dragId = e.currentTarget.dataset.dragId;
+		// Intentar parsear a int si no es 'web', aunque 'web' dará NaN y está bien controlarlo
+		if (dragId !== 'web') {
+			dragId = parseInt(dragId, 10);
+		}
 
-		const drag = appState.drags.find(d => d.id === dragId);
-		const item = drag?.merchItems?.find(i => i.id === itemId);
+		if (!appState) return;
+
+		let item, drag;
+
+		if (dragId === 'web') {
+			drag = { id: 'web', name: 'Rodetes Web' };
+			item = (appState.webMerch || []).find(i => i.id === itemId);
+		} else {
+			if (isNaN(dragId)) return;
+			drag = appState.drags.find(d => d.id === dragId);
+			item = drag?.merchItems?.find(i => i.id === itemId);
+		}
 
 		if (!item || !merchPurchaseModal || !merchPurchaseForm || !merchPurchaseItemName) {
 			showInfoModal("Error al iniciar la compra del artículo.", true);
@@ -3447,16 +3461,19 @@ window.addEventListener('DOMContentLoaded', async () => {
 		const deliveredSales = salesForDrag.filter(s => s.status === 'Delivered');
 		const pendingSalesCount = salesForDrag.length - deliveredSales.length;
 
-		let totalItemsDelivered = 0;
-		let totalRevenueDelivered = 0;
+		// MODIFICADO: Incluir ventas Pendientes en los totales para que la Drag vea que hay movimiento
+		// Se puede separar si se prefiere: "Entregado: X, Pendiente: Y", pero el usuario pide ver ventas
+		const totalSales = salesForDrag;
+		let totalItems = 0;
+		let totalRevenue = 0;
 
-		deliveredSales.forEach(sale => {
-			totalItemsDelivered += sale.quantity || 0;
-			totalRevenueDelivered += (sale.quantity || 0) * (sale.itemPrice || 0);
+		totalSales.forEach(sale => {
+			totalItems += sale.quantity || 0;
+			totalRevenue += (sale.quantity || 0) * (sale.itemPrice || 0);
 		});
 
-		dragMerchTotalItems.textContent = totalItemsDelivered.toString();
-		dragMerchTotalRevenue.textContent = totalRevenueDelivered.toFixed(2) + ' €';
+		dragMerchTotalItems.textContent = totalItems.toString(); // + (pendingSalesCount > 0 ? ` (${pendingSalesCount} pend.)` : '');
+		dragMerchTotalRevenue.textContent = totalRevenue.toFixed(2) + ' €';
 
 		if (salesForDrag.length > 0) {
 			dragMerchViewSalesBtn.textContent = `VER LISTA PEDIDOS (${pendingSalesCount} PENDIENTES)`;
