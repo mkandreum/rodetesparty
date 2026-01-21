@@ -4791,15 +4791,35 @@ window.addEventListener('DOMContentLoaded', async () => {
 			closeModal('email-modal');
 			const holderName = `${existingTicket.nombre || ''} ${existingTicket.apellidos || ''}`.trim() || userEmail; // Nombre guardado o email
 			// Mostrar modal informativo y luego el QR existente
-			showInfoModal(
-				`Este email ya tiene ${existingTicket.quantity} entrada(s) para ${event.name}.<br><strong>Cierra este mensaje para ver tu QR.</strong>`,
-				false, // No es error
-				() => { // Callback al cerrar el info modal
-					// MODIFICADO: Pasar nombre completo al mostrar modal existente
+			// NUEVO: Reenviar email automáticamente
+			showInfoModal(`Ya tienes entrada. Reenviando correo a ${userEmail}...`, false);
+
+			fetch('resend_ticket_email.php', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					ticketId: existingTicket.ticketId,
+					email: userEmail
+				})
+			})
+				.then(res => res.json())
+				.then(data => {
+					if (data.success) {
+						showInfoModal(`Correo reenviado correctamente a ${userEmail}.<br>Revisa tu bandeja de entrada (y spam).`, false, () => {
+							displayTicketModal(event, existingTicket.ticketId, userEmail, existingTicket.quantity, holderName);
+						});
+					} else {
+						showInfoModal(`Error al reenviar correo: ${data.message}`, true, () => {
+							displayTicketModal(event, existingTicket.ticketId, userEmail, existingTicket.quantity, holderName);
+						});
+					}
+				})
+				.catch(err => {
+					console.error("Error reenviando email:", err);
 					displayTicketModal(event, existingTicket.ticketId, userEmail, existingTicket.quantity, holderName);
-				}
-			);
-			return; // No generar nuevo ticket
+				});
+
+			return;
 		}
 
 		// Re-validar estado del evento (podría haber cambiado mientras el modal estaba abierto)
