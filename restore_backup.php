@@ -23,11 +23,8 @@ if ($file['error'] !== UPLOAD_ERR_OK) {
 $zip = new ZipArchive();
 if ($zip->open($file['tmp_name']) === TRUE) {
 
-    // 1. Preparar directorio de datos
-    $dataDir = '/var/www/data_private/';
-    if (!is_dir($dataDir)) {
-        mkdir($dataDir, 0777, true);
-    }
+    $filesProcessed = [];
+    $errors = [];
 
     // 2. Procesar todos los archivos del ZIP
     for ($i = 0; $i < $zip->numFiles; $i++) {
@@ -36,10 +33,21 @@ if ($zip->open($file['tmp_name']) === TRUE) {
         if (empty($baseName))
             continue; // Saltar directorios
 
+        $content = $zip->getFromIndex($i);
+        if ($content === false) {
+            $errors[] = "No se pudo leer el archivo: " . $filename;
+            continue;
+        }
+
         // --- Caso A: Archivos JSON (Datos) ---
         if (substr($filename, -5) === '.json') {
-            // Compatibilidad: aceptar tanto en data/ como en la raíz
-            copy("zip://" . $file['tmp_name'] . "#" . $filename, $dataDir . $baseName);
+            $targetPath = $dataDir . $baseName;
+            if (file_put_contents($targetPath, $content) !== false) {
+                chmod($targetPath, 0666); // Permisos para que PHP pueda leer/escribir luego
+                $filesProcessed[] = "Data: " . $baseName;
+            } else {
+                $errors[] = "Error al escribir data: " . $baseName;
+            }
         }
 
         // --- Caso B: Imágenes y Vídeos (uploads/) ---
@@ -49,14 +57,13 @@ if ($zip->open($file['tmp_name']) === TRUE) {
             $uploadsDir = __DIR__ . '/uploads/';
             if (!is_dir($uploadsDir)) {
                 mkdir($uploadsDir, 0777, true);
+                chmod($uploadsDir, 0777);
             }
 
             // Si el archivo viene dentro de una carpeta 'uploads/' en el ZIP, mantenemos la estructura interna
             if (strpos($filename, 'uploads/') === 0) {
                 $relativePath = substr($filename, strlen('uploads/'));
             } else {
-                // Si es un backup plano (sin carpetas), lo ponemos directo en uploads/
-                // NOTA: Esto ayuda a que coincida con las rutas 'uploads/archivo.png' guardadas en el JSON
                 $relativePath = $filename;
             }
 
@@ -69,14 +76,28 @@ if ($zip->open($file['tmp_name']) === TRUE) {
             $targetDir = dirname($targetPath);
             if (!is_dir($targetDir)) {
                 mkdir($targetDir, 0777, true);
+                chmod($targetDir, 0777);
             }
 
-            copy("zip://" . $file['tmp_name'] . "#" . $filename, $targetPath);
+            if (file_put_contents($targetPath, $content) !== false) {
+                chmod($targetPath, 0644); // Lectura para todos
+                $filesProcessed[] = "Media: " . $relativePath;
+            } else {
+                $errors[] = "Error al escribir media: " . $relativePath;
+            }
         }
     }
 
     $zip->close();
-    echo json_encode(['success' => true, 'message' => 'Restauración completa realizada con éxito']);
+    echo json_encode([
+        'success' => true,
+        'message' => 'Restauración completada',
+        'log' => [
+            'count' => count($filesProcessed),
+            'files' => array_slice($filesProcessed, 0, 10), // Solo primeros 10 para no saturar
+            'errors' => $errors
+        ]
+    ]);
 } else {
     http_response_code(500);
     echo json_encode(['success' => false, 'message' => 'Error al abrir el archivo ZIP']);
