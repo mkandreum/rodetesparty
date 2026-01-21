@@ -382,6 +382,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 	const dragNotifEmail = document.getElementById('drag-notif-email');
 	const dragBuyerTemplate = document.getElementById('drag-buyer-template');
 	const saveDragEmailConfigBtn = document.getElementById('save-drag-email-config-btn');
+	const saveWebMerchConfigBtn = document.getElementById('save-web-merch-config-btn'); // NUEVO
 	// --- FIN ---
 
 
@@ -3608,6 +3609,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 
 		// Cargar select de drags
 		if (dragEmailSelect && appState.drags) {
+			const currentVal = dragEmailSelect.value;
 			dragEmailSelect.innerHTML = '<option value="">-- SELECCIONA UNA DRAG --</option>';
 			appState.drags.sort((a, b) => (a.name || '').localeCompare(b.name || '')).forEach(drag => {
 				const option = document.createElement('option');
@@ -3615,13 +3617,8 @@ window.addEventListener('DOMContentLoaded', async () => {
 				option.textContent = drag.name;
 				dragEmailSelect.appendChild(option);
 			});
+			if (currentVal) dragEmailSelect.value = currentVal;
 		}
-
-		// Listener para cambio en Web Merch (auto guardado con debounce o botón global? 
-		// No hay botón global en esa sección. Deberíamos añadir uno o usar listeners 'change'.
-		// Vamos a añadir listeners 'change' para Web Merch y guardar appState.
-		if (webMerchNotifEmail) webMerchNotifEmail.onchange = saveEmailNotificationsState;
-		if (webMerchBuyerTemplate) webMerchBuyerTemplate.onchange = saveEmailNotificationsState;
 	}
 
 	/**
@@ -3676,6 +3673,9 @@ window.addEventListener('DOMContentLoaded', async () => {
 	/**
 	 * Guarda estado general de notificaciones (para Web Merch)
 	 */
+	/**
+	 * Guarda estado general de notificaciones (para Web Merch)
+	 */
 	async function saveEmailNotificationsState() {
 		if (!appState) return;
 		if (!appState.emailNotifications) appState.emailNotifications = {};
@@ -3685,8 +3685,8 @@ window.addEventListener('DOMContentLoaded', async () => {
 			buyerTemplate: webMerchBuyerTemplate ? webMerchBuyerTemplate.value : ''
 		};
 
-		await saveAppState();
-		// Opcional: mostrar toast pequeño
+		await saveAppState(); // Persistir en servidor (datos_app.json)
+		showInfoModal("Configuración Web Merch guardada.", false);
 	}
 
 	// ========== FIN SMTP CONFIGURATION ==========
@@ -5919,6 +5919,8 @@ window.addEventListener('DOMContentLoaded', async () => {
 	if (testSMTPBtn) addTrackedListener(testSMTPBtn, 'click', testSMTPConnection);
 	if (dragEmailSelect) addTrackedListener(dragEmailSelect, 'change', handleDragEmailSelect);
 	if (saveDragEmailConfigBtn) addTrackedListener(saveDragEmailConfigBtn, 'click', handleSaveDragEmailConfig);
+	if (saveWebMerchConfigBtn) addTrackedListener(saveWebMerchConfigBtn, 'click', saveEmailNotificationsState); // NUEVO
+	if (saveWebMerchConfigBtn) addTrackedListener(saveWebMerchConfigBtn, 'click', saveEmailNotificationsState); // NUEVO
 	// ========== FIN NUEVO ==========
 
 
