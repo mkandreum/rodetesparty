@@ -1,4 +1,4 @@
-const CACHE_NAME = 'rodetes-party-v1.0.3'; // Incrementado
+const CACHE_NAME = 'rodetes-party-v1.0.4'; // Incrementado 22/01
 const urlsToCache = [
     './index.php',
     './style.css',
