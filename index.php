@@ -1479,6 +1479,20 @@ $adminEmail = isset($_SESSION['admin_email']) ? $_SESSION['admin_email'] : '';
         </div>
     </div>
 
+    <!-- PWA Install Banner -->
+    <div id="pwa-install-banner" style="display: none;">
+        <div class="pwa-content">
+            <div class="pwa-text">
+                <div class="pwa-title">INSTALAR APP</div>
+                <div class="pwa-desc">Añade Rodetes Party a tu inicio para un acceso más rápido.</div>
+            </div>
+            <div class="pwa-actions">
+                <button id="pwa-install-btn" class="pwa-install-btn">INSTALAR</button>
+                <button id="pwa-close-btn" class="pwa-close-btn">&times;</button>
+            </div>
+        </div>
+    </div>
+
     <!-- ==== FOOTER ==== -->
     <footer class="container mx-auto px-4 sm:px-6 lg:px-8 mt-12 mb-8 border-t-2 border-gray-700 pt-8">
         <p class="text-center text-gray-600 font-pixel text-sm">RODETES PARTY &copy; <?php echo date("Y"); ?></p>
@@ -1506,7 +1520,7 @@ $adminEmail = isset($_SESSION['admin_email']) ? $_SESSION['admin_email'] : '';
                 navigator.serviceWorker.register('/service-worker.js')
                     .then(registration => {
                         console.log('[PWA] Service Worker registrado:', registration.scope);
-                        
+
                         // Comprobar actualizaciones cada 60 segundos
                         setInterval(() => {
                             registration.update();
@@ -1517,6 +1531,64 @@ $adminEmail = isset($_SESSION['admin_email']) ? $_SESSION['admin_email'] : '';
                     });
             });
         }
+
+        // PWA Install Prompt Logic
+        let deferredPrompt;
+        const installBanner = document.getElementById('pwa-install-banner');
+        const installBtn = document.getElementById('pwa-install-btn');
+        const closeBtn = document.getElementById('pwa-close-btn');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            // Prevent Chrome 67 and earlier from automatically showing the prompt
+            e.preventDefault();
+            // Stash the event so it can be triggered later.
+            deferredPrompt = e;
+            // Update UI to notify the user they can add to home screen
+            installBanner.style.display = 'flex';
+            // Slight delay to allow display:flex to apply before adding class for animation
+            setTimeout(() => {
+                installBanner.classList.add('visible');
+            }, 50);
+
+            // Auto hide after 8 seconds if not interacted
+            setTimeout(() => {
+                if (deferredPrompt && installBanner.classList.contains('visible')) {
+                    installBanner.classList.remove('visible');
+                    setTimeout(() => {
+                        installBanner.style.display = 'none';
+                    }, 500);
+                }
+            }, 8000);
+        });
+
+        installBtn.addEventListener('click', (e) => {
+            // Hide the app provided install promotion
+            installBanner.classList.remove('visible');
+            setTimeout(() => {
+                installBanner.style.display = 'none';
+            }, 500);
+
+            // Show the install prompt
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                // Wait for the user to respond to the prompt
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('User accepted the A2HS prompt');
+                    } else {
+                        console.log('User dismissed the A2HS prompt');
+                    }
+                    deferredPrompt = null;
+                });
+            }
+        });
+
+        closeBtn.addEventListener('click', (e) => {
+            installBanner.classList.remove('visible');
+            setTimeout(() => {
+                installBanner.style.display = 'none';
+            }, 500);
+        });
     </script>
 
 </body>

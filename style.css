@@ -522,3 +522,115 @@ input[type="checkbox"]:hover {
 #next-event-promo-container:hover #next-event-promo {
     animation-play-state: paused;
 }
+
+/* --- 8. PWA INSTALL BANNER --- */
+#pwa-install-banner {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: rgba(0, 0, 0, 0.95);
+    border-top: 2px solid var(--neon-pink);
+    z-index: 100;
+    padding: 1rem;
+    transform: translateY(100%);
+    transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 -5px 20px rgba(240, 45, 125, 0.3);
+    display: flex;
+    /* Ensure it's hidden but displayable via transform */
+}
+
+#pwa-install-banner.visible {
+    transform: translateY(0);
+}
+
+.pwa-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    gap: 1rem;
+    flex-wrap: wrap;
+    /* Allow wrapping on small screens */
+}
+
+.pwa-text {
+    flex-grow: 1;
+}
+
+.pwa-title {
+    font-family: 'VT323', monospace;
+    color: white;
+    font-size: 1.5rem;
+    line-height: 1.2;
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+}
+
+.pwa-desc {
+    font-family: 'Inter', sans-serif;
+    color: #9ca3af;
+    font-size: 0.875rem;
+}
+
+.pwa-actions {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.pwa-install-btn {
+    background-color: var(--neon-pink);
+    color: black;
+    font-family: 'VT323', monospace;
+    font-size: 1.25rem;
+    padding: 0.5rem 1rem;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 0 10px var(--neon-pink);
+    transition: all 0.2s;
+}
+
+.pwa-install-btn:hover {
+    transform: scale(1.05);
+    background-color: white;
+    box-shadow: 0 0 20px white;
+}
+
+.pwa-close-btn {
+    background: transparent;
+    border: 1px solid #4b5563;
+    color: #9ca3af;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: all 0.2s;
+}
+
+.pwa-close-btn:hover {
+    border-color: white;
+    color: white;
+}
+
+@media (max-width: 640px) {
+    .pwa-content {
+        flex-direction: column;
+        align-items: flex-start;
+        text-align: left;
+    }
+
+    .pwa-actions {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .pwa-install-btn {
+        flex-grow: 1;
+        text-align: center;
+    }
+}
