@@ -415,8 +415,8 @@ window.addEventListener('DOMContentLoaded', async () => {
 				const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
 				const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
-				// Formato compacto y pequeño
-				el.innerHTML = `<span class="text-gray-400 text-xs">FALTAN:</span> <span class="text-white font-bold ml-1">${days}d ${hours}h ${minutes}m ${seconds}s</span>`;
+				// Formato compacto y pequeño, pero con color neon
+				el.innerHTML = `<span class="text-[#F02D7D] font-bold text-xs" style="text-shadow: 0 0 2px #F02D7D;">FALTAN:</span> <span class="text-[#00FFFF] font-bold ml-1 text-glow-cyan">${days}d ${hours}h ${minutes}m ${seconds}s</span>`;
 			});
 		};
 
