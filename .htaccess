@@ -3,13 +3,13 @@
     AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript application/json
 </IfModule>
 
-# Headers de seguridad
+# Headers de seguridad y PWA
 <IfModule mod_headers.c>
     # PWA - Service Worker
     Header set Service-Worker-Allowed "/"
     
     # MIME types correctos
-    <FilesMatch "\.(js)$">
+    <FilesMatch "\.js$">
         Header set Content-Type "application/javascript"
     </FilesMatch>
     
@@ -32,7 +32,7 @@
     </FilesMatch>
 </IfModule>
 
-# Permitir CORS para fonts y assets si es necesario
+# Permitir CORS para fonts y assets
 <IfModule mod_headers.c>
     <FilesMatch "\.(ttf|ttc|otf|eot|woff|woff2|font.css|css|js)$">
         Header set Access-Control-Allow-Origin "*"
@@ -40,21 +40,13 @@
 </IfModule>
 
 # Tipos MIME
-AddType application/manifest+json .webmanifest .json
 AddType application/javascript .js
 AddType image/svg+xml .svg .svgz
 AddType image/webp .webp
+AddType image/png .png
+AddType image/jpeg .jpg .jpeg
 
-# Rewrite rules para permitir URLs amigables
-<IfModule mod_rewrite.c>
-    RewriteEngine On
-    RewriteBase /
-    
-    # No reescribir si es un archivo real
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteCond %{REQUEST_FILENAME} !-d
-    
-    # Exception para service worker y manifest
-    RewriteCond %{REQUEST_URI} !^/service-worker\.js$
-    RewriteCond %{REQUEST_URI} !^/manifest\.json$
-</IfModule>
+# Solo para manifest.json específico
+<Files "manifest.json">
+    ForceType application/manifest+json
+</Files>
