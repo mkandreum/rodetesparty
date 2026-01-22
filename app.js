@@ -390,6 +390,41 @@ window.addEventListener('DOMContentLoaded', async () => {
 	// --- Helper Functions ---
 
 	/**
+	 * Inicia el intervalo para actualizar las cuentas atrás de los eventos.
+	 */
+	function startEventCountdowns() {
+		if (window.eventCountdownInterval) clearInterval(window.eventCountdownInterval);
+
+		const updateCountdowns = () => {
+			const now = new Date().getTime();
+			document.querySelectorAll('.event-countdown').forEach(el => {
+				const dateStr = el.dataset.date;
+				if (!dateStr) return;
+
+				const targetDate = new Date(dateStr).getTime();
+				const distance = targetDate - now;
+
+				if (distance < 0) {
+					el.innerHTML = "¡ES HOY!";
+					el.classList.add('animate-pulse');
+					return;
+				}
+
+				const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+				const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+				const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+				const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+				// Formato compacto y pequeño
+				el.innerHTML = `<span class="text-gray-400 text-xs">FALTAN:</span> <span class="text-white font-bold ml-1">${days}d ${hours}h ${minutes}m ${seconds}s</span>`;
+			});
+		};
+
+		updateCountdowns(); // Ejecutar inmediatamente
+		window.eventCountdownInterval = setInterval(updateCountdowns, 1000);
+	}
+
+	/**
 	 * Baraja un array usando el algoritmo Fisher-Yates.
 	 */
 	function shuffleArray(array) {
@@ -1098,6 +1133,10 @@ window.addEventListener('DOMContentLoaded', async () => {
 							   ${event.name || 'Evento sin nombre'}
 							</h3>
 							<p class="text-gray-400 font-semibold font-pixel text-lg mb-3">${eventDate || 'Fecha no disponible'}</p>
+							
+							<!-- CUENTA ATRÁS -->
+							${!isPastEvent ? `<div class="event-countdown font-pixel text-neon-pink text-lg mb-3" data-date="${event.date}"></div>` : ''}
+							
 							<p class="text-4xl font-extrabold ${isPastEvent ? 'text-gray-600' : 'text-white'} mb-4">${price} €</p>
 							<p class="text-gray-400 mb-6 flex-grow" style="white-space: pre-wrap;">${event.description || 'Sin descripción.'}</p>				
 							${buttonHtml}
@@ -1116,6 +1155,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 
 		// Iniciar observación para animaciones
 		observeRevealElements();
+		if (typeof startEventCountdowns === 'function') startEventCountdowns();
 	}
 
 
@@ -1193,6 +1233,10 @@ window.addEventListener('DOMContentLoaded', async () => {
 								${event.name || 'Evento sin nombre'}
 							 </h3>
 							 <p class="text-gray-400 font-semibold font-pixel text-lg mb-3">${eventDate}</p>
+							 
+							 <!-- CUENTA ATRÁS -->
+							 ${!isPastEvent ? `<div class="event-countdown font-pixel text-neon-pink text-lg mb-3" data-date="${event.date}"></div>` : ''}
+							 
 							 <p class="text-4xl font-extrabold ${isPastEvent ? 'text-gray-600' : 'text-white'} mb-4">${price} €</p>
 							 <p class="text-gray-400 mb-6 flex-grow" style="white-space: pre-wrap;">${event.description || 'Sin descripción.'}</p>
 							${buttonHtml}
@@ -1210,6 +1254,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 
 		// Iniciar observación para animaciones
 		observeRevealElements();
+		if (typeof startEventCountdowns === 'function') startEventCountdowns();
 	}
 
 	function handleGalleryLink(e) {
