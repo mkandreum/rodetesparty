@@ -349,7 +349,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 	const webMerchForm = document.getElementById('web-merch-form');
 	const saveWebMerchBtn = document.getElementById('save-web-merch-btn');
 	const cancelWebMerchBtn = document.getElementById('cancel-web-merch-btn');
-	const webMerchListContainer = document.getElementById('web-merch-list-container');
+	const webMerchListContainer = document.getElementById('admin-web-merch-list-container');
 	const webMerchImageUrlInput = document.getElementById('web-merch-image-url');
 	const webMerchImageUploadInput = document.getElementById('web-merch-image-upload');
 	const webMerchSalesSummary = document.getElementById('web-merch-sales-summary');
@@ -1711,7 +1711,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 	 */
 	function renderMerchPage() {
 		console.log("=== renderMerchPage called ===");
-		const webMerchListContainer = document.getElementById('web-merch-list-container');
+		const webMerchListContainer = document.getElementById('public-web-merch-list-container');
 		const dragsMerchListContainer = document.getElementById('drags-merch-list-container');
 
 		if (!webMerchListContainer || !dragsMerchListContainer) {
