@@ -1,6 +1,5 @@
 const CACHE_NAME = 'rodetes-party-v1.0.3'; // Incrementado
 const urlsToCache = [
-    './',
     './index.php',
     './style.css',
     './app.js',
@@ -15,7 +14,15 @@ self.addEventListener('install', (event) => {
         caches.open(CACHE_NAME)
             .then((cache) => {
                 console.log('[SW] Opened cache');
-                return cache.addAll(urlsToCache);
+                // Cache files one by one to catch and log errors
+                const cachePromises = urlsToCache.map(url => {
+                    return cache.add(url).catch(err => {
+                        console.error('[SW] Failed to cache file:', url, err);
+                        // Optional: throw err if you want to abort the entire install on one failure
+                        // throw err; 
+                    });
+                });
+                return Promise.all(cachePromises);
             })
     );
     self.skipWaiting();
