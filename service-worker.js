@@ -1,20 +1,15 @@
 // Service Worker para Rodetes Party PWA
 // IMPORTANTE: Incrementar VERSION cada vez que actualices la web
-const VERSION = 'v1.0.0';
+const VERSION = 'v1.0.1';
 const CACHE_NAME = `rodetes-party-${VERSION}`;
 
-// Recursos críticos para cachear
+// Recursos críticos para cachear (solo recursos propios, no CDN externos)
 const CRITICAL_ASSETS = [
     '/',
     '/index.php',
     '/style.css',
     '/app.js',
-    '/manifest.json',
-    'https://cdn.tailwindcss.com',
-    'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js',
-    'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js',
-    'https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js',
-    'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js'
+    '/manifest.json'
 ];
 
 // Instalación: Cachear recursos críticos
@@ -27,6 +22,9 @@ self.addEventListener('install', (event) => {
                 return cache.addAll(CRITICAL_ASSETS);
             })
             .then(() => self.skipWaiting()) // Activar inmediatamente
+            .catch((error) => {
+                console.error('[SW] Error al cachear recursos:', error);
+            })
     );
 });
 
@@ -104,7 +102,7 @@ self.addEventListener('fetch', (event) => {
                             cache.put(request, response);
                         });
                     }
-                });
+                }).catch(() => { }); // Ignorar errores de actualización en background
                 return cached;
             }
 
