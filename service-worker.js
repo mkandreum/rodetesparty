@@ -1,12 +1,12 @@
 const CACHE_NAME = 'rodetes-party-v1.0.3'; // Incrementado
 const urlsToCache = [
-    '/',
-    '/index.php',
-    '/style.css',
-    '/app.js',
-    '/manifest.json',
-    '/icons/icon-192x192.png',
-    '/icons/icon-512x512.png'
+    './',
+    './index.php',
+    './style.css',
+    './app.js',
+    './manifest.json',
+    './icons/icon-192x192.png',
+    './icons/icon-512x512.png'
 ];
 
 // Install event - cache assets

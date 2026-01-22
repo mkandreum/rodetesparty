@@ -66,12 +66,12 @@ $adminEmail = isset($_SESSION['admin_email']) ? $_SESSION['admin_email'] : '';
     <meta name="description" content="La mejor fiesta drag de tu ciudad - Eventos, galerías y merchandising oficial">
 
     <!-- PWA Manifest -->
-    <link rel="manifest" href="/manifest.json">
+    <link rel="manifest" href="manifest.json">
 
     <!-- Apple Touch Icons -->
-    <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-192x192.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-192x192.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/icons/icon-192x192.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="icons/icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="icons/icon-192x192.png">
 
     <title>Rodetes Party - Eventos</title>
 
@@ -1517,11 +1517,10 @@ $adminEmail = isset($_SESSION['admin_email']) ? $_SESSION['admin_email'] : '';
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/service-worker.js')
+                navigator.serviceWorker.register('service-worker.js')
                     .then(registration => {
                         console.log('[PWA] Service Worker registrado:', registration.scope);
-
-                        // Comprobar actualizaciones cada 60 segundos
+ // Comprobar actualizaciones cada 60 segundos
                         setInterval(() => {
                             registration.update();
                         }, 60000);
@@ -1547,7 +1546,7 @@ $adminEmail = isset($_SESSION['admin_email']) ? $_SESSION['admin_email'] : '';
             installBanner.style.display = 'flex';
             // Slight delay to allow display:flex to apply before adding class for animation
             setTimeout(() => {
-                installBanner.classList.add('visible');
+                installB                anner.classList.add('visible');
             }, 50);
 
             // Auto hide after 8 seconds if not interacted
