@@ -56,6 +56,23 @@ $adminEmail = isset($_SESSION['admin_email']) ? $_SESSION['admin_email'] : '';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#F02D7D">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Rodetes Party">
+    <meta name="description" content="La mejor fiesta drag de tu ciudad - Eventos, galerías y merchandising oficial">
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json">
+
+    <!-- Apple Touch Icons -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/icons/icon-192x192.png">
+
     <title>Rodetes Party - Eventos</title>
 
     <!-- Tailwind CSS -->
@@ -1481,6 +1498,26 @@ $adminEmail = isset($_SESSION['admin_email']) ? $_SESSION['admin_email'] : '';
 
     <!--  App Principal (Carga diferida) -->
     <script src="app.js?v=<?php echo time(); ?>" defer></script>
+
+    <!-- Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then(registration => {
+                        console.log('[PWA] Service Worker registrado:', registration.scope);
+                        
+                        // Comprobar actualizaciones cada 60 segundos
+                        setInterval(() => {
+                            registration.update();
+                        }, 60000);
+                    })
+                    .catch(error => {
+                        console.log('[PWA] Error al registrar Service Worker:', error);
+                    });
+            });
+        }
+    </script>
 
 </body>
 

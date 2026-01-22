@@ -14,12 +14,12 @@ body {
     color: #e5e7eb; 
     scroll-behavior: smooth; 
     padding-top: 128px; 
-    overflow-x: hidden; /* Prevent horizontal scroll from effects */
+    overflow-x: hidden;
     position: relative;
     min-height: 100vh;
 }
 
-/* --- 1. FONDO "ALIVE" CRT SCANLINESS --- */
+/* --- 1. FONDO "ALIVE" CRT SCANLINES --- */
 body::before {
     content: " ";
     display: block;
@@ -83,7 +83,6 @@ body::before {
 }
 
 /* --- 3. NEON BUTTONS --- */
-/* Base para todos los botones de acción */
 button:not(:disabled).neon-btn, 
 .neon-btn {
     position: relative;
@@ -91,7 +90,7 @@ button:not(:disabled).neon-btn,
     background: transparent;
     color: white;
     text-transform: uppercase;
-    transition: all 0.2s ease-in-out;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     box-shadow: 0 0 5px rgba(255, 255, 255, 0.1); 
 }
 
@@ -102,19 +101,113 @@ button:not(:disabled).neon-btn:hover,
     box-shadow: 0 0 20px var(--neon-pink), 0 0 40px var(--neon-pink);
     border-color: var(--neon-pink);
     text-shadow: none;
-    transform: scale(1.02);
+    transform: scale(1.05);
 }
 
-/* --- 4. SCROLL REVEAL --- */
+/* --- 4. SMOOTH PAGE TRANSITIONS --- */
+.page-container {
+    transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
+                transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.page-container.page-exit {
+    opacity: 0;
+    transform: translateX(-30px);
+}
+
+.page-container.page-enter {
+    animation: pageEnter 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes pageEnter {
+    from {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.page-fade-in { 
+    animation: fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1); 
+}
+
+@keyframes fadeIn { 
+    from { opacity: 0; transform: translateY(20px); } 
+    to { opacity: 1; transform: translateY(0); } 
+}
+
+/* --- 5. ENHANCED MODAL ANIMATIONS --- */
+.modal-backdrop-fade-in { 
+    animation: modalBackdropIn 0.3s ease-out forwards; 
+}
+
+.modal-backdrop-fade-out {
+    animation: modalBackdropOut 0.2s ease-in forwards;
+}
+
+.modal-content-scale-in { 
+    animation: modalScaleIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; 
+}
+
+.modal-content-scale-out {
+    animation: modalScaleOut 0.25s cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+
+@keyframes modalBackdropIn { 
+    from { opacity: 0; } 
+    to { opacity: 1; } 
+}
+
+@keyframes modalBackdropOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+@keyframes modalScaleIn { 
+    from { 
+        opacity: 0; 
+        transform: scale(0.9) translateY(-20px); 
+    } 
+    to { 
+        opacity: 1; 
+        transform: scale(1) translateY(0); 
+    } 
+}
+
+@keyframes modalScaleOut {
+    from {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: scale(0.95) translateY(10px);
+    }
+}
+
+/* --- 6. SCROLL REVEAL --- */
 .reveal-on-scroll {
     opacity: 0;
-    transform: translateY(30px);
-    transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    transform: translateY(40px);
+    transition: all 0.7s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .reveal-on-scroll.visible {
     opacity: 1;
     transform: translateY(0);
+}
+
+/* --- 7. ENHANCED CARD HOVER EFFECTS --- */
+.bg-gray-900, .bg-gray-800 {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.bg-gray-900:hover, .bg-gray-800:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 30px rgba(240, 45, 125, 0.3);
 }
 
 /* --- Layout fixes & Components --- */
@@ -125,8 +218,9 @@ header {
     left: 0; 
     right: 0; 
     z-index: 40; 
-    background-color: rgba(0,0,0,0.9); /* Slight transparency */
-    backdrop-filter: blur(5px);
+    background-color: rgba(0,0,0,0.9);
+    backdrop-filter: blur(10px);
+    transition: backdrop-filter 0.3s;
 }
 
 #secondary-nav-container { 
@@ -211,8 +305,8 @@ input[type='datetime-local'], input[type='number'], textarea, select {
     border-radius: 0; 
     border-width: 1px; 
     padding: 0.5rem 0.75rem;
-    transition: all 0.2s ease-in-out;
-    font-family: 'VT323', monospace; /* Pixel font for inputs too */
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-family: 'VT323', monospace;
     font-size: 1.25rem;
 }
 
@@ -221,7 +315,8 @@ input::placeholder, textarea::placeholder { color: #555; }
 input:focus, textarea:focus, select:focus {
     outline: none;
     border-color: var(--neon-pink);
-    box-shadow: 0 0 10px var(--neon-pink);
+    box-shadow: 0 0 15px rgba(240, 45, 125, 0.5);
+    transform: scale(1.01);
 }
 
 /* File Input */
@@ -241,11 +336,12 @@ input[type="file"]::file-selector-button {
     border-radius: 0; 
     margin-right: 0.5rem;
     cursor: pointer; 
-    transition: background-color 0.2s;
+    transition: all 0.3s;
     font-family: 'VT323', monospace;
 }
 input[type="file"]::file-selector-button:hover { 
-    background-color: #666; 
+    background-color: var(--neon-pink);
+    transform: scale(1.05);
 }
 
 .restore-label {
@@ -258,9 +354,12 @@ input[type="file"]::file-selector-button:hover {
     cursor: pointer; 
     font-family: 'VT323', monospace; 
     font-size: 1.125rem;
-    transition: background-color 0.2s;
+    transition: all 0.3s;
 }
-.restore-label:hover { background-color: #333; }
+.restore-label:hover { 
+    background-color: #333;
+    transform: scale(1.02);
+}
 
 button:disabled { opacity: 0.5; cursor: not-allowed; }
 
@@ -268,26 +367,12 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator {
     filter: invert(0.8); cursor: pointer; 
 }
 
-/* UI Animations */
-.page-fade-in { animation: fadeIn 0.4s ease-in-out; }
-@keyframes fadeIn { 
-    from { opacity: 0; transform: translateY(10px); } 
-    to { opacity: 1; transform: translateY(0); } 
-}
-
-.modal-backdrop-fade-in { animation: modalFadeIn 0.2s ease-out forwards; }
-.modal-content-scale-in { animation: modalScaleIn 0.25s ease-out forwards; }
-@keyframes modalFadeIn { from { opacity: 0; } to { opacity: 1; } }
-@keyframes modalScaleIn { 
-    from { opacity: 0; transform: scale(0.95) translateY(10px); } 
-    to { opacity: 1; transform: scale(1) translateY(0); } 
-}
-
 /* Checkbox */
 input[type="checkbox"] {
     appearance: none; background-color: #222; border: 1px solid #666; padding: 0; 
     display: inline-block; vertical-align: middle; position: relative;
     width: 1.5rem; height: 1.5rem; cursor: pointer;
+    transition: all 0.2s;
 }
 input[type="checkbox"]:checked { 
     background-color: var(--neon-pink); 
@@ -298,7 +383,10 @@ input[type="checkbox"]:checked::after {
     font-size: 1.2rem; top: 50%; left: 50%; transform: translate(-50%, -55%); line-height: 1;
 }
 input[type="checkbox"]:focus {
-    outline: none; box-shadow: 0 0 5px var(--neon-pink);
+    outline: none; box-shadow: 0 0 8px var(--neon-pink);
+}
+input[type="checkbox"]:hover {
+    transform: scale(1.1);
 }
 
 /* Marquee */
@@ -315,8 +403,8 @@ input[type="checkbox"]:focus {
     white-space: nowrap;
     font-family: 'VT323', monospace; 
     color: var(--neon-yellow);
-    font-size: 1.5rem; /* Bigger */
-    text-shadow: 0 0 5px var(--neon-yellow);
+    font-size: 1.5rem;
+    text-shadow: 0 0 10px var(--neon-yellow);
 }
 #next-event-promo > span { display: inline-block; }
 #next-event-promo-container:hover #next-event-promo { animation-play-state: paused; }
