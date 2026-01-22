@@ -401,6 +401,122 @@ window.addEventListener('DOMContentLoaded', async () => {
 		return newArray;
 	}
 
+	/**
+	 * Calcula el tiempo restante hasta una fecha objetivo.
+	 * Devuelve objeto con days, hours, minutes, seconds, y isExpired.
+	 */
+	function getCountdown(targetDate) {
+		const now = new Date().getTime();
+		const target = new Date(targetDate).getTime();
+		const distance = target - now;
+
+		if (distance < 0) {
+			return { days: 0, hours: 0, minutes: 0, seconds: 0, isExpired: true };
+		}
+
+		return {
+			days: Math.floor(distance / (1000 * 60 * 60 * 24)),
+			hours: Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+			minutes: Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)),
+			seconds: Math.floor((distance % (1000 * 60)) / 1000),
+			isExpired: false
+		};
+	}
+
+	/**
+	 * Genera HTML para un countdown timer animado.
+	 * @param {string} id - ID único para el countdown
+	 * @param {Date|string} targetDate - Fecha objetivo
+	 * @param {boolean} compact - Si es true, versión compacta (banner)
+	 */
+	function createCountdownHTML(id, targetDate, compact = false) {
+		const { days, hours, minutes, seconds, isExpired } = getCountdown(targetDate);
+
+		if (isExpired) return '';
+
+		const formatNum = (num) => String(num).padStart(2, '0');
+
+		if (compact) {
+			// Versión compacta para banner
+			return `
+				<span class="countdown-compact" data-countdown-id="${id}" data-target="${new Date(targetDate).getTime()}">
+					<span class="countdown-value">${formatNum(days)}</span>d 
+					<span class="countdown-value">${formatNum(hours)}</span>h 
+					<span class="countdown-value">${formatNum(minutes)}</span>m 
+					<span class="countdown-value">${formatNum(seconds)}</span>s
+				</span>
+			`;
+		}
+
+		// Versión completa para cards
+		return `
+			<div class="countdown-timer" data-countdown-id="${id}" data-target="${new Date(targetDate).getTime()}">
+				<div class="countdown-label">⏰ FALTAN</div>
+				<div class="countdown-units">
+					<div class="countdown-unit">
+						<div class="countdown-value">${formatNum(days)}</div>
+						<div class="countdown-unit-label">días</div>
+					</div>
+					<div class="countdown-separator">:</div>
+					<div class="countdown-unit">
+						<div class="countdown-value">${formatNum(hours)}</div>
+						<div class="countdown-unit-label">hrs</div>
+					</div>
+					<div class="countdown-separator">:</div>
+					<div class="countdown-unit">
+						<div class="countdown-value">${formatNum(minutes)}</div>
+						<div class="countdown-unit-label">min</div>
+					</div>
+					<div class="countdown-separator">:</div>
+					<div class="countdown-unit">
+						<div class="countdown-value">${formatNum(seconds)}</div>
+						<div class="countdown-unit-label">seg</div>
+					</div>
+				</div>
+			</div>
+		`;
+	}
+
+	/**
+	 * Inicializa y actualiza todos los countdowns activos en la página.
+	 */
+	function updateCountdowns() {
+		document.querySelectorAll('[data-countdown-id]').forEach(countdown => {
+			const target = parseInt(countdown.dataset.target, 10);
+			if (!target || isNaN(target)) return;
+
+			const now = new Date().getTime();
+			const distance = target - now;
+
+			if (distance < 0) {
+				countdown.style.opacity = '0';
+				return;
+			}
+
+			const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+			const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+			const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+			const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+			const formatNum = (num) => String(num).padStart(2, '0');
+			const values = countdown.querySelectorAll('.countdown-value');
+
+			if (values.length === 4) {
+				values[0].textContent = formatNum(days);
+				values[1].textContent = formatNum(hours);
+				values[2].textContent = formatNum(minutes);
+				values[3].textContent = formatNum(seconds);
+			}
+		});
+	}
+
+	// Actualizar countdowns cada segundo
+	let countdownInterval = null;
+	function startCountdownInterval() {
+		if (countdownInterval) clearInterval(countdownInterval);
+		countdownInterval = setInterval(updateCountdowns, 1000);
+	}
+
 	// --- Page Navigation (actualizada para manejar estado inicial de login) ---
 	function showPage(pageId) {
 		Object.values(pages).forEach(page => {
@@ -1181,6 +1297,9 @@ window.addEventListener('DOMContentLoaded', async () => {
 				const imageUrl = event.posterImageUrl || `https://placehold.co/400x200/000000/ffffff?text=${encodeURIComponent(event.name || 'Evento')}&font=vt323`;
 				const price = (event.price || 0).toFixed(2);
 
+				// NUEVO: Crear countdown si el evento es futuro
+				const countdownHTML = !isPastEvent ? createCountdownHTML(`event-${event.id}`, event.date, false) : '';
+
 				card.innerHTML = `
 						${statusBadgeHtml}
 						<!-- MODIFICADO: Sin altura fija, con actionClass y dataAttribute -->
@@ -1193,6 +1312,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 								${event.name || 'Evento sin nombre'}
 							 </h3>
 							 <p class="text-gray-400 font-semibold font-pixel text-lg mb-3">${eventDate}</p>
+							 ${countdownHTML}
 							 <p class="text-4xl font-extrabold ${isPastEvent ? 'text-gray-600' : 'text-white'} mb-4">${price} €</p>
 							 <p class="text-gray-400 mb-6 flex-grow" style="white-space: pre-wrap;">${event.description || 'Sin descripción.'}</p>
 							${buttonHtml}

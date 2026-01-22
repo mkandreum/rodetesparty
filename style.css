@@ -8,12 +8,12 @@
     --bg-dark: #050505;
 }
 
-body { 
-    font-family: 'Inter', sans-serif; 
-    background-color: var(--bg-dark); 
-    color: #e5e7eb; 
-    scroll-behavior: smooth; 
-    padding-top: 128px; 
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-dark);
+    color: #e5e7eb;
+    scroll-behavior: smooth;
+    padding-top: 128px;
     overflow-x: hidden;
     position: relative;
     min-height: 100vh;
@@ -44,7 +44,8 @@ body::before {
     animation: glitch-anim-1 0.4s infinite linear alternate-reverse;
 }
 
-.glitch-hover:hover::before, .glitch-hover:hover::after {
+.glitch-hover:hover::before,
+.glitch-hover:hover::after {
     content: attr(data-text);
     position: absolute;
     top: 0;
@@ -69,21 +70,43 @@ body::before {
 }
 
 @keyframes glitch-anim-1 {
-    0% { transform: translate(0) }
-    20% { transform: translate(-2px, 2px) }
-    40% { transform: translate(-2px, -2px) }
-    60% { transform: translate(2px, 2px) }
-    80% { transform: translate(2px, -2px) }
-    100% { transform: translate(0) }
+    0% {
+        transform: translate(0)
+    }
+
+    20% {
+        transform: translate(-2px, 2px)
+    }
+
+    40% {
+        transform: translate(-2px, -2px)
+    }
+
+    60% {
+        transform: translate(2px, 2px)
+    }
+
+    80% {
+        transform: translate(2px, -2px)
+    }
+
+    100% {
+        transform: translate(0)
+    }
 }
 
 @keyframes glitch-anim-2 {
-    0% { clip: rect(12px, 9999px, 34px, 0); }
-    100% { clip: rect(65px, 9999px, 83px, 0); }
+    0% {
+        clip: rect(12px, 9999px, 34px, 0);
+    }
+
+    100% {
+        clip: rect(65px, 9999px, 83px, 0);
+    }
 }
 
 /* --- 3. NEON BUTTONS --- */
-button:not(:disabled).neon-btn, 
+button:not(:disabled).neon-btn,
 .neon-btn {
     position: relative;
     border: 1px solid white;
@@ -91,10 +114,10 @@ button:not(:disabled).neon-btn,
     color: white;
     text-transform: uppercase;
     transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    box-shadow: 0 0 5px rgba(255, 255, 255, 0.1); 
+    box-shadow: 0 0 5px rgba(255, 255, 255, 0.1);
 }
 
-button:not(:disabled).neon-btn:hover, 
+button:not(:disabled).neon-btn:hover,
 .neon-btn:hover {
     background-color: white;
     color: black;
@@ -106,8 +129,8 @@ button:not(:disabled).neon-btn:hover,
 
 /* --- 4. SMOOTH PAGE TRANSITIONS --- */
 .page-container {
-    transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
-                transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+        transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .page-container.page-exit {
@@ -124,57 +147,76 @@ button:not(:disabled).neon-btn:hover,
         opacity: 0;
         transform: translateX(30px);
     }
+
     to {
         opacity: 1;
         transform: translateX(0);
     }
 }
 
-.page-fade-in { 
-    animation: fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1); 
+.page-fade-in {
+    animation: fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-@keyframes fadeIn { 
-    from { opacity: 0; transform: translateY(20px); } 
-    to { opacity: 1; transform: translateY(0); } 
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* --- 5. ENHANCED MODAL ANIMATIONS --- */
-.modal-backdrop-fade-in { 
-    animation: modalBackdropIn 0.3s ease-out forwards; 
+.modal-backdrop-fade-in {
+    animation: modalBackdropIn 0.3s ease-out forwards;
 }
 
 .modal-backdrop-fade-out {
     animation: modalBackdropOut 0.2s ease-in forwards;
 }
 
-.modal-content-scale-in { 
-    animation: modalScaleIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; 
+.modal-content-scale-in {
+    animation: modalScaleIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .modal-content-scale-out {
     animation: modalScaleOut 0.25s cubic-bezier(0.4, 0, 1, 1) forwards;
 }
 
-@keyframes modalBackdropIn { 
-    from { opacity: 0; } 
-    to { opacity: 1; } 
+@keyframes modalBackdropIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
 
 @keyframes modalBackdropOut {
-    from { opacity: 1; }
-    to { opacity: 0; }
+    from {
+        opacity: 1;
+    }
+
+    to {
+        opacity: 0;
+    }
 }
 
-@keyframes modalScaleIn { 
-    from { 
-        opacity: 0; 
-        transform: scale(0.9) translateY(-20px); 
-    } 
-    to { 
-        opacity: 1; 
-        transform: scale(1) translateY(0); 
-    } 
+@keyframes modalScaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9) translateY(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
 }
 
 @keyframes modalScaleOut {
@@ -182,6 +224,7 @@ button:not(:disabled).neon-btn:hover,
         opacity: 1;
         transform: scale(1) translateY(0);
     }
+
     to {
         opacity: 0;
         transform: scale(0.95) translateY(10px);
@@ -201,118 +244,151 @@ button:not(:disabled).neon-btn:hover,
 }
 
 /* --- 7. ENHANCED CARD HOVER EFFECTS --- */
-.bg-gray-900, .bg-gray-800 {
+.bg-gray-900,
+.bg-gray-800 {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.bg-gray-900:hover, .bg-gray-800:hover {
+.bg-gray-900:hover,
+.bg-gray-800:hover {
     transform: translateY(-4px);
     box-shadow: 0 10px 30px rgba(240, 45, 125, 0.3);
 }
 
 /* --- Layout fixes & Components --- */
 
-header { 
-    position: fixed; 
-    top: 0; 
-    left: 0; 
-    right: 0; 
-    z-index: 40; 
-    background-color: rgba(0,0,0,0.9);
+header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 40;
+    background-color: rgba(0, 0, 0, 0.9);
     backdrop-filter: blur(10px);
     transition: backdrop-filter 0.3s;
 }
 
-#secondary-nav-container { 
-    position: fixed; 
-    top: 80px; 
-    left: 0; 
-    right: 0; 
-    z-index: 30; 
-    background-color: rgba(0,0,0,0.95); 
-    border-bottom: 1px solid #4b5563; 
+#secondary-nav-container {
+    position: fixed;
+    top: 80px;
+    left: 0;
+    right: 0;
+    z-index: 30;
+    background-color: rgba(0, 0, 0, 0.95);
+    border-bottom: 1px solid #4b5563;
 }
 
-#mobile-menu { 
-    top: 80px; 
+#mobile-menu {
+    top: 80px;
 }
 
-#next-event-promo-container { 
-    flex-grow: 1; 
-    min-width: 0; 
-    overflow: hidden; 
-    white-space: nowrap; 
-    box-sizing: border-box; 
-    position: relative; 
+#next-event-promo-container {
+    flex-grow: 1;
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    box-sizing: border-box;
+    position: relative;
 }
 
-.font-pixel { 
-    font-family: 'VT323', monospace; 
+.font-pixel {
+    font-family: 'VT323', monospace;
 }
 
-.text-glow-white { 
-    text-shadow: 0 0 5px rgba(255,255,255,0.8), 0 0 10px rgba(255,255,255,0.4); 
+.text-glow-white {
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.8), 0 0 10px rgba(255, 255, 255, 0.4);
 }
 
 .text-glow-pink {
     text-shadow: 0 0 5px var(--neon-pink), 0 0 10px var(--neon-pink);
 }
 
-.spinner { 
-    animation: spin 1s linear infinite; 
+.spinner {
+    animation: spin 1s linear infinite;
 }
 
-@keyframes spin { 
-    0% { transform: rotate(0deg); } 
-    100% { transform: rotate(360deg); } 
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
 /* Ocultar flechas inputs number */
 input[type='number']::-webkit-inner-spin-button,
-input[type='number']::-webkit-outer-spin-button { 
-    -webkit-appearance: none; 
-    margin: 0; 
+input[type='number']::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
 }
-input[type='number'] { 
-    -moz-appearance: textfield; 
-    appearance: textfield; 
+
+input[type='number'] {
+    -moz-appearance: textfield;
+    appearance: textfield;
 }
 
 /* Scanner */
-#scanner-video { 
-    width: 100%; 
-    height: auto; 
-    max-height: 70vh; 
-    display: block; 
-    background-color: #222; 
-    border-radius: 0; 
+#scanner-video {
+    width: 100%;
+    height: auto;
+    max-height: 70vh;
+    display: block;
+    background-color: #222;
+    border-radius: 0;
 }
-#scanner-canvas { display: none; }
-.scanner-guide { 
-    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; 
+
+#scanner-canvas {
+    display: none;
 }
-.scanner-box { 
-    width: 75%; padding-bottom: 50%; max-width: 400px; max-height: 300px; 
-    border: 4px dashed rgba(255, 255, 255, 0.5); position: relative; 
+
+.scanner-guide {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+}
+
+.scanner-box {
+    width: 75%;
+    padding-bottom: 50%;
+    max-width: 400px;
+    max-height: 300px;
+    border: 4px dashed rgba(255, 255, 255, 0.5);
+    position: relative;
 }
 
 /* Forms */
-input[type='email'], input[type='password'], input[type='text'], input[type='url'],
-input[type='datetime-local'], input[type='number'], textarea, select {
-    background-color: #111; 
-    border-color: #444; 
+input[type='email'],
+input[type='password'],
+input[type='text'],
+input[type='url'],
+input[type='datetime-local'],
+input[type='number'],
+textarea,
+select {
+    background-color: #111;
+    border-color: #444;
     color: #ffffff;
-    border-radius: 0; 
-    border-width: 1px; 
+    border-radius: 0;
+    border-width: 1px;
     padding: 0.5rem 0.75rem;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     font-family: 'VT323', monospace;
     font-size: 1.25rem;
 }
 
-input::placeholder, textarea::placeholder { color: #555; }
+input::placeholder,
+textarea::placeholder {
+    color: #555;
+}
 
-input:focus, textarea:focus, select:focus {
+input:focus,
+textarea:focus,
+select:focus {
     outline: none;
     border-color: var(--neon-pink);
     box-shadow: 0 0 15px rgba(240, 45, 125, 0.5);
@@ -320,91 +396,259 @@ input:focus, textarea:focus, select:focus {
 }
 
 /* File Input */
-input[type="file"] { 
-    background-color: #222; 
-    border-color: #444; 
-    color: #ccc; 
-    padding: 0.4rem 0.6rem; 
-    border-radius: 0; 
-    cursor: pointer; 
+input[type="file"] {
+    background-color: #222;
+    border-color: #444;
+    color: #ccc;
+    padding: 0.4rem 0.6rem;
+    border-radius: 0;
+    cursor: pointer;
 }
+
 input[type="file"]::file-selector-button {
-    background-color: #444; 
-    color: white; 
+    background-color: #444;
+    color: white;
     border: none;
-    padding: 0.4rem 0.8rem; 
-    border-radius: 0; 
+    padding: 0.4rem 0.8rem;
+    border-radius: 0;
     margin-right: 0.5rem;
-    cursor: pointer; 
+    cursor: pointer;
     transition: all 0.3s;
     font-family: 'VT323', monospace;
 }
-input[type="file"]::file-selector-button:hover { 
+
+input[type="file"]::file-selector-button:hover {
     background-color: var(--neon-pink);
     transform: scale(1.05);
 }
 
 .restore-label {
-    display: inline-block; 
-    background-color: #222; 
+    display: inline-block;
+    background-color: #222;
     color: #eee;
-    border: 1px solid #444; 
-    padding: 0.5rem 1rem; 
+    border: 1px solid #444;
+    padding: 0.5rem 1rem;
     border-radius: 0;
-    cursor: pointer; 
-    font-family: 'VT323', monospace; 
+    cursor: pointer;
+    font-family: 'VT323', monospace;
     font-size: 1.125rem;
     transition: all 0.3s;
 }
-.restore-label:hover { 
+
+.restore-label:hover {
     background-color: #333;
     transform: scale(1.02);
 }
 
-button:disabled { opacity: 0.5; cursor: not-allowed; }
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
 
-input[type="datetime-local"]::-webkit-calendar-picker-indicator { 
-    filter: invert(0.8); cursor: pointer; 
+input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+    filter: invert(0.8);
+    cursor: pointer;
 }
 
 /* Checkbox */
 input[type="checkbox"] {
-    appearance: none; background-color: #222; border: 1px solid #666; padding: 0; 
-    display: inline-block; vertical-align: middle; position: relative;
-    width: 1.5rem; height: 1.5rem; cursor: pointer;
+    appearance: none;
+    background-color: #222;
+    border: 1px solid #666;
+    padding: 0;
+    display: inline-block;
+    vertical-align: middle;
+    position: relative;
+    width: 1.5rem;
+    height: 1.5rem;
+    cursor: pointer;
     transition: all 0.2s;
 }
-input[type="checkbox"]:checked { 
-    background-color: var(--neon-pink); 
-    border-color: var(--neon-pink); 
+
+input[type="checkbox"]:checked {
+    background-color: var(--neon-pink);
+    border-color: var(--neon-pink);
 }
+
 input[type="checkbox"]:checked::after {
-    content: 'X'; position: absolute; color: black; font-weight: bold; font-family: 'VT323', monospace;
-    font-size: 1.2rem; top: 50%; left: 50%; transform: translate(-50%, -55%); line-height: 1;
+    content: 'X';
+    position: absolute;
+    color: black;
+    font-weight: bold;
+    font-family: 'VT323', monospace;
+    font-size: 1.2rem;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -55%);
+    line-height: 1;
 }
+
 input[type="checkbox"]:focus {
-    outline: none; box-shadow: 0 0 8px var(--neon-pink);
+    outline: none;
+    box-shadow: 0 0 8px var(--neon-pink);
 }
+
 input[type="checkbox"]:hover {
     transform: scale(1.1);
 }
 
 /* Marquee */
-@keyframes marquee { 
-    0% { transform: translateX(100%); } 
-    100% { transform: translateX(-100%); } 
+@keyframes marquee {
+    0% {
+        transform: translateX(100%);
+    }
+
+    100% {
+        transform: translateX(-100%);
+    }
 }
 
 #next-event-promo {
-    display: inline-block; 
+    display: inline-block;
     padding-left: 100%;
     animation: marquee 20s linear infinite;
-    will-change: transform; 
+    will-change: transform;
     white-space: nowrap;
-    font-family: 'VT323', monospace; 
+    font-family: 'VT323', monospace;
     color: var(--neon-yellow);
     font-size: 1.5rem;
     text-shadow: 0 0 10px var(--neon-yellow);
 }
-#next-event-promo > span { display: inline-block; }
-#next-event-promo-container:hover #next-event-promo { animation-play-state: paused; }
+
+#next-event-promo>span {
+    display: inline-block;
+}
+
+#next-event-promo-container:hover #next-event-promo {
+    animation-play-state: paused;
+}
+
+/* --- 8. COUNTDOWN TIMERS --- */
+.countdown-timer {
+    background: linear-gradient(135deg, rgba(240, 45, 125, 0.1), rgba(0, 255, 255, 0.05));
+    border: 2px solid var(--neon-pink);
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    box-shadow: 0 0 20px rgba(240, 45, 125, 0.3), inset 0 0 20px rgba(240, 45, 125, 0.1);
+    transition: all 0.3s ease;
+}
+
+.countdown-timer:hover {
+    box-shadow: 0 0 30px rgba(240, 45, 125, 0.5), inset 0 0 30px rgba(240, 45, 125, 0.15);
+    transform: scale(1.02);
+}
+
+.countdown-label {
+    font-family: 'VT323', monospace;
+    font-size: 1.2rem;
+    color: var(--neon-pink);
+    text-shadow: 0 0 10px var(--neon-pink);
+    margin-bottom: 0.5rem;
+    letter-spacing: 2px;
+}
+
+.countdown-units {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.countdown-unit {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.countdown-value {
+    font-family: 'VT323', monospace;
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #fff;
+    text-shadow:
+        0 0 10px var(--neon-cyan),
+        0 0 20px var(--neon-cyan),
+        0 0 30px rgba(0, 255, 255, 0.5);
+    background: rgba(0, 0, 0, 0.6);
+    padding: 0.5rem 1rem;
+    min-width: 60px;
+    border: 1px solid rgba(0, 255, 255, 0.3);
+    animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.countdown-separator {
+    font-family: 'VT323', monospace;
+    font-size: 2rem;
+    color: var(--neon-pink);
+    text-shadow: 0 0 10px var(--neon-pink);
+    animation: blink 1s step-start infinite;
+}
+
+.countdown-unit-label {
+    font-family: 'VT323', monospace;
+    font-size: 0.9rem;
+    color: #999;
+    margin-top: 0.25rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Versión compacta para banner */
+.countdown-compact {
+    font-family: 'VT323', monospace;
+    font-size: 1.3rem;
+    color: var(--neon-yellow);
+    text-shadow: 0 0 10px var(--neon-yellow);
+    margin-left: 1rem;
+    letter-spacing: 1px;
+}
+
+.countdown-compact .countdown-value {
+    font-size: inherit;
+    color: #fff;
+    text-shadow:
+        0 0 8px var(--neon-cyan),
+        0 0 15px rgba(0, 255, 255, 0.5);
+    background: transparent;
+    padding: 0;
+    min-width: auto;
+    border: none;
+    animation: none;
+    font-weight: bold;
+}
+
+@keyframes pulse-glow {
+
+    0%,
+    100% {
+        box-shadow: 0 0 10px rgba(0, 255, 255, 0.4);
+    }
+
+    50% {
+        box-shadow: 0 0 20px rgba(0, 255, 255, 0.8);
+    }
+}
+
+@keyframes blink {
+    50% {
+        opacity: 0;
+    }
+}
+
+/* Responsive countdown */
+@media (max-width: 640px) {
+    .countdown-value {
+        font-size: 2rem;
+        padding: 0.4rem 0.8rem;
+        min-width: 50px;
+    }
+
+    .countdown-separator {
+        font-size: 1.5rem;
+    }
+
+    .countdown-unit-label {
+        font-size: 0.75rem;
+    }
+}
