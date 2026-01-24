@@ -52,8 +52,8 @@ body {
     border-bottom: none !important;
     backdrop-filter: none !important;
     pointer-events: none;
-    padding-top: 5px;
-    /* Minimal padding to keep it near top */
+    padding-top: 20px;
+    /* Definitive logo breathing room */
 }
 
 .header-main .container {
@@ -90,10 +90,9 @@ main {
 #page-gallery h2,
 #page-merch h2,
 #page-drags h2 {
-    margin-top: 10px !important;
-    /* Pull titles closer to logo area */
+    margin-top: 35px !important;
+    /* Restored breathing gap as requested */
     margin-bottom: 24px !important;
-    padding-top: 0 !important;
 }
 
 /* 2. Floating Bottom Pill Refinement */
@@ -105,29 +104,30 @@ main {
     transform: translateX(-50%);
     width: 95%;
     max-width: 500px;
-    /* Wider as requested */
     display: flex;
     align-items: center;
     justify-content: space-around;
-    padding: 6px 5px;
+    padding: 12px 5px;
+    /* Increased thickening */
+    min-height: 70px;
+    /* Thicker pill */
 
     /* Crystal Clear Navigation */
-    background: rgba(10, 10, 10, 0.15);
-    /* More transparent */
+    background: rgba(10, 10, 10, 0.4);
+    /* Slightly less transparent for robustness */
     backdrop-filter: blur(25px) saturate(210%);
     -webkit-backdrop-filter: blur(25px) saturate(210%);
 
-    border: none !important;
-    /* Remove all borders to avoid "white lines" */
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    /* Re-add subtle border for definition */
     border-radius: 50px;
 
     z-index: 9999 !important;
 
     /* Potentiated Neon Glow */
     box-shadow:
-        0 10px 40px rgba(0, 0, 0, 0.6),
-        0 0 35px rgba(240, 45, 125, 0.25),
-        0 0 10px rgba(240, 45, 125, 0.1);
+        0 15px 45px rgba(0, 0, 0, 0.7),
+        0 0 35px rgba(240, 45, 125, 0.25);
 
     transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -211,8 +211,8 @@ main {
 
 /* 3. Modern Glass Cards - CLEAN VERSION (No backgrounds/borders on images requested) */
 .bg-gray-900 {
-    background: transparent;
-    /* Clean look */
+    background: #000 !important;
+    /* Pure Black requested */
     border: none;
     box-shadow: none;
     border-radius: 0;
@@ -549,6 +549,14 @@ header {
     white-space: nowrap;
     box-sizing: border-box;
     position: relative;
+    height: 30px !important;
+    /* Fino */
+    background: #000;
+}
+
+#next-event-promo {
+    font-size: 0.8rem !important;
+    line-height: 30px !important;
 }
 
 .font-pixel {
