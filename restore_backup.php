@@ -1,109 +1,133 @@
 <?php
+// Desactivar salida de errores HTML, solo log
+ini_set('display_errors', 0);
+ini_set('log_errors', 1);
+error_reporting(E_ALL);
+
+header('Content-Type: application/json');
+
 session_start();
 
-// --- Seguridad: Solo admin ---
-if (!isset($_SESSION['is_logged_in']) || $_SESSION['is_logged_in'] !== true) {
-    http_response_code(403);
-    echo json_encode(['success' => false, 'message' => 'Acceso denegado']);
-    exit;
-}
+try {
+    // --- Seguridad: Solo admin ---
+    if (!isset($_SESSION['is_logged_in']) || $_SESSION['is_logged_in'] !== true) {
+        throw new Exception('Acceso denegado', 403);
+    }
 
-if (!isset($_FILES['backup_file'])) {
-    http_response_code(400);
-    echo json_encode(['success' => false, 'message' => 'No se recibió el archivo de respaldo']);
-    exit;
-}
+    if (!isset($_FILES['backup_file'])) {
+        throw new Exception('No se recibió el archivo de respaldo', 400);
+    }
 
-$file = $_FILES['backup_file'];
-if ($file['error'] !== UPLOAD_ERR_OK) {
-    echo json_encode(['success' => false, 'message' => 'Error en la subida: ' . $file['error']]);
-    exit;
-}
+    $file = $_FILES['backup_file'];
+    if ($file['error'] !== UPLOAD_ERR_OK) {
+        throw new Exception('Error en la subida: código ' . $file['error'], 400);
+    }
 
-$zip = new ZipArchive();
-if ($zip->open($file['tmp_name']) === TRUE) {
+    // Verificar extensión ZIP
+    if (!class_exists('ZipArchive')) {
+        throw new Exception('La extensión ZIP de PHP no está instalada en el servidor.', 500);
+    }
+
+    $zip = new ZipArchive();
+    $res = $zip->open($file['tmp_name']);
+
+    if ($res !== TRUE) {
+        throw new Exception("Error al abrir el archivo ZIP. Código: $res", 500);
+    }
 
     $filesProcessed = [];
     $errors = [];
     $dataDir = '/var/www/data_private/';
+
+    // Asegurar directorio data_private
     if (!is_dir($dataDir)) {
-        mkdir($dataDir, 0777, true);
+        if (!mkdir($dataDir, 0777, true)) {
+            throw new Exception("No se pudo crear el directorio de datos privados.", 500);
+        }
     }
 
-    // 2. Procesar todos los archivos del ZIP
+    // Procesar ZIP
     for ($i = 0; $i < $zip->numFiles; $i++) {
         $filename = $zip->getNameIndex($i);
         $baseName = basename($filename);
-        if (empty($baseName))
-            continue; // Saltar directorios
+        if (empty($baseName) || substr($filename, -1) === '/')
+            continue; // Directorios
 
         $content = $zip->getFromIndex($i);
         if ($content === false) {
-            $errors[] = "No se pudo leer el archivo: " . $filename;
+            $errors[] = "No se pudo leer: " . $filename;
             continue;
         }
 
-        // --- Caso A: Archivos JSON (Datos) ---
+        // --- A: JSON Data ---
         if (substr($filename, -5) === '.json') {
             $targetPath = $dataDir . $baseName;
             if (file_put_contents($targetPath, $content) !== false) {
-                chmod($targetPath, 0666); // Permisos para que PHP pueda leer/escribir luego
+                chmod($targetPath, 0666);
                 $filesProcessed[] = "Data: " . $baseName;
             } else {
-                $errors[] = "Error al escribir data: " . $baseName;
+                $errors[] = "Error escribiendo: " . $baseName;
             }
         }
 
-        // --- Caso B: Imágenes y Vídeos (uploads/) ---
-        $isMedia = preg_match('/\.(jpg|jpeg|png|gif|webp|svg|mp4|webm|ogv)$/i', $filename);
-
-        if ($isMedia) {
+        // --- B: Media (uploads/) ---
+        if (preg_match('/\.(jpg|jpeg|png|gif|webp|svg|mp4|webm|ogv)$/i', $filename)) {
             $uploadsDir = __DIR__ . '/uploads/';
             if (!is_dir($uploadsDir)) {
                 mkdir($uploadsDir, 0777, true);
                 chmod($uploadsDir, 0777);
             }
 
-            // Si el archivo viene dentro de una carpeta 'uploads/' en el ZIP, mantenemos la estructura interna
+            // Normalizar ruta relativa (quitar prefijo uploads/ si existe)
+            $relativePath = $filename;
             if (strpos($filename, 'uploads/') === 0) {
                 $relativePath = substr($filename, strlen('uploads/'));
-            } else {
-                $relativePath = $filename;
             }
+
+            // Seguridad: evitar Path Traversal
+            $relativePath = str_replace(['../', '..\\'], '', $relativePath);
 
             if (empty($relativePath))
                 continue;
 
             $targetPath = $uploadsDir . $relativePath;
-
-            // Asegurar que existan subdirectorios si los hubiera
             $targetDir = dirname($targetPath);
+
             if (!is_dir($targetDir)) {
                 mkdir($targetDir, 0777, true);
                 chmod($targetDir, 0777);
             }
 
             if (file_put_contents($targetPath, $content) !== false) {
-                chmod($targetPath, 0644); // Lectura para todos
+                chmod($targetPath, 0644);
                 $filesProcessed[] = "Media: " . $relativePath;
             } else {
-                $errors[] = "Error al escribir media: " . $relativePath;
+                $errors[] = "Error escribiendo media: " . $relativePath;
             }
         }
     }
 
     $zip->close();
+
     echo json_encode([
         'success' => true,
-        'message' => 'Restauración completada',
+        'message' => 'Restauración completada con éxito.',
         'log' => [
             'count' => count($filesProcessed),
-            'files' => array_slice($filesProcessed, 0, 10), // Solo primeros 10 para no saturar
+            'files' => array_slice($filesProcessed, 0, 10),
             'errors' => $errors
         ]
     ]);
-} else {
-    http_response_code(500);
-    echo json_encode(['success' => false, 'message' => 'Error al abrir el archivo ZIP']);
+
+} catch (Exception $e) {
+    if ($e->getCode() && is_int($e->getCode()) && $e->getCode() >= 400 && $e->getCode() < 600) {
+        http_response_code($e->getCode());
+    } else {
+        http_response_code(500);
+    }
+    echo json_encode([
+        'success' => false,
+        'message' => $e->getMessage()
+    ]);
 }
 ?>
