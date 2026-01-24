@@ -51,22 +51,26 @@ body {
 
 .header-main .container {
     pointer-events: auto;
-    height: 60px;
-    /* Reduced from default */
+    height: 45px;
     display: flex;
     align-items: center;
 }
 
 header {
-    height: 60px !important;
+    height: 45px !important;
 }
 
 main {
-    padding-top: 60px !important;
+    padding-top: 50px !important;
 }
 
-#page-home h2 {
-    margin-top: 5px !important;
+#page-home h2,
+#page-events h2,
+#page-gallery h2,
+#page-merch h2,
+#page-drags h2 {
+    margin-top: -15px !important;
+    margin-bottom: 20px;
 }
 
 /* 2. Floating Bottom Pill Refinement */
@@ -76,8 +80,9 @@ main {
     bottom: 25px;
     left: 50%;
     transform: translateX(-50%);
-    width: 90%;
-    max-width: 450px;
+    width: 95%;
+    max-width: 500px;
+    /* Wider as requested */
     display: flex;
     align-items: center;
     justify-content: space-around;
@@ -173,26 +178,25 @@ main {
     text-shadow: 0 0 10px rgba(240, 45, 125, 0.5);
 }
 
-/* 3. Modern Glass Cards */
+/* 3. Modern Glass Cards - CLEAN VERSION (No backgrounds/borders on images requested) */
 .bg-gray-900 {
-    background: rgba(10, 10, 10, 0.6);
-    backdrop-filter: blur(15px);
-    -webkit-backdrop-filter: blur(15px);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-    border-radius: 16px;
+    background: transparent;
+    /* Clean look */
+    border: none;
+    box-shadow: none;
+    border-radius: 0;
     overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .bg-gray-900:hover {
-    transform: translateY(-8px);
-    background: rgba(20, 20, 20, 0.7);
-    border-color: rgba(240, 45, 125, 0.8);
-    box-shadow:
-        0 20px 50px rgba(0, 0, 0, 0.7),
-        0 0 35px rgba(240, 45, 125, 0.5),
-        /* Potent glow */
-        0 0 10px rgba(240, 45, 125, 0.2);
+    transform: translateY(-5px);
+}
+
+.event-card-img-container {
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
 }
 
 /* Gallery Grid Modernization */

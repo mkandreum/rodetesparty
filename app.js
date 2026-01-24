@@ -1875,18 +1875,27 @@ window.addEventListener('DOMContentLoaded', async () => {
 						const itemImage = item.imageUrl || `https://placehold.co/200x200/000/fff?text=${encodeURIComponent(item.name || 'Item')}&font=vt323`;
 						const price = (parseFloat(item.price) || 0).toFixed(2);
 						itemsHtml += `
-							<div class="flex-shrink-0 w-36 bg-black border border-gray-700 p-2 snap-center flex flex-col">
-								<div class="h-24 w-full bg-gray-900 mb-2 overflow-hidden flex items-center justify-center">
+							<div class="flex-shrink-0 w-36 snap-center flex flex-col mb-2">
+								<!-- 1. Imagen (Limpia) -->
+								<div class="h-32 w-full bg-black overflow-hidden flex items-center justify-center">
 									<img src="${itemImage}" alt="${item.name}" class="object-cover w-full h-full" onerror="this.src='https://placehold.co/200x200/000/fff?text=Error&font=vt323'">
 								</div>
-								<p class="text-white text-xs font-pixel truncate mb-1" title="${item.name}">${item.name}</p>
-								<p class="text-pink-500 font-bold text-sm mb-2">${price}€</p>
-								<button 
-									data-item-id="${item.id}" 
-									data-drag-id="${drag.id}"
-									class="auto-buy-merch-btn w-full bg-white text-black text-xs font-pixel py-1 hover:bg-pink-500 hover:text-white transition-colors mt-auto rounded-none border border-gray-400">
-									COMPRAR
-								</button>
+								
+								<!-- 2. Info (Caja Pegada) -->
+								<div class="bg-black/60 border-x border-b border-white/10 p-2">
+									<p class="text-white text-xs font-pixel truncate mb-1" title="${item.name}">${item.name}</p>
+									<p class="text-pink-500 font-bold text-sm">${price}€</p>
+								</div>
+								
+								<!-- 3. Botón (Caja Pegada) -->
+								<div class="mt-0">
+									<button 
+										data-item-id="${item.id}" 
+										data-drag-id="${drag.id}"
+										class="auto-buy-merch-btn w-full bg-white text-black text-xs font-pixel py-2 hover:bg-pink-500 hover:text-white transition-colors">
+										COMPRAR
+									</button>
+								</div>
 							</div>`;
 					});
 
@@ -1928,28 +1937,38 @@ window.addEventListener('DOMContentLoaded', async () => {
 	 */
 	function createMerchCard(item, dragInfo) {
 		const card = document.createElement('div');
-		card.className = "bg-gray-800 border border-white rounded-none p-4 flex flex-col transform transition-transform duration-300 hover:scale-[1.02]";
+		card.className = "flex flex-col transform transition-all duration-300 hover:scale-[1.02] mb-6";
 
 		const imageUrl = item.imageUrl || `https://placehold.co/300x300/333/ccc?text=${encodeURIComponent(item.name || 'Merch')}&font=vt323`;
 		const price = (item.price || 0).toFixed(2);
 
 		card.innerHTML = `
-			<div class="w-full h-48 bg-black flex items-center justify-center mb-4 border border-gray-600 overflow-hidden">
-				<img src="${imageUrl}" alt="${item.name || 'Artículo'}" class="w-full h-full object-contain" onerror="this.onerror=null;this.src='https://placehold.co/300x300/333/ccc?text=Error&font=vt323';">
+			<!-- 1. Imagen (Limpia) -->
+			<div class="w-full aspect-square bg-black overflow-hidden flex items-center justify-center">
+				<img src="${imageUrl}" alt="${item.name || 'Artículo'}" class="w-full h-full object-cover" onerror="this.onerror=null;this.src='https://placehold.co/300x300/333/ccc?text=Error&font=vt323';">
 			</div>
-			<h4 class="text-xl font-pixel text-white mb-1 truncate">${item.name || 'Artículo'}</h4>
-			<p class="text-sm text-gray-400 mb-2 font-pixel tracking-wider">${dragInfo.name}</p>
-			<p class="text-2xl font-bold text-white mb-4">${price} €</p>
-			<button data-item-id="${item.id}" data-drag-id="${dragInfo.id}" class="mt-auto bg-white text-black font-pixel text-lg py-2 px-4 rounded-none border border-gray-400 hover:bg-gray-300 merch-buy-btn">
-				COMPRAR
-			</button>
+			
+			<!-- 2. Info (Caja Pegada) -->
+			<div class="bg-black/60 backdrop-blur-md border-x border-b border-white/10 p-4">
+				<h4 class="text-xl font-pixel text-white mb-1 truncate">${item.name || 'Artículo'}</h4>
+				<p class="text-xs text-gray-500 mb-2 font-pixel tracking-wider">${dragInfo.name}</p>
+				<p class="text-2xl font-bold text-pink-500">${price} €</p>
+			</div>
+			
+			<!-- 3. Botón (Caja Pegada Full Width) -->
+			<div class="mt-0">
+				<button data-item-id="${item.id}" data-drag-id="${dragInfo.id}" 
+					class="w-full bg-white text-black font-pixel text-lg py-3 px-4 hover:bg-pink-500 hover:text-white transition-all merch-buy-btn shadow-lg">
+					COMPRAR
+				</button>
+			</div>
 		`;
 
 		// Listener para comprar
 		const buyBtn = card.querySelector('.merch-buy-btn');
-		addTrackedListener(buyBtn, 'click', handleMerchBuyClick); // Reutilizamos el handler, adaptaremos la lógica allí
+		addTrackedListener(buyBtn, 'click', handleMerchBuyClick);
 
-		return card; // CORRECCIÓN: Devolver card
+		return card;
 	}
 
 
