@@ -223,7 +223,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 				if (adminPanel.classList.contains('hidden')) {
 					adminPanel.classList.remove('hidden');
 					// Default to events tab if just opening
-					switchAdminTab('events');
+					showAdminPage('events');
 				} else {
 					adminPanel.classList.add('hidden');
 				}
@@ -339,6 +339,8 @@ window.addEventListener('DOMContentLoaded', async () => {
 	const contentManageForm = document.getElementById('content-manage-form');
 	const bannerUrlInput = document.getElementById('banner-url');
 	const bannerUploadInput = document.getElementById('banner-upload');
+	const promoEnableCheckbox = document.getElementById('promo-enable');
+	const promoTextInput = document.getElementById('promo-text');
 	const promoNeonColorInput = document.getElementById('promo-neon-color');
 	const countdownEnableCheckbox = document.getElementById('countdown-enable');
 	const countdownTitleInput = document.getElementById('countdown-title');
@@ -376,6 +378,9 @@ window.addEventListener('DOMContentLoaded', async () => {
 	const scannerConfirmBtn = document.getElementById('scanner-confirm-btn'); // Botón confirmar
 	const scannerCancelBtn = document.getElementById('scanner-cancel-btn'); // Botón cancelar
 	const scannerCloseBtn = document.getElementById('scanner-close-btn'); // NUEVO: Botón cerrar
+
+	const infoModal = document.getElementById('info-modal');
+	const infoModalText = document.getElementById('info-modal-text');
 
 	// Esta es la variable principal que controlará el nuevo escáner
 	let html5QrCodeScanner = null;
@@ -1092,7 +1097,11 @@ window.addEventListener('DOMContentLoaded', async () => {
 	function renderCountdown() {
 		if (!homeCountdownSection || !appState) return;
 
-		if (appState.countdownEnabled && appState.countdownTargetDate) {
+		// Regla: Solo mostrar si NO hay un evento activo/próximo anunciado
+		const now = new Date();
+		const nextActiveEvent = currentEvents && currentEvents.find(e => e && !e.isArchived && e.date && new Date(e.date) > now);
+
+		if (appState.countdownEnabled && appState.countdownTargetDate && !nextActiveEvent) {
 			homeCountdownSection.classList.remove('hidden');
 			if (countdownLabel) countdownLabel.textContent = appState.countdownTitle || 'PRÓXIMO EVENTO';
 			if (countdownFooterDate) countdownFooterDate.textContent = appState.countdownDateText || '';
