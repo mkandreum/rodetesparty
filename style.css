@@ -89,7 +89,8 @@ main {
 #page-events h2,
 #page-gallery h2,
 #page-merch h2,
-#page-drags h2 {
+#page-drags h2,
+#page-admin h2 {
     margin-top: 60px !important;
     /* Increased to separate from logo area */
     margin-bottom: 24px !important;
