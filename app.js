@@ -1060,7 +1060,10 @@ window.addEventListener('DOMContentLoaded', async () => {
 				const eventDate = new Date(nextEvent.date);
 				const shortDate = eventDate.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit' });
 				const fullDate = eventDate.toLocaleString('es-ES', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-				let promoText = appState.promoCustomText;
+
+				// Fallback text if promoCustomText is empty
+				let promoText = appState.promoCustomText || '¡PRÓXIMO EVENTO: {eventName} - {eventDate}! Consigue tus entradas ya.';
+
 				promoText = promoText.replace('{eventName}', nextEvent.name || 'Evento');
 				promoText = promoText.replace('{eventDate}', fullDate || 'Próximamente');
 				promoText = promoText.replace('{eventShortDate}', shortDate || '??/??');
