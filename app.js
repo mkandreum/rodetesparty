@@ -162,6 +162,21 @@ window.addEventListener('DOMContentLoaded', async () => {
 
 	loadInitialDataFromServer(); // Carga datos iniciales desde PHP
 
+	// --- NUEVO: Auto-recarga en PWA para entorno de PRUEBAS ---
+	const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+	const isTestingEnv = window.location.hostname.includes('pruebas') || window.location.hostname === 'localhost';
+
+	if (isStandalone && isTestingEnv) {
+		const sessionReloaded = sessionStorage.getItem('pwa_auto_reloaded');
+		if (!sessionReloaded) {
+			sessionStorage.setItem('pwa_auto_reloaded', 'true');
+			console.log("PWA detectado en pruebas: Forzando recarga para asegurar última versión.");
+			window.location.reload();
+			return; // Detener ejecución actual, la web se está recargando
+		}
+	}
+	// --- FIN AUTO-RECARGA ---
+
 	// Referenciar currentEvents DESPUÉS de cargar appState
 	let currentEvents = [...(appState.events || [])];
 
