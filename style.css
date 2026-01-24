@@ -94,8 +94,8 @@ header {
 }
 
 main {
-    padding-top: calc(var(--promo-banner-height) + var(--header-height) + 30px) !important;
-    /* Increased breathing room to prevent header collision */
+    padding-top: calc(var(--promo-banner-height) + var(--header-height) + 50px) !important;
+    /* Generous breathing room to ensure it never hits the logo on load */
 }
 
 #page-home h2,
@@ -104,8 +104,8 @@ main {
 #page-merch h2,
 #page-drags h2,
 #page-admin h2 {
-    margin-top: 25px !important;
-    /* Further reduced gap with content above */
+    margin-top: 15px !important;
+    /* Very tight gap to keep sections connected */
     margin-bottom: 24px !important;
 }
 
