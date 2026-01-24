@@ -352,7 +352,8 @@ $adminEmail = isset($_SESSION['admin_email']) ? $_SESSION['admin_email'] : '';
         <div id="page-home" data-page="home" class="hidden">
 
             <!-- NUEVO: Cuenta Atrás Principal -->
-            <div id="home-countdown-section" class="hidden mb-2 reveal-on-scroll">
+            <div id="home-countdown-section" class="hidden reveal-on-scroll"
+                style="margin-bottom: var(--safe-gap) !important;">
                 <div
                     class="max-w-4xl mx-auto text-center p-8 bg-black/40 backdrop-blur-md border border-white/10 rounded-2xl shadow-2xl">
                     <h3 id="countdown-label"
