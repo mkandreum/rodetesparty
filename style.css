@@ -58,19 +58,10 @@ body {
 
 .header-main .container {
     pointer-events: auto;
-    height: 100%;
-    width: 100%;
-    display: block;
-    /* Remove flex here to let inner div handle it */
     height: 60px;
-    /* Breathe */
-    width: 100%;
     display: flex;
     align-items: center;
-}
-
-.header-main .container>div {
-    height: 100% !important;
+    width: 100%;
 }
 
 #mobile-menu-btn {
