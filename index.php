@@ -283,7 +283,7 @@ $adminEmail = isset($_SESSION['admin_email']) ? $_SESSION['admin_email'] : '';
     <header
         class="bg-black/90 backdrop-blur-md border-b border-white/20 left-0 right-0 z-40 header-main fixed top-0 transition-all duration-300">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center h-full">
+            <div class="flex justify-between items-center h-full w-full">
                 <!-- LOGO -->
                 <div class="flex items-center min-w-0 mr-4">
                     <button id="logo-btn" data-nav="home"
