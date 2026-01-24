@@ -1497,6 +1497,7 @@ $adminEmail = isset($_SESSION['admin_email']) ? $_SESSION['admin_email'] : '';
 
     <!-- ==== NUEVA: BARRA DE NAVEGACIÓN FLOTANTE (PILL) ==== -->
     <nav id="bottom-pill-nav">
+        <div class="nav-active-indicator"></div>
         <a href="#" data-nav="home" class="nav-pill-item active">
             <span class="icon">🏠</span>
             <span class="text">INICIO</span>

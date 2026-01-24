@@ -10,13 +10,34 @@
 
 /* --- VISUAL MODERNIZATION START --- */
 
-/* 1. Body & Header Adjustments */
+/* --- VISUAL REFINEMENT START --- */
+
+/* 1. Animated Gradient Background */
+@keyframes backgroundMove {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
 body {
-    padding-top: 20px;
-    /* Space for Logo */
+    background: linear-gradient(-45deg, #000000, #1a0a14, #000000, #2d0a1b);
+    background-size: 400% 400%;
+    animation: backgroundMove 15s ease infinite;
+    padding-top: 0;
     padding-bottom: 120px;
-    /* Space for Bottom Nav */
-    /* background now handled by scanlines/image, ensure base is dark */
+    color: #e5e7eb;
+    scroll-behavior: smooth;
+    overflow-x: hidden;
+    position: relative;
+    min-height: 100vh;
 }
 
 .header-main {
@@ -33,7 +54,7 @@ body {
     /* Re-enable clicks on buttons */
 }
 
-/* 2. Floating Bottom Pill Navigation (iOS Glass Style) */
+/* 2. Floating Bottom Pill Refinement */
 #bottom-pill-nav {
     position: fixed;
     bottom: 25px;
@@ -44,30 +65,49 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-around;
-    padding: 10px 5px;
+    padding: 8px 5px;
 
-    /* High-End Glassmorphism */
-    background: rgba(15, 15, 15, 0.75);
+    /* Pure Transparent Glass */
+    background: rgba(10, 10, 10, 0.4);
     backdrop-filter: blur(25px) saturate(180%);
     -webkit-backdrop-filter: blur(25px) saturate(180%);
 
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-top: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 40px;
-    /* Perfect Pill */
+    /* Subtle Highlights */
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 50px;
 
     z-index: 9999 !important;
+
+    /* Diffused Neon Shadow (The Glow) */
     box-shadow:
-        0 20px 40px rgba(0, 0, 0, 0.6),
-        inset 0 1px 1px rgba(255, 255, 255, 0.1);
+        0 10px 40px rgba(0, 0, 0, 0.5),
+        0 0 25px rgba(240, 45, 125, 0.15);
+    /* Soft pink aura */
 
     transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+/* 3. Sliding Active Indicator */
+.nav-active-indicator {
+    position: absolute;
+    height: 48px;
+    width: 60px;
+    /* Base width */
+    background: rgba(255, 255, 255, 0.08);
+    /* White subtle highlight */
+    border-radius: 25px;
+    z-index: 0;
+    pointer-events: none;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 0 15px rgba(240, 45, 125, 0.1);
+}
+
 #bottom-pill-nav:hover {
     transform: translateX(-50%) translateY(-3px);
-    background: rgba(20, 20, 20, 0.85);
-    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.8);
+    background: rgba(20, 20, 20, 0.5);
+    box-shadow:
+        0 25px 50px rgba(0, 0, 0, 0.6),
+        0 0 35px rgba(240, 45, 125, 0.2);
 }
 
 .nav-pill-item {

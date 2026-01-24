@@ -194,6 +194,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 	const adminNavLinks = {};
 	const mobileNavLinks = {};
 	const bottomPillNavLinks = {}; // NUEVO: Enlaces de la barra inferior
+	const navActiveIndicator = document.querySelector('.nav-active-indicator');
 	const loadingModal = document.getElementById('loading-modal');
 	// ... (otros selectores sin cambios) ...
 
@@ -239,6 +240,24 @@ window.addEventListener('DOMContentLoaded', async () => {
 
 	// ... (resto) ...
 
+	/**
+	 * Actualiza la posición y ancho del indicador de la barra de navegación.
+	 */
+	function updateNavIndicator(pageId) {
+		const activeItem = bottomPillNavLinks[pageId];
+		if (activeItem && navActiveIndicator) {
+			const rect = activeItem.getBoundingClientRect();
+			const parentRect = activeItem.parentElement.getBoundingClientRect();
+
+			// Calcular posición relativa al padre
+			const left = rect.left - parentRect.left;
+			const width = rect.width;
+
+			navActiveIndicator.style.left = `${left}px`;
+			navActiveIndicator.style.width = `${width}px`;
+		}
+	}
+
 	// --- Page Navigation (Updated for Pill Nav) ---
 	function showPage(pageId) {
 		Object.values(pages).forEach(page => {
@@ -274,6 +293,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 		});
 		if (bottomPillNavLinks[pageId]) {
 			bottomPillNavLinks[pageId].classList.add('active');
+			updateNavIndicator(pageId); // Mover el indicador
 		}
 
 		mobileMenu?.classList.add('hidden');
