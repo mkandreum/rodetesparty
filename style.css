@@ -34,35 +34,26 @@ body {
 }
 
 /* 2. Floating Bottom Pill Navigation (iOS Glass Style) */
+/* 2. Floating Bottom Pill Navigation (iOS Glass Style) */
 #bottom-pill-nav {
     position: fixed;
     bottom: 30px;
     left: 50%;
     transform: translateX(-50%);
-    width: auto;
-    max-width: 95%;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.5rem;
-    padding: 10px 20px;
+    gap: 1rem;
+    padding: 12px 24px;
 
-    /* Glassmorphism */
-    background: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(240, 45, 125, 0.5);
-    /* Neon Pink Border */
-    border-radius: 9999px;
-    /* Pill Shape */
+    /* High contrast for visibility test */
+    background: rgba(10, 10, 10, 0.9);
+    border: 2px solid var(--neon-pink);
+    border-radius: 50px;
 
-    box-shadow:
-        0 10px 40px rgba(0, 0, 0, 0.5),
-        0 0 20px rgba(240, 45, 125, 0.2),
-        inset 0 1px 0 rgba(255, 255, 255, 0.2);
-
-    z-index: 100;
-    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    z-index: 9999 !important;
+    /* Force on top */
+    box-shadow: 0 0 20px rgba(240, 45, 125, 0.4);
 }
 
 #bottom-pill-nav:hover {

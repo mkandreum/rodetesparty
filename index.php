@@ -346,29 +346,7 @@ $adminEmail = isset($_SESSION['admin_email']) ? $_SESSION['admin_email'] : '';
         </div>
     </header>
 
-    <!-- ==== NUEVA: BARRA DE NAVEGACIÓN FLOTANTE (PILL) ==== -->
-    <nav id="bottom-pill-nav">
-        <a href="#" data-nav="home" class="nav-pill-item active">
-            <span class="icon">🏠</span>
-            <span class="text">INICIO</span>
-        </a>
-        <a href="#" data-nav="events" class="nav-pill-item">
-            <span class="icon">🎉</span>
-            <span class="text">EVENTOS</span>
-        </a>
-        <a href="#" data-nav="gallery" class="nav-pill-item">
-            <span class="icon">📸</span>
-            <span class="text">FOTOS</span>
-        </a>
-        <a href="#" data-nav="merch" class="nav-pill-item">
-            <span class="icon">👕</span>
-            <span class="text">TIENDA</span>
-        </a>
-        <a href="#" data-nav="drags" class="nav-pill-item">
-            <span class="icon">💃</span>
-            <span class="text">DRAGS</span>
-        </a>
-    </nav>
+
 
     <!-- ==== CONTENIDO PRINCIPAL ==== -->
     <main class="container mx-auto p-4 sm:p-6 lg:p-8">
@@ -1517,6 +1495,29 @@ $adminEmail = isset($_SESSION['admin_email']) ? $_SESSION['admin_email'] : '';
 
 
 
+    <!-- ==== NUEVA: BARRA DE NAVEGACIÓN FLOTANTE (PILL) ==== -->
+    <nav id="bottom-pill-nav">
+        <a href="#" data-nav="home" class="nav-pill-item active">
+            <span class="icon">🏠</span>
+            <span class="text">INICIO</span>
+        </a>
+        <a href="#" data-nav="events" class="nav-pill-item">
+            <span class="icon">🎉</span>
+            <span class="text">EVENTOS</span>
+        </a>
+        <a href="#" data-nav="gallery" class="nav-pill-item">
+            <span class="icon">📸</span>
+            <span class="text">FOTOS</span>
+        </a>
+        <a href="#" data-nav="merch" class="nav-pill-item">
+            <span class="icon">👕</span>
+            <span class="text">TIENDA</span>
+        </a>
+        <a href="#" data-nav="drags" class="nav-pill-item">
+            <span class="icon">💃</span>
+            <span class="text">DRAGS</span>
+        </a>
+    </nav>
 </body>
 
 </html>
