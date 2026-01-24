@@ -11,6 +11,9 @@ html {
     --neon-cyan: #00FFFF;
     --neon-yellow: #FACC15;
     --bg-dark: #000000;
+    --promo-banner-height: 30px;
+    --header-height: 60px;
+    /* Reduced from 75px to fit better with the new logic */
 }
 
 /* --- VISUAL MODERNIZATION START --- */
@@ -53,14 +56,12 @@ body {
     backdrop-filter: none !important;
     pointer-events: none;
     padding-top: 5px;
-    transition: transform 0.3s ease, margin-top 0.3s ease;
-    /* Smooth transition */
-}
-
-/* Dynamic Positioning */
-body:not(.promo-active) .header-main {
-    margin-top: -30px;
-    /* Pull up to top edge when banner is gone */
+    /* Spacing between banner and Logo */
+    position: fixed;
+    top: var(--promo-banner-height);
+    /* Synchronized with banner */
+    width: 100%;
+    z-index: 40;
 }
 
 .header-main .container {
@@ -88,13 +89,8 @@ header {
 }
 
 main {
-    padding-top: 75px !important;
-    transition: padding-top 0.3s ease;
-}
-
-body:not(.promo-active) main {
-    padding-top: 45px !important;
-    /* Pull content up when banner is gone */
+    padding-top: calc(var(--promo-banner-height) + var(--header-height) + 20px) !important;
+    /* Balanced offset: Banner + Header + breathing room */
 }
 
 #page-home h2,
@@ -103,8 +99,8 @@ body:not(.promo-active) main {
 #page-merch h2,
 #page-drags h2,
 #page-admin h2 {
-    margin-top: 60px !important;
-    /* Increased to separate from logo area */
+    margin-top: 45px !important;
+    /* Calibrated middle ground */
     margin-bottom: 24px !important;
 }
 
