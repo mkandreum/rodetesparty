@@ -162,11 +162,14 @@ window.addEventListener('DOMContentLoaded', async () => {
 
 	loadInitialDataFromServer(); // Carga datos iniciales desde PHP
 
-	// --- NUEVO: Auto-recarga en PWA para entorno de PRUEBAS ---
+	// --- NUEVO: Auto-recarga en PWA para asegurar última versión ---
 	const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-	const isTestingEnv = window.location.hostname.includes('pruebas') || window.location.hostname === 'localhost';
+	// Recargar en pruebas, localhost o producción (rodetesparty)
+	const isAllowedEnv = window.location.hostname.includes('pruebas') ||
+		window.location.hostname.includes('rodetesparty') ||
+		window.location.hostname === 'localhost';
 
-	if (isStandalone && isTestingEnv) {
+	if (isStandalone && isAllowedEnv) {
 		const sessionReloaded = sessionStorage.getItem('pwa_auto_reloaded');
 		if (!sessionReloaded) {
 			sessionStorage.setItem('pwa_auto_reloaded', 'true');
