@@ -53,7 +53,14 @@ body {
     backdrop-filter: none !important;
     pointer-events: none;
     padding-top: 5px;
-    /* Reduced to pull logo closer to top banner */
+    transition: transform 0.3s ease, margin-top 0.3s ease;
+    /* Smooth transition */
+}
+
+/* Dynamic Positioning */
+body:not(.promo-active) .header-main {
+    margin-top: -30px;
+    /* Pull up to top edge when banner is gone */
 }
 
 .header-main .container {
@@ -82,7 +89,12 @@ header {
 
 main {
     padding-top: 75px !important;
-    /* Align with header bottom */
+    transition: padding-top 0.3s ease;
+}
+
+body:not(.promo-active) main {
+    padding-top: 45px !important;
+    /* Pull content up when banner is gone */
 }
 
 #page-home h2,
