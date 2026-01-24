@@ -62,7 +62,8 @@ $adminEmail = isset($_SESSION['admin_email']) ? $_SESSION['admin_email'] : '';
     <!-- Fonts (Optimized Loading) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&family=VT323&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&family=VT323&display=swap"
+        rel="stylesheet">
 
     <!-- PWA Manifest -->
     <link rel="manifest" href="manifest.json">
@@ -290,6 +291,15 @@ $adminEmail = isset($_SESSION['admin_email']) ? $_SESSION['admin_email'] : '';
 </head>
 
 <body class="text-gray-200">
+    <!-- PULL TO REFRESH INDICATOR -->
+    <div id="pull-refresh-indicator"
+        class="fixed top-20 left-0 right-0 z-50 flex justify-center pointer-events-none opacity-0 transition-opacity duration-300">
+        <div
+            class="bg-black border-2 border-white px-4 py-2 font-pixel text-neon-cyan flex items-center gap-2 shadow-lg">
+            <div class="spinner w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>
+            <span>ACTUALIZANDO...</span>
+        </div>
+    </div>
 
     <div id="next-event-promo-container" class="fixed top-0 left-0 right-0 z-50">
         <div id="next-event-promo" class="promo-banner-content">
@@ -1490,6 +1500,53 @@ $adminEmail = isset($_SESSION['admin_email']) ? $_SESSION['admin_email'] : '';
     <footer class="container mx-auto px-4 sm:px-6 lg:px-8 mt-12 mb-8 border-t-2 border-gray-700 pt-8">
         <p class="text-center text-gray-600 font-pixel text-sm">RODETES PARTY &copy; <?php echo date("Y"); ?></p>
     </footer>
+
+    <!-- MOBILE BOTTOM NAVIGATION -->
+    <nav id="mobile-bottom-nav"
+        class="fixed bottom-0 left-0 right-0 bg-black/95 backdrop-blur-md border-t border-gray-800 z-50 md:hidden safe-pb">
+        <div class="flex justify-around items-center h-16">
+            <button
+                class="nav-btn flex flex-col items-center justify-center w-full h-full text-gray-500 hover:text-white transition-colors active:text-neon-pink"
+                data-page="home">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="square" stroke-linejoin="miter" stroke-width="2"
+                        d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                </svg>
+                <span class="font-pixel text-xs tracking-wider">MUNDO</span>
+            </button>
+            <button
+                class="nav-btn flex flex-col items-center justify-center w-full h-full text-gray-500 hover:text-white transition-colors active:text-neon-pink"
+                data-page="gallery">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="square" stroke-linejoin="miter" stroke-width="2"
+                        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <span class="font-pixel text-xs tracking-wider">FOTOS</span>
+            </button>
+            <button
+                class="nav-btn flex flex-col items-center justify-center w-full h-full text-gray-500 hover:text-white transition-colors active:text-neon-pink"
+                data-page="merch">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="square" stroke-linejoin="miter" stroke-width="2"
+                        d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                </svg>
+                <span class="font-pixel text-xs tracking-wider">TIENDA</span>
+            </button>
+            <button
+                class="nav-btn flex flex-col items-center justify-center w-full h-full text-gray-500 hover:text-white transition-colors active:text-neon-pink"
+                onclick="toggleLoginModal()">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="square" stroke-linejoin="miter" stroke-width="2"
+                        d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                </svg>
+                <span class="font-pixel text-xs tracking-wider">LOGIN</span>
+            </button>
+        </div>
+    </nav>
 
     <!-- ==== SCRIPTS ==== -->
 

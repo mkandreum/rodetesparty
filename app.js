@@ -1204,86 +1204,137 @@ window.addEventListener('DOMContentLoaded', async () => {
 			return;
 		}
 
+		// Ordenar: Futuros ascendente (el más cercano primero), Pasados descendente (el más reciente primero)
 		const now = new Date();
-		const eventsToShow = events
-			.filter(e => e && !e.isArchived) // Filtrar nulos y archivados
-			.sort((a, b) => (b.date && a.date) ? new Date(b.date) - new Date(a.date) : 0); // Más recientes primero
+		const validEvents = events.filter(e => e && !e.isArchived);
 
-		if (eventsToShow.length === 0) {
+		const futureEvents = validEvents
+			.filter(e => new Date(e.date) >= now)
+			.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+		const pastEvents = validEvents
+			.filter(e => new Date(e.date) < now)
+			.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+		if (futureEvents.length === 0 && pastEvents.length === 0) {
 			eventListContainer.innerHTML = '<p class="text-gray-400 text-center col-span-full font-pixel">NO HAY EVENTOS PROGRAMADOS POR AHORA.</p>';
 			return;
 		}
 
-		eventsToShow.forEach(event => {
-			try {
-				const eventDate = event.date ? new Date(event.date).toLocaleString('es-ES', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Fecha no disponible';
-				const isPastEvent = event.date ? new Date(event.date) < now : false;
+		// Helper para crear HTML de la card
+		const createCard = (event, isSnap = false) => {
+			const eventDate = event.date ? new Date(event.date).toLocaleString('es-ES', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Fecha no disponible';
+			const isPastEvent = new Date(event.date) < now;
 
-				let buttonHtml = '';
-				let statusBadgeHtml = '';
-				let cardBorderColor = 'border-white';
-				let actionClass = ''; // Para hacer imagen/título clicables
-				let dataAttribute = `data-event-id="${event.id}"`; // Para imagen/título
+			let buttonHtml = '';
+			let statusBadgeHtml = '';
+			let cardBorderColor = 'border-white';
+			let actionClass = '';
+			let dataAttribute = `data-event-id="${event.id}"`;
 
-				if (isPastEvent) {
-					statusBadgeHtml = '<div class="absolute top-0 left-0 bg-red-700 text-white font-pixel text-sm px-2 py-1 rounded-none border-b border-r border-black z-10 shadow-md">FINALIZADO</div>';
-					if (event.galleryImages && event.galleryImages.length > 0) {
-						buttonHtml = `<button data-event-id="${event.id}" class="gallery-link-btn w-full neon-btn text-white font-pixel text-2xl py-3 px-4 rounded-none">VER GALERÍA</button>`;
-						actionClass = 'gallery-link-btn cursor-pointer'; // <-- Acción clicable
-					} else {
-						buttonHtml = `<button disabled class="w-full bg-gray-800 text-gray-500 font-pixel text-2xl py-3 px-4 rounded-none border border-gray-700 cursor-not-allowed">EVENTO FINALIZADO</button>`;
-						dataAttribute = ''; // <-- Sin acción clicable
-					}
+			if (isPastEvent) {
+				statusBadgeHtml = '<div class="absolute top-0 left-0 bg-red-700 text-white font-pixel text-sm px-2 py-1 rounded-none border-b border-r border-black z-10 shadow-md">FINALIZADO</div>';
+				if (event.galleryImages && event.galleryImages.length > 0) {
+					buttonHtml = `<button data-event-id="${event.id}" class="gallery-link-btn w-full neon-btn text-white font-pixel text-2xl py-3 px-4 rounded-none">VER GALERÍA</button>`;
+					actionClass = 'gallery-link-btn cursor-pointer';
 				} else {
-					const capacity = event.ticketCapacity || 0;
-					const sold = event.ticketsSold || 0;
-					if (capacity > 0 && sold >= capacity) {
-						buttonHtml = `<button disabled class="w-full bg-red-800 text-red-300 font-pixel text-2xl py-3 px-4 rounded-none border border-red-700 cursor-not-allowed">AGOTADO</button>`;
-						dataAttribute = ''; // <-- Sin acción clicable
-					} else {
-						buttonHtml = `<button data-event-id="${event.id}" class="get-ticket-btn w-full neon-btn font-pixel text-2xl py-3 px-4 rounded-none">CONSEGUIR ENTRADA</button>`;
-						actionClass = 'get-ticket-btn cursor-pointer'; // <-- Acción clicable
-					}
+					buttonHtml = `<button disabled class="w-full bg-gray-800 text-gray-500 font-pixel text-2xl py-3 px-4 rounded-none border border-gray-700 cursor-not-allowed">FINALIZADO</button>`;
+					dataAttribute = '';
 				}
-
-				const card = document.createElement('div');
-				card.className = `relative bg-gray-900 rounded-none ${cardBorderColor} overflow-hidden flex flex-col transform transition-all hover:border-gray-300 hover:shadow-white/30 duration-300 reveal-on-scroll`;
-
-				const imageUrl = event.posterImageUrl || `https://placehold.co/400x200/000000/ffffff?text=${encodeURIComponent(event.name || 'Evento')}&font=vt323`;
-				const price = (event.price || 0).toFixed(2);
-
-				card.innerHTML = `
-						${statusBadgeHtml}
-						<!-- MODIFICADO: Sin altura fija, con actionClass y dataAttribute -->
-						<div class="w-full bg-black border-b ${cardBorderColor} overflow-hidden ${actionClass}" ${dataAttribute}>
-							<img src="${imageUrl}" alt="${event.name || 'Evento'}" class="w-full ${isPastEvent ? 'opacity-60' : ''}" onerror="this.onerror=null;this.src='https://placehold.co/400x200/000/fff?text=Error&font=vt323';">
-						</div>
-						<div class="p-6 flex flex-col flex-grow">
-							 <!-- MODIFICADO: con actionClass y dataAttribute -->
-							 <h3 class="text-3xl font-pixel ${isPastEvent ? 'text-gray-500' : 'text-white text-glow-white'} mb-2 ${actionClass} glitch-hover" ${dataAttribute}>
-								${event.name || 'Evento sin nombre'}
-							 </h3>
-							 <p class="text-gray-400 font-semibold font-pixel text-lg mb-3">${eventDate}</p>
-							 
-							 <!-- CUENTA ATRÁS -->
-							 ${!isPastEvent ? `<div class="event-countdown font-pixel text-neon-pink text-lg mb-3" data-date="${event.date}"></div>` : ''}
-							 
-							 <p class="text-4xl font-extrabold ${isPastEvent ? 'text-gray-600' : 'text-white'} mb-4">${price} €</p>
-							 <p class="text-gray-400 mb-6 flex-grow" style="white-space: pre-wrap;">${event.description || 'Sin descripción.'}</p>
-							${buttonHtml}
-						</div>
-					`;
-				eventListContainer.appendChild(card);
-			} catch (e) {
-				console.error(`Error renderizando evento ${event?.id} en lista pública:`, e);
+			} else {
+				const capacity = event.ticketCapacity || 0;
+				const sold = event.ticketsSold || 0;
+				if (capacity > 0 && sold >= capacity) {
+					buttonHtml = `<button disabled class="w-full bg-red-800 text-red-300 font-pixel text-2xl py-3 px-4 rounded-none border border-red-700 cursor-not-allowed">AGOTADO</button>`;
+					dataAttribute = '';
+				} else {
+					buttonHtml = `<button data-event-id="${event.id}" class="get-ticket-btn w-full neon-btn font-pixel text-2xl py-3 px-4 rounded-none">CONSEGUIR ENTRADA</button>`;
+					actionClass = 'get-ticket-btn cursor-pointer';
+				}
 			}
-		});
 
-		// Re-adjuntar listeners (ya incluye los nuevos elementos clicables)
-		eventListContainer.querySelectorAll('.get-ticket-btn').forEach(btn => addTrackedListener(btn, 'click', handleGetTicket));
-		eventListContainer.querySelectorAll('.gallery-link-btn').forEach(btn => addTrackedListener(btn, 'click', handleGalleryLink));
+			const card = document.createElement('div');
+			// Si es snap, eliminamos margin-bottom y ajustamos width 100% relativo al wrapper
+			card.className = `relative bg-gray-900 rounded-none ${cardBorderColor} overflow-hidden flex flex-col transform transition-all hover:border-gray-300 hover:shadow-white/30 duration-300 reveal-on-scroll h-full`;
 
-		// Iniciar observación para animaciones
+			const imageUrl = event.posterImageUrl || `https://placehold.co/400x200/000000/ffffff?text=${encodeURIComponent(event.name || 'Evento')}&font=vt323`;
+			const price = (event.price || 0).toFixed(2);
+
+			// Lazy load excepto para el primero de la lista global
+			const loadingAttr = 'lazy';
+
+			card.innerHTML = `
+					${statusBadgeHtml}
+					<div class="w-full bg-black border-b ${cardBorderColor} overflow-hidden ${actionClass}" ${dataAttribute}>
+						<img src="${imageUrl}" alt="${event.name}" loading="${loadingAttr}" class="w-full aspect-video object-cover ${isPastEvent ? 'opacity-60' : ''}" onerror="this.onerror=null;this.src='https://placehold.co/400x200/000/fff?text=Error&font=vt323';">
+					</div>
+					<div class="p-6 flex flex-col flex-grow">
+						 <h3 class="text-2xl font-pixel ${isPastEvent ? 'text-gray-500' : 'text-white text-glow-white'} mb-2 ${actionClass} glitch-hover leading-tight" ${dataAttribute}>
+							${event.name || 'Evento sin nombre'}
+						 </h3>
+						 <p class="text-gray-400 font-semibold font-pixel text-lg mb-3">${eventDate}</p>
+						 ${!isPastEvent ? `<div class="event-countdown font-pixel text-neon-pink text-lg mb-3" data-date="${event.date}"></div>` : ''}
+						 <p class="text-3xl font-extrabold ${isPastEvent ? 'text-gray-600' : 'text-white'} mb-4">${price} €</p>
+						 <p class="text-gray-400 mb-6 flex-grow text-sm line-clamp-3" style="white-space: pre-wrap;">${event.description || ''}</p>
+						<div class="mt-auto">${buttonHtml}</div>
+					</div>
+				`;
+			return card;
+		};
+
+		// 1. Renderizar Futuros (Grid)
+		if (futureEvents.length > 0) {
+			// Título opcional si tambien hay pasados
+			if (pastEvents.length > 0) {
+				const title = document.createElement('h3');
+				title.className = "col-span-full font-pixel text-2xl text-neon-yellow mb-4 pl-2";
+				title.textContent = "PRÓXIMAS FIESTAS";
+				eventListContainer.appendChild(title);
+			}
+			futureEvents.forEach(evt => {
+				eventListContainer.appendChild(createCard(evt));
+			});
+		}
+
+		// 2. Renderizar Pasados
+		if (pastEvents.length > 0) {
+			const separator = document.createElement('div');
+			separator.className = "col-span-full font-pixel text-xl text-gray-500 mt-8 mb-4 border-b border-gray-800 pb-2 pl-2 flex items-center gap-2";
+			separator.innerHTML = '<span>HISTORIAL</span><div class="h-px bg-gray-800 flex-grow"></div>';
+			eventListContainer.appendChild(separator);
+
+			const isMobile = window.innerWidth < 768; // Detectar móvil
+
+			if (isMobile) {
+				// MÓVIL: Horizontal Scroll (Snap)
+				const swipeContainer = document.createElement('div');
+				// "col-span-full" para ocupar todo el ancho del grid, "-mx-4 px-4" para romper el padding del contenedor padre y llegar a los bordes
+				swipeContainer.className = "col-span-full snap-x-mandatory -mx-4 px-4 pb-4";
+
+				pastEvents.forEach(evt => {
+					const wrapper = document.createElement('div');
+					wrapper.className = "snap-center bg-transparent";
+					// Aseguramos que wrapper tenga display block y width definido
+					wrapper.style.minWidth = "85vw";
+					wrapper.style.maxWidth = "85vw";
+
+					wrapper.appendChild(createCard(evt, true));
+					swipeContainer.appendChild(wrapper);
+				});
+				eventListContainer.appendChild(swipeContainer);
+			} else {
+				// DESKTOP: Grid normal
+				pastEvents.forEach(evt => {
+					eventListContainer.appendChild(createCard(evt));
+				});
+			}
+		}
+
+		// Re-adjuntar listeners
+		const allContainer = eventListContainer; // Buscar en todo el contenedor (incluido swipe)
+		allContainer.querySelectorAll('.get-ticket-btn').forEach(btn => addTrackedListener(btn, 'click', handleGetTicket));
+		allContainer.querySelectorAll('.gallery-link-btn').forEach(btn => addTrackedListener(btn, 'click', handleGalleryLink));
+
 		observeRevealElements();
 		if (typeof startEventCountdowns === 'function') startEventCountdowns();
 	}
@@ -6149,6 +6200,101 @@ window.addEventListener('DOMContentLoaded', async () => {
 	if (clearDragFormButton) addTrackedListener(clearDragFormButton, 'click', resetDragForm);
 	if (addMerchItemForm) addTrackedListener(addMerchItemForm, 'submit', handleSaveMerchItem);
 	if (clearMerchItemFormButton) addTrackedListener(clearMerchItemFormButton, 'click', resetMerchItemForm);
+
+	// --- MOBILE UX LOGIC ---
+	function setupMobileUX() {
+		// 1. Bottom Navigation Logic
+		const bottomNavButtons = document.querySelectorAll('#mobile-bottom-nav .nav-btn[data-page]');
+		const allNavSvgs = document.querySelectorAll('#mobile-bottom-nav .nav-btn svg');
+
+		const updateActiveNav = (pageId) => {
+			bottomNavButtons.forEach(btn => {
+				const targetPage = btn.dataset.page;
+				// Home is active for both 'home' and 'events' pages
+				const isActive = (pageId === targetPage) || (pageId === 'events' && targetPage === 'home') || (pageId === '' && targetPage === 'home');
+
+				btn.classList.toggle('active', isActive);
+				const svg = btn.querySelector('svg');
+				if (isActive) {
+					svg.classList.add('text-neon-pink');
+					svg.classList.remove('text-gray-500');
+				} else {
+					svg.classList.remove('text-neon-pink');
+					svg.classList.add('text-gray-500');
+				}
+			});
+		};
+
+		bottomNavButtons.forEach(btn => {
+			addTrackedListener(btn, 'click', (e) => {
+				const page = e.currentTarget.dataset.page;
+				showPage(page);
+				updateActiveNav(page);
+				triggerHaptic(10); // Feedback táctil
+			});
+		});
+
+		// 2. Pull to Refresh Logic
+		let touchStartY = 0;
+		let isPulling = false;
+		const ptrIndicator = document.getElementById('pull-refresh-indicator');
+		const PULL_THRESHOLD = 80;
+
+		window.addEventListener('touchstart', (e) => {
+			if (window.scrollY === 0) {
+				touchStartY = e.touches[0].clientY;
+				isPulling = true;
+			}
+		}, { passive: true });
+
+		window.addEventListener('touchmove', (e) => {
+			if (!isPulling) return;
+			const touchY = e.touches[0].clientY;
+			const pullDist = touchY - touchStartY;
+
+			if (pullDist > 0 && window.scrollY <= 0) {
+				// Resistance effect
+				const move = Math.min(pullDist * 0.4, 100);
+				ptrIndicator.style.opacity = Math.min(pullDist / PULL_THRESHOLD, 1);
+				ptrIndicator.style.transform = `translateY(${move}px)`;
+			}
+		}, { passive: true });
+
+		window.addEventListener('touchend', async (e) => {
+			if (!isPulling) return;
+			isPulling = false;
+			const touchY = e.changedTouches[0].clientY;
+			const pullDist = touchY - touchStartY;
+
+			if (pullDist > PULL_THRESHOLD && window.scrollY <= 0) {
+				// Trigger Refresh
+				ptrIndicator.style.transform = 'translateY(50px)'; // Hold position
+				triggerHaptic(20);
+				// Simular recarga visual si es muy rápida
+				const start = Date.now();
+				await loadInitialDataFromServer();
+				const elapsed = Date.now() - start;
+				const delay = Math.max(0, 800 - elapsed); // Mínimo 800ms para que se vea
+
+				setTimeout(() => {
+					ptrIndicator.style.transform = '';
+					ptrIndicator.style.opacity = '0';
+				}, delay);
+			} else {
+				// Reset
+				ptrIndicator.style.transform = '';
+				ptrIndicator.style.opacity = '0';
+			}
+		});
+	}
+
+	// Haptic Feedback Utility
+	function triggerHaptic(ms = 10) {
+		if (navigator.vibrate) navigator.vibrate(ms);
+	}
+
+	// Iniciar UX Móvil
+	setupMobileUX();
 
 	// Listeners Modales Generales y Navegación Imágenes
 	document.querySelectorAll('[data-close-modal]').forEach(btn => {

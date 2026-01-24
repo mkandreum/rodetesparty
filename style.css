@@ -668,3 +668,60 @@ input[type="checkbox"]:hover {
         text-align: center;
     }
 }
+
+/* --- 9. MOBILE UX ENHANCEMENTS --- */
+
+/* Safe Area for Bottom Nav (iPhone Home Indicator) */
+.safe-pb {
+    padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Ensure body has enough padding so content isn't hidden behind bottom nav */
+@media (max-width: 768px) {
+    body {
+        padding-bottom: 80px;
+        /* 64px nav + spacing */
+    }
+
+    /* Hide top hamburger menu on mobile since we have bottom nav */
+    #mobile-menu-btn {
+        display: none !important;
+    }
+}
+
+/* Scroll Snap Utilities */
+.snap-x-mandatory {
+    scroll-snap-type: x mandatory;
+    display: flex;
+    overflow-x: auto;
+    gap: 1rem;
+    padding-bottom: 1rem;
+    /* Space for scrollbar if visible */
+    -webkit-overflow-scrolling: touch;
+}
+
+.snap-center {
+    scroll-snap-align: center;
+    flex: 0 0 85%;
+    /* Cards take 85% width to show peek of next one */
+}
+
+/* Nav Active State */
+.nav-btn.active {
+    color: var(--neon-pink);
+}
+
+.nav-btn.active svg {
+    filter: drop-shadow(0 0 5px var(--neon-pink));
+}
+
+/* Pull to Refresh Spinner Animation */
+@keyframes spin-fast {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+#pull-refresh-indicator .spinner {
+    animation: spin-fast 0.6s linear infinite;
+}
