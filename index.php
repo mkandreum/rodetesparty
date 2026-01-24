@@ -56,14 +56,8 @@ $adminEmail = isset($_SESSION['admin_email']) ? $_SESSION['admin_email'] : '';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <!-- PWA Meta Tags -->
-    <meta name="theme-color" content="#F02D7D">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Rodetes Party">
-    <meta name="description" content="La mejor fiesta drag de tu ciudad - Eventos, galerías y merchandising oficial">
+    <meta name="theme-color" content="#000000">
+    <meta name="description" content="La mejor fiesta queer de Albacete">
 
     <!-- PWA Manifest -->
     <link rel="manifest" href="manifest.json">
@@ -289,6 +283,27 @@ $adminEmail = isset($_SESSION['admin_email']) ? $_SESSION['admin_email'] : '';
 
     <div id="next-event-promo-container" class="fixed top-0 left-0 right-0 z-50">
         <div id="next-event-promo" class="promo-banner-content">
+        </div>
+    </div>
+
+    <!-- PWA Install Banner -->
+    <div id="pwa-install-banner" class="fixed bottom-0 left-0 right-0 z-50 bg-black border-t-2 border-white hidden"
+        style="padding: 1rem; transform: translateY(100%); transition: transform 0.3s ease-in-out;">
+        <div class="container mx-auto flex items-center justify-between gap-4 flex-wrap">
+            <div class="flex items-center gap-3 flex-1 min-w-0">
+                <img src="icons/icon-96x96.png" alt="Rodetes Party" class="w-12 h-12 flex-shrink-0">
+                <div class="min-w-0">
+                    <p class="font-pixel text-white text-lg">Instala Rodetes Party</p>
+                    <p class="text-gray-400 text-sm">Acceso rápido desde tu pantalla de inicio</p>
+                </div>
+            </div>
+            <div class="flex gap-2 flex-shrink-0">
+                <button id="pwa-install-button"
+                    class="neon-btn font-pixel text-sm py-2 px-4 rounded-none">INSTALAR</button>
+                <button id="pwa-install-dismiss"
+                    class="bg-gray-700 text-white font-pixel text-sm py-2 px-4 rounded-none hover:bg-gray-600">AHORA
+                    NO</button>
+            </div>
         </div>
     </div>
     <header class="bg-black border-b-2 border-white left-0 right-0 z-40 header-main">
@@ -1479,19 +1494,7 @@ $adminEmail = isset($_SESSION['admin_email']) ? $_SESSION['admin_email'] : '';
         </div>
     </div>
 
-    <!-- PWA Install Banner -->
-    <div id="pwa-install-banner" style="display: none;">
-        <div class="pwa-content">
-            <div class="pwa-text">
-                <div class="pwa-title">INSTALAR APP</div>
-                <div class="pwa-desc">Añade Rodetes Party a tu inicio para un acceso más rápido.</div>
-            </div>
-            <div class="pwa-actions">
-                <button id="pwa-install-btn" class="pwa-install-btn">INSTALAR</button>
-                <button id="pwa-close-btn" class="pwa-close-btn">&times;</button>
-            </div>
-        </div>
-    </div>
+
 
     <!-- ==== FOOTER ==== -->
     <footer class="container mx-auto px-4 sm:px-6 lg:px-8 mt-12 mb-8 border-t-2 border-gray-700 pt-8">
@@ -1513,82 +1516,80 @@ $adminEmail = isset($_SESSION['admin_email']) ? $_SESSION['admin_email'] : '';
     <!--  App Principal (Carga diferida) -->
     <script src="app.js?v=<?php echo time(); ?>" defer></script>
 
-    <!-- Service Worker Registration -->
+    <!-- PWA Service Worker Registration & Install Banner -->
     <script>
+        // Register Service Worker
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('service-worker.js')
-                    .then(registration => {
-                        console.log('[PWA] Service Worker registrado:', registration.scope);
- // Comprobar actualizaciones cada 60 segundos
-                        setInterval(() => {
-                            registration.update();
-                        }, 60000);
+                navigator.serviceWorker.register('/sw.js')
+                    .then((registration) => {
+                        console.log('Service Worker registered:', registration);
                     })
-                    .catch(error => {
-                        console.log('[PWA] Error al registrar Service Worker:', error);
+                    .catch((error) => {
+                        console.log('Service Worker registration failed:', error);
                     });
             });
         }
 
-        // PWA Install Prompt Logic
+        // PWA Install Banner Logic
         let deferredPrompt;
         const installBanner = document.getElementById('pwa-install-banner');
-        const installBtn = document.getElementById('pwa-install-btn');
-        const closeBtn = document.getElementById('pwa-close-btn');
+        const installButton = document.getElementById('pwa-install-button');
+        const dismissButton = document.getElementById('pwa-install-dismiss');
 
         window.addEventListener('beforeinstallprompt', (e) => {
-            // Prevent Chrome 67 and earlier from automatically showing the prompt
+            // Prevent the mini-infobar from appearing on mobile
             e.preventDefault();
-            // Stash the event so it can be triggered later.
+            // Stash the event so it can be triggered later
             deferredPrompt = e;
-            // Update UI to notify the user they can add to home screen
-            installBanner.style.display = 'flex';
-            // Slight delay to allow display:flex to apply before adding class for animation
-            setTimeout(() => {
-                installB                anner.classList.add('visible');
-            }, 50);
 
-            // Auto hide after 8 seconds if not interacted
-            setTimeout(() => {
-                if (deferredPrompt && installBanner.classList.contains('visible')) {
-                    installBanner.classList.remove('visible');
-                    setTimeout(() => {
-                        installBanner.style.display = 'none';
-                    }, 500);
-                }
-            }, 8000);
-        });
-
-        installBtn.addEventListener('click', (e) => {
-            // Hide the app provided install promotion
-            installBanner.classList.remove('visible');
-            setTimeout(() => {
-                installBanner.style.display = 'none';
-            }, 500);
-
-            // Show the install prompt
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                // Wait for the user to respond to the prompt
-                deferredPrompt.userChoice.then((choiceResult) => {
-                    if (choiceResult.outcome === 'accepted') {
-                        console.log('User accepted the A2HS prompt');
-                    } else {
-                        console.log('User dismissed the A2HS prompt');
-                    }
-                    deferredPrompt = null;
-                });
+            // Check if user has dismissed the banner before
+            const dismissed = localStorage.getItem('pwa-install-dismissed');
+            if (!dismissed) {
+                // Show the install banner with animation
+                installBanner.classList.remove('hidden');
+                setTimeout(() => {
+                    installBanner.style.transform = 'translateY(0)';
+                }, 100);
             }
         });
 
-        closeBtn.addEventListener('click', (e) => {
-            installBanner.classList.remove('visible');
+        installButton.addEventListener('click', async () => {
+            if (!deferredPrompt) {
+                return;
+            }
+            // Show the install prompt
+            deferredPrompt.prompt();
+            // Wait for the user to respond to the prompt
+            const { outcome } = await deferredPrompt.userChoice;
+            console.log(`User response to the install prompt: ${outcome}`);
+            // We've used the prompt, and can't use it again, throw it away
+            deferredPrompt = null;
+            // Hide the banner
+            hideBanner();
+        });
+
+        dismissButton.addEventListener('click', () => {
+            // Remember that user dismissed the banner
+            localStorage.setItem('pwa-install-dismissed', 'true');
+            hideBanner();
+        });
+
+        function hideBanner() {
+            installBanner.style.transform = 'translateY(100%)';
             setTimeout(() => {
-                installBanner.style.display = 'none';
-            }, 500);
+                installBanner.classList.add('hidden');
+            }, 300);
+        }
+
+        // Listen for successful installation
+        window.addEventListener('appinstalled', () => {
+            console.log('PWA was installed');
+            hideBanner();
         });
     </script>
+
+
 
 </body>
 
