@@ -318,6 +318,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 
 		window.scrollTo({ top: 0, behavior: 'smooth' });
 	} const nextEventPromoContainer = document.getElementById('next-event-promo-container');
+	const eventListContainer = document.getElementById('event-list-container');
 	const nextEventPromo = document.getElementById('next-event-promo');
 	const homeEventListContainer = document.getElementById('home-event-list-container');
 	const viewAllEventsBtn = document.getElementById('view-all-events-btn');
