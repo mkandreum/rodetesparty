@@ -254,11 +254,11 @@ window.addEventListener('DOMContentLoaded', async () => {
 			if (pages['home']) {
 				pages['home'].classList.remove('hidden');
 				pages['home'].classList.add('page-fade-in');
-				pageId = 'home'; // Actualizar pageId
+				pageId = 'home';
 			}
 		}
 
-		// Actualizar estilos nav móvil (drawer)
+		// Update Mobile Drawer Links
 		Object.values(mobileNavLinks).forEach(link => {
 			link.classList.remove('bg-gray-700', 'text-white');
 			link.classList.add('text-gray-300');
@@ -268,7 +268,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 			mobileNavLinks[pageId].classList.remove('text-gray-300');
 		}
 
-		// NUEVO: Actualizar estilos Pill Nav
+		// Update Bottom Pill Nav Links
 		Object.values(bottomPillNavLinks).forEach(link => {
 			link.classList.remove('active');
 		});
@@ -276,15 +276,26 @@ window.addEventListener('DOMContentLoaded', async () => {
 			bottomPillNavLinks[pageId].classList.add('active');
 		}
 
-		mobileMenu.classList.add('hidden'); // Siempre cerrar menú móvil drawer
+		mobileMenu?.classList.add('hidden');
 
-		// Re-renderizar contenido dinámico
+		// Render dynamic content
 		if (pageId === 'events') renderPublicEvents(currentEvents);
 		if (pageId === 'merch') renderMerchPage();
 		if (pageId === 'gallery') renderGalleryEventList();
 		if (pageId === 'drags') renderDragList();
+		if (pageId === 'home') {
+			renderPastGalleries(currentEvents);
+			renderHomeEvents(currentEvents);
+			renderBannerVideo();
+			renderAppLogo();
+			renderNextEventPromo();
+		}
 
-		// Scroll to top behavior
+		// Mostrar panel admin o login si se navega a 'admin'
+		if (pageId === 'admin') {
+			checkAdminUI();
+		}
+
 		window.scrollTo({ top: 0, behavior: 'smooth' });
 	} const nextEventPromoContainer = document.getElementById('next-event-promo-container');
 	const nextEventPromo = document.getElementById('next-event-promo');
@@ -521,68 +532,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 		return newArray;
 	}
 
-	// --- Page Navigation (actualizada para manejar estado inicial de login) ---
-	function showPage(pageId) {
-		Object.values(pages).forEach(page => {
-			page.classList.add('hidden');
-			page.classList.remove('page-fade-in');
-		});
-		if (pages[pageId]) {
-			pages[pageId].classList.remove('hidden');
-			void pages[pageId].offsetWidth; // Trigger reflow for animation
-			pages[pageId].classList.add('page-fade-in');
-		} else {
-			console.warn(`Página "${pageId}" no encontrada. Mostrando 'home'.`);
-			if (pages['home']) {
-				pages['home'].classList.remove('hidden');
-				pages['home'].classList.add('page-fade-in');
-				pageId = 'home'; // Actualizar pageId para estilos de nav
-			}
-		}
 
-		// Actualizar estilos nav móvil
-		Object.values(mobileNavLinks).forEach(link => {
-			link.classList.remove('bg-gray-700', 'text-white');
-			link.classList.add('text-gray-300');
-		});
-		if (mobileNavLinks[pageId]) {
-			mobileNavLinks[pageId].classList.add('bg-gray-700', 'text-white');
-			mobileNavLinks[pageId].classList.remove('text-gray-300');
-		}
-
-
-
-		mobileMenu.classList.add('hidden'); // Siempre cerrar menú móvil al navegar
-
-		// Re-renderizar contenido dinámico al mostrar la página correspondiente
-		if (pageId === 'events') {
-			renderPublicEvents(currentEvents); // Usa la variable local actualizada
-		}
-		if (pageId === 'merch') {
-			renderMerchPage(); // NUEVO: Renderizar página de merch
-		}
-		if (pageId === 'gallery') {
-			renderGalleryEventList();
-		}
-		if (pageId === 'drags') {
-			renderDragList();
-		}
-		if (pageId === 'home') {
-			renderPastGalleries(currentEvents); // Usa la variable local actualizada
-			renderHomeEvents(currentEvents);    // Usa la variable local actualizada
-			renderBannerVideo();
-			renderAppLogo();
-			renderNextEventPromo(); // Asegurar que promo se renderiza al ir a home
-		}
-
-		// Mostrar panel admin o login si se navega a 'admin'
-		if (pageId === 'admin') {
-			checkAdminUI(); // Función centralizada para mostrar login o panel
-		}
-
-		// --- NUEVO: Scroll al inicio al cambiar de página ---
-		window.scrollTo({ top: 0, behavior: 'instant' });
-	}
 
 	function showAdminPage(adminPageId) {
 		Object.values(adminPages).forEach(page => page.classList.add('hidden'));
