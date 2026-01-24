@@ -1,11 +1,12 @@
-const CACHE_NAME = 'rodetes-party-v2';
+const CACHE_NAME = 'rodetes-party-v3';
 const urlsToCache = [
-    '/index.php',
-    '/style.css',
-    '/app.js',
-    '/manifest.json',
-    '/icon-192.png',
-    '/icon-512.png'
+    './',
+    './index.php',
+    './style.css',
+    './app.js',
+    './manifest.json',
+    './icon-192.png',
+    './icon-512.png'
 ];
 
 // Install event - cache assets
