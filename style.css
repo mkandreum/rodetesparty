@@ -51,17 +51,19 @@ body {
 
 .header-main .container {
     pointer-events: auto;
-    height: 45px;
+    height: 60px;
     display: flex;
     align-items: center;
 }
 
 header {
-    height: 45px !important;
+    height: 60px !important;
+    background: rgba(0, 0, 0, 0.8) !important;
+    backdrop-filter: blur(15px) !important;
 }
 
 main {
-    padding-top: 50px !important;
+    padding-top: 60px !important;
 }
 
 #page-home h2,
@@ -69,8 +71,8 @@ main {
 #page-gallery h2,
 #page-merch h2,
 #page-drags h2 {
-    margin-top: -15px !important;
-    margin-bottom: 20px;
+    margin-top: 10px !important;
+    margin-bottom: 24px;
 }
 
 /* 2. Floating Bottom Pill Refinement */
@@ -121,6 +123,12 @@ main {
     pointer-events: none;
     transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     box-shadow: 0 0 15px rgba(240, 45, 125, 0.3);
+}
+
+#mobile-menu {
+    pointer-events: auto !important;
+    /* Fix unclickable buttons */
+    top: 60px !important;
 }
 
 #bottom-pill-nav:hover {
