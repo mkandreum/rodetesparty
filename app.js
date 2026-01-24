@@ -309,6 +309,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 			renderBannerVideo();
 			renderAppLogo();
 			renderNextEventPromo();
+			renderCountdown();
 		}
 
 		// Mostrar panel admin o login si se navega a 'admin'
@@ -338,9 +339,15 @@ window.addEventListener('DOMContentLoaded', async () => {
 	const contentManageForm = document.getElementById('content-manage-form');
 	const bannerUrlInput = document.getElementById('banner-url');
 	const bannerUploadInput = document.getElementById('banner-upload');
-	const promoEnableCheckbox = document.getElementById('promo-enable');
-	const promoTextInput = document.getElementById('promo-text');
-	const promoNeonColorInput = document.getElementById('promo-neon-color'); // <-- AÑADIR ESTA LÍNEA
+	const promoNeonColorInput = document.getElementById('promo-neon-color');
+	const countdownEnableCheckbox = document.getElementById('countdown-enable');
+	const countdownTitleInput = document.getElementById('countdown-title');
+	const countdownTargetDateInput = document.getElementById('countdown-target-date');
+	const countdownDateTextInput = document.getElementById('countdown-date-text');
+	const homeCountdownSection = document.getElementById('home-countdown-section');
+	const countdownTimer = document.getElementById('countdown-timer');
+	const countdownLabel = document.getElementById('countdown-label');
+	const countdownFooterDate = document.getElementById('countdown-footer-date');
 	const backupBtn = document.getElementById('backup-btn');
 	const restoreInput = document.getElementById('restore-input');
 	const galleryManageForm = document.getElementById('gallery-manage-form');
@@ -638,12 +645,14 @@ window.addEventListener('DOMContentLoaded', async () => {
 				appLogoUrl: appState.appLogoUrl,
 				ticketLogoUrl: appState.ticketLogoUrl,
 				bannerVideoUrl: appState.bannerVideoUrl,
-				promoEnabled: appState.promoEnabled,
-				promoCustomText: appState.promoCustomText,
-				promoNeonColor: appState.promoNeonColor, // <-- AÑADIDO
-				emailNotifications: appState.emailNotifications || {}, // <-- AÑADIDO: Persistencia de notificaciones
-				webMerch: appState.webMerch || [], // <-- AÑADIDO: Persistencia de Merch Web
-				allowedDomains: appState.allowedDomains || [], // Asegurar array
+				promoNeonColor: appState.promoNeonColor,
+				countdownEnabled: appState.countdownEnabled,
+				countdownTitle: appState.countdownTitle,
+				countdownTargetDate: appState.countdownTargetDate,
+				countdownDateText: appState.countdownDateText,
+				emailNotifications: appState.emailNotifications || {},
+				webMerch: appState.webMerch || [],
+				allowedDomains: appState.allowedDomains || [],
 				events: (appState.events || []).map(event => {
 					// Excluir datos temporales si los hubiera
 					const { purchasedTickets, ...eventToSave } = event;
@@ -1076,6 +1085,59 @@ window.addEventListener('DOMContentLoaded', async () => {
 			document.body.classList.remove('promo-active');
 		}
 	}
+
+	// --- NUEVO: FUNCIONALIDAD DE CUENTA ATRÁS ---
+	let countdownInterval = null;
+
+	function renderCountdown() {
+		if (!homeCountdownSection || !appState) return;
+
+		if (appState.countdownEnabled && appState.countdownTargetDate) {
+			homeCountdownSection.classList.remove('hidden');
+			if (countdownLabel) countdownLabel.textContent = appState.countdownTitle || 'PRÓXIMO EVENTO';
+			if (countdownFooterDate) countdownFooterDate.textContent = appState.countdownDateText || '';
+
+			startCountdownTimer();
+		} else {
+			homeCountdownSection.classList.add('hidden');
+			if (countdownInterval) clearInterval(countdownInterval);
+		}
+	}
+
+	function startCountdownTimer() {
+		if (countdownInterval) clearInterval(countdownInterval);
+
+		const targetDate = new Date(appState.countdownTargetDate).getTime();
+
+		function updateTimer() {
+			const now = new Date().getTime();
+			const distance = targetDate - now;
+
+			if (distance < 0) {
+				if (countdownTimer) countdownTimer.textContent = "00:00:00:00";
+				clearInterval(countdownInterval);
+				return;
+			}
+
+			const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+			const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+			const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+			const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+			if (countdownTimer) {
+				countdownTimer.textContent =
+					(days < 10 ? "0" : "") + days + ":" +
+					(hours < 10 ? "0" : "") + hours + ":" +
+					(minutes < 10 ? "0" : "") + minutes + ":" +
+					(seconds < 10 ? "0" : "") + seconds;
+			}
+		}
+
+		updateTimer();
+		countdownInterval = setInterval(updateTimer, 1000);
+	}
+	// --- FIN CUENTA ATRÁS ---
+
 	/**
 	 * Renderiza los eventos destacados en la página de inicio.
 	 * MODIFICADO: Imagen completa, imagen y título clicables.
@@ -2542,8 +2604,10 @@ window.addEventListener('DOMContentLoaded', async () => {
 			}
 
 			// Guardar ambos estados actualizados
-			await saveAppState();
-			await saveMerchSalesState();
+			await Promise.all([
+				saveAppState(),
+				saveMerchSalesState()
+			]);
 
 			showLoading(false);
 			showInfoModal(`DRAG "${dragToDelete.name}" Y SUS VENTAS ELIMINADAS.`, false);
@@ -4490,8 +4554,12 @@ window.addEventListener('DOMContentLoaded', async () => {
 		if (bannerUrlInput) bannerUrlInput.value = appState.bannerVideoUrl || '';
 		if (promoEnableCheckbox) promoEnableCheckbox.checked = appState.promoEnabled || false;
 		if (promoTextInput) promoTextInput.value = appState.promoCustomText || '';
-		if (promoNeonColorInput) promoNeonColorInput.value = appState.promoNeonColor || '#F02D7D';
+		if (promoNeonColorInput) promoNeonColorInput.value = appState.promoNeonColor || '';
 
+		if (countdownEnableCheckbox) countdownEnableCheckbox.checked = appState.countdownEnabled === true;
+		if (countdownTitleInput) countdownTitleInput.value = appState.countdownTitle || '';
+		if (countdownTargetDateInput) countdownTargetDateInput.value = appState.countdownTargetDate || '';
+		if (countdownDateTextInput) countdownDateTextInput.value = appState.countdownDateText || '';
 		const domainsInput = document.getElementById('allowed-domains-input');
 		if (domainsInput) {
 			domainsInput.value = (appState.allowedDomains || []).join('\n');
@@ -4544,9 +4612,16 @@ window.addEventListener('DOMContentLoaded', async () => {
 		const newAppLogoUrl = appLogoUrlInput?.value.trim() || '';
 		const newTicketLogoUrl = ticketLogoUrlInput?.value.trim() || '';
 		const newBannerUrl = bannerUrlInput?.value.trim() || '';
-		const newPromoEnabled = promoEnableCheckbox?.checked || false;
-		const newPromoText = promoTextInput?.value.trim() || '';
-		const newPromoNeonColor = promoNeonColorInput?.value.trim() || '#F02D7D'; // <-- AÑADIDO
+		appState.promoEnabled = promoEnableCheckbox?.checked || false;
+		appState.promoCustomText = promoTextInput.value.trim();
+		appState.promoNeonColor = promoNeonColorInput.value.trim();
+
+		appState.countdownEnabled = countdownEnableCheckbox.checked;
+		appState.countdownTitle = countdownTitleInput.value.trim();
+		appState.countdownTargetDate = countdownTargetDateInput.value;
+		appState.countdownDateText = countdownDateTextInput.value.trim();
+
+		showLoading(true); // <-- AÑADIDO
 		const domainsInput = document.getElementById('allowed-domains-input');
 		const newAllowedDomains = (domainsInput?.value || '')
 			.split('\n')

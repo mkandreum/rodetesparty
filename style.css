@@ -239,6 +239,23 @@ main {
     padding: 0 !important;
 }
 
+/* --- COUNTDOWN STYLES --- */
+#countdown-timer {
+    text-shadow:
+        0 0 20px rgba(255, 255, 255, 0.4),
+        0 0 40px var(--neon-pink),
+        0 0 60px var(--neon-pink);
+    letter-spacing: -2px;
+}
+
+#home-countdown-section {
+    transition: all 0.5s ease;
+}
+
+.tabular-nums {
+    font-variant-numeric: tabular-nums;
+}
+
 /* Gallery Grid Modernization */
 #past-galleries-grid,
 #gallery-event-list-container {

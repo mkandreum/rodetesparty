@@ -351,6 +351,22 @@ $adminEmail = isset($_SESSION['admin_email']) ? $_SESSION['admin_email'] : '';
         <!-- ==== PÁGINA: INICIO ==== -->
         <div id="page-home" data-page="home" class="hidden">
 
+            <!-- NUEVO: Cuenta Atrás Principal -->
+            <div id="home-countdown-section" class="hidden mb-12 reveal-on-scroll">
+                <div
+                    class="max-w-4xl mx-auto text-center p-8 bg-black/40 backdrop-blur-md border border-white/10 rounded-2xl shadow-2xl">
+                    <h3 id="countdown-label"
+                        class="text-2xl sm:text-3xl font-pixel text-pink-500 mb-4 tracking-widest uppercase">PRÓXIMO
+                        EVENTO</h3>
+                    <div id="countdown-timer"
+                        class="text-6xl sm:text-8xl md:text-9xl font-pixel text-white mb-4 text-glow-white tabular-nums">
+                        00:00:00:00</div>
+                    <p id="countdown-footer-date"
+                        class="text-xl sm:text-2xl font-pixel text-gray-400 tracking-widest uppercase">CARGANDO FECHA...
+                    </p>
+                </div>
+            </div>
+
             <!-- Eventos Próximos/Pasados en Inicio -->
             <h2 class="text-4xl font-pixel text-white mb-6 text-center text-glow-white glitch-hover"
                 data-text="EVENTOS">EVENTOS</h2>
@@ -670,6 +686,40 @@ $adminEmail = isset($_SESSION['admin_email']) ? $_SESSION['admin_email'] : '';
                                         placeholder="#F02D7D">
                                     <p class="text-xs text-gray-400 mt-1">Color (hex) para el efecto neón del texto.
                                         P.ej: #F02D7D o #00FFFF.</p>
+                                </div>
+                            </div>
+
+                            <div class="pt-4">
+                                <h4
+                                    class="text-2xl font-pixel text-white mb-4 text-glow-white border-b border-gray-700 pb-2">
+                                    CONFIGURACIÓN CUENTA ATRÁS (INICIO)</h4>
+                                <div class="pt-4 mb-4 flex items-center">
+                                    <input type="checkbox" id="countdown-enable" name="countdown-enable" class="mr-3">
+                                    <label for="countdown-enable"
+                                        class="text-sm font-pixel text-lg text-gray-300">ACTIVAR CUENTA ATRÁS</label>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div class="mb-4">
+                                        <label for="countdown-title"
+                                            class="block text-sm font-pixel text-lg text-gray-300 mb-1">TÍTULO (EJ:
+                                            PRÓXIMO EVENTO)</label>
+                                        <input type="text" id="countdown-title" name="countdown-title" class="w-full"
+                                            placeholder="PRÓXIMO EVENTO">
+                                    </div>
+                                    <div class="mb-4">
+                                        <label for="countdown-target-date"
+                                            class="block text-sm font-pixel text-lg text-gray-300 mb-1">FECHA/HORA
+                                            OBJETIVO</label>
+                                        <input type="datetime-local" id="countdown-target-date"
+                                            name="countdown-target-date" class="w-full">
+                                    </div>
+                                    <div class="mb-4 md:col-span-2">
+                                        <label for="countdown-date-text"
+                                            class="block text-sm font-pixel text-lg text-gray-300 mb-1">TEXTO FECHA (EJ:
+                                            23 DE ENERO)</label>
+                                        <input type="text" id="countdown-date-text" name="countdown-date-text"
+                                            class="w-full" placeholder="23 DE ENERO 2026">
+                                    </div>
                                 </div>
                             </div>
 
