@@ -52,8 +52,8 @@ body {
     border-bottom: none !important;
     backdrop-filter: none !important;
     pointer-events: none;
-    padding-top: 20px;
-    /* Definitive logo breathing room */
+    padding-top: 5px;
+    /* Reduced to pull logo closer to top banner */
 }
 
 .header-main .container {
@@ -90,8 +90,8 @@ main {
 #page-gallery h2,
 #page-merch h2,
 #page-drags h2 {
-    margin-top: 35px !important;
-    /* Restored breathing gap as requested */
+    margin-top: 60px !important;
+    /* Increased to separate from logo area */
     margin-bottom: 24px !important;
 }
 
@@ -555,7 +555,10 @@ header {
 }
 
 #next-event-promo {
-    font-size: 0.8rem !important;
+    font-size: 0.95rem !important;
+    /* Larger text as requested */
+    font-weight: bold;
+    letter-spacing: 0.02em;
     line-height: 30px !important;
 }
 
