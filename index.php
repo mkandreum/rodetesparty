@@ -285,7 +285,7 @@ $adminEmail = isset($_SESSION['admin_email']) ? $_SESSION['admin_email'] : '';
         <div class="container mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-full">
                 <!-- LOGO -->
-                <div class="flex items-center flex-grow min-w-0 mr-4">
+                <div class="flex items-center min-w-0 mr-4">
                     <button id="logo-btn" data-nav="home"
                         class="focus:outline-none transition-opacity hover:opacity-80 flex-shrink-0 mr-4">
                         <div>
@@ -296,7 +296,7 @@ $adminEmail = isset($_SESSION['admin_email']) ? $_SESSION['admin_email'] : '';
                 </div>
 
                 <!-- HAMBURGER (Icon-Only Design) -->
-                <div class="flex-shrink-0 flex items-center justify-end">
+                <div class="flex-shrink-0 flex items-center justify-end ml-auto">
                     <button id="mobile-menu-btn" type="button"
                         class="inline-flex items-center justify-center text-white hover:text-pink-500 bg-transparent border-none focus:outline-none focus:ring-0"
                         aria-controls="mobile-menu" aria-expanded="false"
@@ -313,7 +313,7 @@ $adminEmail = isset($_SESSION['admin_email']) ? $_SESSION['admin_email'] : '';
         </div>
         <!-- Mobile Drawer (Navigation & Admin) -->
         <div id="mobile-menu"
-            class="hidden absolute top-[60px] right-4 z-50 bg-black/95 border border-white/20 w-56 shadow-2xl shadow-pink-500/20 rounded-xl backdrop-blur-xl">
+            class="hidden absolute top-[60px] right-4 z-50 bg-black/70 border border-white/20 w-44 shadow-2xl shadow-pink-500/20 rounded-xl backdrop-blur-xl">
             <div class="px-2 pt-4 pb-3 space-y-2">
                 <!-- MAIN NAV IN DRAWER -->
                 <a href="#" data-nav="home"
