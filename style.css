@@ -1,11 +1,16 @@
 /* VT323 Font */
 /* VT323 Font - Moved to index.php for performance */
 
+html {
+    background: #000;
+    /* Prevent white bars at ends */
+}
+
 :root {
     --neon-pink: #F02D7D;
     --neon-cyan: #00FFFF;
     --neon-yellow: #FACC15;
-    --bg-dark: #050505;
+    --bg-dark: #000000;
 }
 
 /* --- VISUAL MODERNIZATION START --- */
@@ -30,6 +35,8 @@
 body {
     background: linear-gradient(-45deg, #000000, #1a0a14, #000000, #2d0a1b);
     background-size: 400% 400%;
+    background-attachment: fixed;
+    /* Fixed background */
     animation: backgroundMove 15s ease infinite;
     padding-top: 0;
     padding-bottom: 120px;
@@ -42,28 +49,33 @@ body {
 
 .header-main {
     /* Top Bar is now just for Logo & Admin Toggle, minimalist */
-    background: transparent !important;
+    background: rgba(0, 0, 0, 0.4) !important;
+    /* Even more transparent */
     border-bottom: none !important;
-    backdrop-filter: none !important;
+    backdrop-filter: blur(10px) !important;
     pointer-events: none;
-    /* Let clicks pass through empty areas */
+    padding-top: 15px;
+    /* Add breathing room from top */
 }
 
 .header-main .container {
     pointer-events: auto;
-    height: 60px;
+    height: 70px;
+    /* Breathe */
     display: flex;
     align-items: center;
 }
 
 header {
-    height: 60px !important;
+    height: 85px !important;
+    /* height + padding-top */
     background: rgba(0, 0, 0, 0.8) !important;
     backdrop-filter: blur(15px) !important;
 }
 
 main {
-    padding-top: 60px !important;
+    padding-top: 85px !important;
+    /* Match header height */
 }
 
 #page-home h2,
@@ -71,8 +83,9 @@ main {
 #page-gallery h2,
 #page-merch h2,
 #page-drags h2 {
-    margin-top: 10px !important;
-    margin-bottom: 24px;
+    margin-top: 15px !important;
+    /* Pull titles closer to logo area */
+    margin-bottom: 25px !important;
 }
 
 /* 2. Floating Bottom Pill Refinement */
@@ -90,12 +103,14 @@ main {
     justify-content: space-around;
     padding: 6px 5px;
 
-    /* Super Transparent Glass */
-    background: rgba(10, 10, 10, 0.28);
-    backdrop-filter: blur(25px) saturate(200%);
-    -webkit-backdrop-filter: blur(25px) saturate(200%);
+    /* Crystal Clear Navigation */
+    background: rgba(10, 10, 10, 0.15);
+    /* More transparent */
+    backdrop-filter: blur(25px) saturate(210%);
+    -webkit-backdrop-filter: blur(25px) saturate(210%);
 
-    border: 1px solid rgba(255, 255, 255, 0.03);
+    border: none !important;
+    /* Remove all borders to avoid "white lines" */
     border-radius: 50px;
 
     z-index: 9999 !important;
