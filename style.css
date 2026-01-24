@@ -1,5 +1,5 @@
 /* VT323 Font */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&family=VT323&display=swap');
+/* VT323 Font - Moved to index.php for performance */
 
 :root {
     --neon-pink: #F02D7D;
