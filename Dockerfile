@@ -6,8 +6,8 @@ RUN apt-get update && apt-get install -y \
     unzip \
     && docker-php-ext-install zip
 
-# Habilitar mod_rewrite
-RUN a2enmod rewrite
+# Habilitar mod_rewrite y mod_headers
+RUN a2enmod rewrite headers
 # Fix "Could not reliably determine the server's fully qualified domain name"
 RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf
 
@@ -26,6 +26,7 @@ RUN mkdir -p /var/www/data_private && \
     mkdir -p /var/www/html/uploads && \
     chown -R www-data:www-data /var/www/data_private && \
     chown -R www-data:www-data /var/www/html/uploads && \
+    chown -R www-data:www-data /var/www/html/icons && \
     chown -R www-data:www-data /var/www/html
 
 EXPOSE 80
