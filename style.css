@@ -94,8 +94,8 @@ header {
 }
 
 main {
-    padding-top: calc(var(--promo-banner-height) + var(--header-height) + 10px) !important;
-    /* Balanced offset: Banner + Header + slim breathing room */
+    padding-top: calc(var(--promo-banner-height) + var(--header-height) + 30px) !important;
+    /* Increased breathing room to prevent header collision */
 }
 
 #page-home h2,
@@ -104,8 +104,8 @@ main {
 #page-merch h2,
 #page-drags h2,
 #page-admin h2 {
-    margin-top: 35px !important;
-    /* Slimmer spacing as requested */
+    margin-top: 25px !important;
+    /* Further reduced gap with content above */
     margin-bottom: 24px !important;
 }
 
