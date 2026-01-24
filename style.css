@@ -58,10 +58,21 @@ body {
 
 .header-main .container {
     pointer-events: auto;
-    height: 40px;
-    /* Even tighter logo area */
-    display: flex;
-    align-items: center;
+    height: 100%;
+    width: 100%;
+    display: block;
+    /* Remove flex here to let inner div handle it */
+}
+
+.header-main .container>div {
+    height: 100% !important;
+}
+
+#mobile-menu-btn {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
 }
 
 header {
@@ -82,9 +93,9 @@ main {
 #page-gallery h2,
 #page-merch h2,
 #page-drags h2 {
-    margin-top: -15px !important;
-    /* Aggressively pull titles up to logo */
-    margin-bottom: 15px !important;
+    margin-top: -25px !important;
+    /* Pull titles even closer */
+    margin-bottom: 20px !important;
     padding-top: 0 !important;
 }
 
