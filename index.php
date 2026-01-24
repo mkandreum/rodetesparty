@@ -1536,7 +1536,7 @@ $adminEmail = isset($_SESSION['admin_email']) ? $_SESSION['admin_email'] : '';
                 <span class="font-pixel text-xs tracking-wider">TIENDA</span>
             </button>
             <button
-                class="nav-btn flex flex-col items-center justify-center w-full h-full text-gray-500 hover:text-white transition-colors active:text-neon-pink"
+                class="nav-btn flex flex-col items-center justify-center w-full h-full text-gray-500 hover:text-white transition-colors active:text-neon-pink hidden"
                 onclick="toggleLoginModal()">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24"
                     stroke="currentColor">

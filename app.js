@@ -1266,7 +1266,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 			card.innerHTML = `
 					${statusBadgeHtml}
 					<div class="w-full bg-black border-b ${cardBorderColor} overflow-hidden ${actionClass}" ${dataAttribute}>
-						<img src="${imageUrl}" alt="${event.name}" loading="${loadingAttr}" class="w-full aspect-video object-cover ${isPastEvent ? 'opacity-60' : ''}" onerror="this.onerror=null;this.src='https://placehold.co/400x200/000/fff?text=Error&font=vt323';">
+						<img src="${imageUrl}" alt="${event.name}" loading="${loadingAttr}" class="w-full aspect-[3/4] object-cover ${isPastEvent ? 'opacity-60' : ''}" onerror="this.onerror=null;this.src='https://placehold.co/400x200/000/fff?text=Error&font=vt323';">
 					</div>
 					<div class="p-6 flex flex-col flex-grow">
 						 <h3 class="text-2xl font-pixel ${isPastEvent ? 'text-gray-500' : 'text-white text-glow-white'} mb-2 ${actionClass} glitch-hover leading-tight" ${dataAttribute}>
