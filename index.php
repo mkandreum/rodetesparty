@@ -312,13 +312,14 @@ $adminEmail = isset($_SESSION['admin_email']) ? $_SESSION['admin_email'] : '';
                     </button>
                 </div>
 
-                <!-- HAMBURGER (Only for Admin/Extra) -->
+                <!-- HAMBURGER (Icon-Only Design) -->
                 <div class="flex-shrink-0">
                     <button id="mobile-menu-btn" type="button"
-                        class="inline-flex items-center justify-center p-2 rounded-md text-white hover:text-gray-300 hover:bg-gray-900 focus:outline-none"
-                        aria-controls="mobile-menu" aria-expanded="false">
+                        class="inline-flex items-center justify-center p-0 text-white hover:text-pink-500 bg-transparent border-none focus:outline-none"
+                        aria-controls="mobile-menu" aria-expanded="false"
+                        style="background: transparent !important; border: none !important; box-shadow: none !important;">
                         <span class="sr-only">Menú Admin</span>
-                        <svg class="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                        <svg class="block h-8 w-8" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                             stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M4 6h16M4 12h16M4 18h16" />

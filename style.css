@@ -48,34 +48,33 @@ body {
 }
 
 .header-main {
-    /* Top Bar is now just for Logo & Admin Toggle, minimalist */
-    background: rgba(0, 0, 0, 0.4) !important;
-    /* Even more transparent */
+    background: transparent !important;
     border-bottom: none !important;
-    backdrop-filter: blur(10px) !important;
+    backdrop-filter: none !important;
     pointer-events: none;
-    padding-top: 15px;
-    /* Add breathing room from top */
+    padding-top: 5px;
+    /* Minimal padding to keep it near top */
 }
 
 .header-main .container {
     pointer-events: auto;
-    height: 70px;
-    /* Breathe */
+    height: 40px;
+    /* Even tighter logo area */
     display: flex;
     align-items: center;
 }
 
 header {
-    height: 85px !important;
-    /* height + padding-top */
-    background: rgba(0, 0, 0, 0.8) !important;
-    backdrop-filter: blur(15px) !important;
+    height: 45px !important;
+    background: transparent !important;
+    backdrop-filter: none !important;
+    box-shadow: none !important;
+    border: none !important;
 }
 
 main {
-    padding-top: 85px !important;
-    /* Match header height */
+    padding-top: 45px !important;
+    /* Start content right after logo */
 }
 
 #page-home h2,
@@ -83,9 +82,10 @@ main {
 #page-gallery h2,
 #page-merch h2,
 #page-drags h2 {
-    margin-top: 15px !important;
-    /* Pull titles closer to logo area */
-    margin-bottom: 25px !important;
+    margin-top: -15px !important;
+    /* Aggressively pull titles up to logo */
+    margin-bottom: 15px !important;
+    padding-top: 0 !important;
 }
 
 /* 2. Floating Bottom Pill Refinement */
