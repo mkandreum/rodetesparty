@@ -216,12 +216,35 @@ try {
             sendResponse(false, 'Error al mover el archivo subido.');
         }
 
+        // Verificar si GD está instalado
+        if (!extension_loaded('gd')) {
+            sendResponse(true, 'Imagen subida (GD no instalado, sin optimización)', [
+                'url' => $targetPath,
+                'thumb_small' => $targetPath,
+                'thumb_medium' => $targetPath,
+                'thumb_large' => $targetPath
+            ]);
+        }
+
         try {
             $result = processImage($targetPath, $targetName);
             sendResponse(true, 'Imagen optimizada y subida con éxito', $result);
         } catch (Exception $e) {
             // Si falla la optimización, devolver imagen original
-            sendResponse(true, 'Imagen subida (sin optimizar): ' . $e->getMessage(), ['url' => $targetPath]);
+            sendResponse(true, 'Imagen subida (sin optimizar): ' . $e->getMessage(), [
+                'url' => $targetPath,
+                'thumb_small' => $targetPath,
+                'thumb_medium' => $targetPath,
+                'thumb_large' => $targetPath
+            ]);
+        } catch (Error $e) {
+            // Si hay un error fatal durante el procesamiento (ej. función no encontrada)
+            sendResponse(true, 'Imagen subida (sin optimizar - error): ' . $e->getMessage(), [
+                'url' => $targetPath,
+                'thumb_small' => $targetPath,
+                'thumb_medium' => $targetPath,
+                'thumb_large' => $targetPath
+            ]);
         }
 
     } elseif (strpos($mimeType, 'video/') === 0) {
