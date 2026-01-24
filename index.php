@@ -297,9 +297,11 @@ $adminEmail = isset($_SESSION['admin_email']) ? $_SESSION['admin_email'] : '';
         </div>
     </div>
 
-    <header class="bg-black border-b-2 border-white left-0 right-0 z-40 header-main">
-        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+    <header
+        class="bg-black/90 backdrop-blur-md border-b border-white/20 left-0 right-0 z-40 header-main fixed top-0 transition-all duration-300">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-20">
+                <!-- LOGO -->
                 <div class="flex items-center flex-grow min-w-0 mr-4">
                     <button id="logo-btn" data-nav="home"
                         class="focus:outline-none transition-opacity hover:opacity-80 flex-shrink-0 mr-4">
@@ -309,74 +311,64 @@ $adminEmail = isset($_SESSION['admin_email']) ? $_SESSION['admin_email'] : '';
                         </div>
                     </button>
                 </div>
-                <div id="main-nav" class="hidden sm:flex flex-shrink-0 justify-center items-center gap-4 sm:gap-8">
-                    <a href="#" data-nav="home"
-                        class="font-pixel uppercase text-lg text-gray-500 hover:text-white transition-colors text-glow-white">INICIO</a>
-                    <a href="#" data-nav="events"
-                        class="font-pixel uppercase text-lg text-gray-500 hover:text-white transition-colors">EVENTOS</a>
-                    <a href="#" data-nav="gallery"
-                        class="font-pixel uppercase text-lg text-gray-500 hover:text-white transition-colors">GALERÍA</a>
-                    <a href="#" data-nav="merch"
-                        class="font-pixel uppercase text-lg text-gray-500 hover:text-white transition-colors">MERCH</a>
-                    <a href="#" data-nav="drags"
-                        class="font-pixel uppercase text-lg text-gray-500 hover:text-white transition-colors">DRAGS</a>
-                </div>
-                <div class="flex-shrink-0 ml-4 sm:ml-0">
+
+                <!-- HAMBURGER (Only for Admin/Extra) -->
+                <div class="flex-shrink-0">
                     <button id="mobile-menu-btn" type="button"
-                        class="inline-flex items-center justify-center p-2 rounded-md text-white hover:text-gray-300 hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
+                        class="inline-flex items-center justify-center p-2 rounded-md text-white hover:text-gray-300 hover:bg-gray-900 focus:outline-none"
                         aria-controls="mobile-menu" aria-expanded="false">
-                        <span class="sr-only">Abrir menú principal</span>
+                        <span class="sr-only">Menú Admin</span>
                         <svg class="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor" aria-hidden="true">
+                            stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M4 6h16M4 12h16M4 18h16" />
-                        </svg>
-                        <svg class="hidden h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M6 18L18 6M6 6l12 12" />
                         </svg>
                     </button>
                 </div>
             </div>
-        </nav>
+        </div>
+        <!-- Mobile Drawer (Admin/Login) -->
         <div id="mobile-menu"
-            class="hidden absolute top-20 right-4 z-50 bg-black border-2 border-white w-64 shadow-lg shadow-white/30 rounded-none">
+            class="hidden absolute top-20 right-4 z-50 bg-black border border-white w-48 shadow-lg shadow-white/30 rounded-none">
             <div class="px-2 pt-2 pb-3 space-y-1">
-                <a href="#" data-nav="home"
-                    class="font-pixel text-lg text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md">INICIO</a>
-                <a href="#" data-nav="events"
-                    class="font-pixel text-lg text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md">EVENTOS</a>
-                <a href="#" data-nav="gallery"
-                    class="font-pixel text-lg text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md">GALERÍA</a>
-                <a href="#" data-nav="merch"
-                    class="font-pixel text-lg text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md">MERCH</a>
-                <a href="#" data-nav="drags"
-                    class="font-pixel text-lg text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md">DRAGS</a>
                 <a href="#" data-nav="admin"
-                    class="font-pixel text-lg text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md <?php echo $isLoggedIn ? '' : 'hidden'; ?>">ADMIN</a>
+                    class="font-pixel text-lg text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md <?php echo $isLoggedIn ? '' : 'hidden'; ?>">PANEL
+                    ADMIN</a>
+                <a href="login.php"
+                    class="font-pixel text-lg text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md <?php echo $isLoggedIn ? 'hidden' : ''; ?>">LOGIN
+                    STAFF</a>
+                <?php if ($isLoggedIn): ?>
+                    <a href="logout.php"
+                        class="font-pixel text-lg text-red-400 hover:bg-red-900 hover:text-white block px-3 py-2 rounded-md">CERRAR
+                        SESIÓN</a>
+                <?php endif; ?>
             </div>
         </div>
     </header>
 
-    <!-- ==== NAV SECUNDARIA (MÓVIL) ==== -->
-    <div id="secondary-nav-container"
-        class="fixed top-[80px] left-0 right-0 z-30 bg-black border-b border-gray-700 sm:hidden">
-        <nav id="secondary-nav" class="container mx-auto px-4 py-2">
-            <div class="flex justify-around items-center gap-4">
-                <a href="#" data-nav="home"
-                    class="font-pixel uppercase text-lg text-gray-500 hover:text-white transition-colors text-glow-white">INICIO</a>
-                <a href="#" data-nav="events"
-                    class="font-pixel uppercase text-lg text-gray-500 hover:text-white transition-colors">EVENTOS</a>
-                <a href="#" data-nav="gallery"
-                    class="font-pixel uppercase text-lg text-gray-500 hover:text-white transition-colors">GALERÍA</a>
-                <a href="#" data-nav="merch"
-                    class="font-pixel uppercase text-lg text-gray-500 hover:text-white transition-colors">MERCH</a>
-                <a href="#" data-nav="drags"
-                    class="font-pixel uppercase text-lg text-gray-500 hover:text-white transition-colors">DRAGS</a>
-            </div>
-        </nav>
-    </div>
+    <!-- ==== NUEVA: BARRA DE NAVEGACIÓN FLOTANTE (PILL) ==== -->
+    <nav id="bottom-pill-nav">
+        <a href="#" data-nav="home" class="nav-pill-item active">
+            <span class="icon">🏠</span>
+            <span class="text">INICIO</span>
+        </a>
+        <a href="#" data-nav="events" class="nav-pill-item">
+            <span class="icon">🎉</span>
+            <span class="text">EVENTOS</span>
+        </a>
+        <a href="#" data-nav="gallery" class="nav-pill-item">
+            <span class="icon">📸</span>
+            <span class="text">FOTOS</span>
+        </a>
+        <a href="#" data-nav="merch" class="nav-pill-item">
+            <span class="icon">👕</span>
+            <span class="text">TIENDA</span>
+        </a>
+        <a href="#" data-nav="drags" class="nav-pill-item">
+            <span class="icon">💃</span>
+            <span class="text">DRAGS</span>
+        </a>
+    </nav>
 
     <!-- ==== CONTENIDO PRINCIPAL ==== -->
     <main class="container mx-auto p-4 sm:p-6 lg:p-8">

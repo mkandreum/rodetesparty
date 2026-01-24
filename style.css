@@ -8,16 +8,177 @@
     --bg-dark: #050505;
 }
 
+/* --- VISUAL MODERNIZATION START --- */
+
+/* 1. Body & Header Adjustments */
 body {
-    font-family: 'Inter', sans-serif;
-    background-color: var(--bg-dark);
-    color: #e5e7eb;
-    scroll-behavior: smooth;
-    padding-top: 128px;
-    overflow-x: hidden;
-    position: relative;
-    min-height: 100vh;
+    padding-top: 20px;
+    /* Space for Logo */
+    padding-bottom: 120px;
+    /* Space for Bottom Nav */
+    /* background now handled by scanlines/image, ensure base is dark */
 }
+
+.header-main {
+    /* Top Bar is now just for Logo & Admin Toggle, minimalist */
+    background: transparent !important;
+    border-bottom: none !important;
+    backdrop-filter: none !important;
+    pointer-events: none;
+    /* Let clicks pass through empty areas */
+}
+
+.header-main .container {
+    pointer-events: auto;
+    /* Re-enable clicks on buttons */
+}
+
+/* 2. Floating Bottom Pill Navigation (iOS Glass Style) */
+#bottom-pill-nav {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: auto;
+    max-width: 95%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 10px 20px;
+
+    /* Glassmorphism */
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(240, 45, 125, 0.5);
+    /* Neon Pink Border */
+    border-radius: 9999px;
+    /* Pill Shape */
+
+    box-shadow:
+        0 10px 40px rgba(0, 0, 0, 0.5),
+        0 0 20px rgba(240, 45, 125, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+
+    z-index: 100;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+#bottom-pill-nav:hover {
+    box-shadow:
+        0 15px 50px rgba(0, 0, 0, 0.6),
+        0 0 30px rgba(240, 45, 125, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    transform: translateX(-50%) translateY(-2px);
+}
+
+.nav-pill-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    color: #9ca3af;
+    padding: 8px 16px;
+    border-radius: 20px;
+    transition: all 0.3s;
+    min-width: 60px;
+}
+
+.nav-pill-item .icon {
+    font-size: 1.5rem;
+    margin-bottom: 2px;
+    filter: grayscale(100%);
+    transition: all 0.3s;
+}
+
+.nav-pill-item .text {
+    font-family: 'VT323', monospace;
+    font-size: 0.8rem;
+    letter-spacing: 1px;
+    opacity: 0.7;
+}
+
+.nav-pill-item:hover,
+.nav-pill-item.active {
+    color: white;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.nav-pill-item:hover .icon,
+.nav-pill-item.active .icon {
+    filter: grayscale(0%);
+    transform: scale(1.1);
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+.nav-pill-item.active .text {
+    color: var(--neon-pink);
+    text-shadow: 0 0 5px var(--neon-pink);
+    opacity: 1;
+}
+
+/* 3. Modern Glass Cards */
+.bg-gray-900 {
+    background: rgba(10, 10, 10, 0.6);
+    /* Semi-transparent */
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    border-radius: 12px;
+    /* Slight rounding for modern feel */
+}
+
+/* Hover Effect: Neon Pulse Border */
+.bg-gray-900:hover {
+    transform: translateY(-5px) scale(1.01);
+    background: rgba(15, 15, 15, 0.7);
+    border-color: var(--neon-pink);
+    box-shadow:
+        0 15px 40px rgba(0, 0, 0, 0.5),
+        0 0 20px rgba(240, 45, 125, 0.2),
+        inset 0 0 20px rgba(240, 45, 125, 0.05);
+}
+
+/* Gallery Grid Modernization */
+#past-galleries-grid,
+#gallery-event-list-container {
+    gap: 1.5rem;
+}
+
+/* Adjust secondary mobile view to be hidden (since we replaced it) */
+#secondary-nav-container {
+    display: none !important;
+}
+
+/* Media Queries for Pill */
+@media (max-width: 640px) {
+    #bottom-pill-nav {
+        width: 90%;
+        padding: 8px 12px;
+        bottom: 20px;
+        justify-content: space-between;
+    }
+
+    .nav-pill-item {
+        padding: 5px 8px;
+        min-width: auto;
+    }
+
+    .nav-pill-item .icon {
+        font-size: 1.4rem;
+    }
+
+    .nav-pill-item .text {
+        display: none;
+        /* Hide text on very small screens if tight, or keep small */
+        font-size: 0.7rem;
+    }
+}
+
+/* --- VISUAL MODERNIZATION END --- */
 
 /* --- 1. FONDO "ALIVE" CRT SCANLINES --- */
 body::before {
@@ -667,4 +828,26 @@ input[type="checkbox"]:hover {
         flex-grow: 1;
         text-align: center;
     }
+}
+
+/* Gallery Grid Modernization */
+#past-galleries-grid,
+#gallery-event-list-container {
+    gap: 1.5rem;
+}
+
+#past-galleries-grid>div,
+#gallery-event-list-container>div {
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+#past-galleries-grid>div:hover,
+#gallery-event-list-container>div:hover {
+    transform: scale(1.03);
+    border-color: var(--neon-cyan);
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+    z-index: 10;
 }

@@ -193,11 +193,100 @@ window.addEventListener('DOMContentLoaded', async () => {
 	const adminPages = {};
 	const adminNavLinks = {};
 	const mobileNavLinks = {};
+	const bottomPillNavLinks = {}; // NUEVO: Enlaces de la barra inferior
 	const loadingModal = document.getElementById('loading-modal');
-	const infoModal = document.getElementById('info-modal');
-	const infoModalText = document.getElementById('info-modal-text');
-	const eventListContainer = document.getElementById('event-list-container');
-	const nextEventPromoContainer = document.getElementById('next-event-promo-container');
+	// ... (otros selectores sin cambios) ...
+
+	// ... (dentro de DOMContentLoaded, alrededor linea 270) ...
+	// Rellenar mapas de elementos
+	document.querySelectorAll('[data-page]').forEach(el => pages[el.dataset.page] = el);
+	document.querySelectorAll('[data-admin-page]').forEach(el => adminPages[el.dataset.adminPage] = el);
+	document.querySelectorAll('#admin-nav [data-nav]').forEach(el => adminNavLinks[el.dataset.nav] = el);
+
+	// NUEVO: Pilla los links de la barra inferior
+	document.querySelectorAll('#bottom-pill-nav [data-nav]').forEach(el => bottomPillNavLinks[el.dataset.nav] = el);
+
+	// Mobile menu (drawer) links
+	document.querySelectorAll('#mobile-menu a[data-nav]').forEach(el => mobileNavLinks[el.dataset.nav] = el);
+
+	// General click listener for navigation
+	document.querySelectorAll('[data-nav]').forEach(link => {
+		link.addEventListener('click', (e) => {
+			e.preventDefault();
+			const navTarget = link.dataset.nav;
+
+			console.log('Navegando a:', navTarget);
+
+			if (navTarget === 'admin') {
+				// Toggle admin panel
+				if (adminPanel.classList.contains('hidden')) {
+					adminPanel.classList.remove('hidden');
+					// Default to events tab if just opening
+					switchAdminTab('events');
+				} else {
+					adminPanel.classList.add('hidden');
+				}
+				// Close mobile menu if open
+				mobileMenu.classList.add('hidden');
+			} else {
+				// Hide admin panel if going to main pages
+				adminPanel.classList.add('hidden');
+				showPage(navTarget);
+			}
+		});
+	});
+
+
+	// ... (resto) ...
+
+	// --- Page Navigation (Updated for Pill Nav) ---
+	function showPage(pageId) {
+		Object.values(pages).forEach(page => {
+			page.classList.add('hidden');
+			page.classList.remove('page-fade-in');
+		});
+		if (pages[pageId]) {
+			pages[pageId].classList.remove('hidden');
+			void pages[pageId].offsetWidth; // Trigger reflow for animation
+			pages[pageId].classList.add('page-fade-in');
+		} else {
+			console.warn(`Página "${pageId}" no encontrada. Mostrando 'home'.`);
+			if (pages['home']) {
+				pages['home'].classList.remove('hidden');
+				pages['home'].classList.add('page-fade-in');
+				pageId = 'home'; // Actualizar pageId
+			}
+		}
+
+		// Actualizar estilos nav móvil (drawer)
+		Object.values(mobileNavLinks).forEach(link => {
+			link.classList.remove('bg-gray-700', 'text-white');
+			link.classList.add('text-gray-300');
+		});
+		if (mobileNavLinks[pageId]) {
+			mobileNavLinks[pageId].classList.add('bg-gray-700', 'text-white');
+			mobileNavLinks[pageId].classList.remove('text-gray-300');
+		}
+
+		// NUEVO: Actualizar estilos Pill Nav
+		Object.values(bottomPillNavLinks).forEach(link => {
+			link.classList.remove('active');
+		});
+		if (bottomPillNavLinks[pageId]) {
+			bottomPillNavLinks[pageId].classList.add('active');
+		}
+
+		mobileMenu.classList.add('hidden'); // Siempre cerrar menú móvil drawer
+
+		// Re-renderizar contenido dinámico
+		if (pageId === 'events') renderPublicEvents(currentEvents);
+		if (pageId === 'merch') renderMerchPage();
+		if (pageId === 'gallery') renderGalleryEventList();
+		if (pageId === 'drags') renderDragList();
+
+		// Scroll to top behavior
+		window.scrollTo({ top: 0, behavior: 'smooth' });
+	} const nextEventPromoContainer = document.getElementById('next-event-promo-container');
 	const nextEventPromo = document.getElementById('next-event-promo');
 	const homeEventListContainer = document.getElementById('home-event-list-container');
 	const viewAllEventsBtn = document.getElementById('view-all-events-btn');
@@ -272,10 +361,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 	const ticketListContent = document.getElementById('ticket-list-content');
 	const emailModal = document.getElementById('email-modal');
 	const emailForm = document.getElementById('email-form');
-	const mainNavLinks = {};
-	document.querySelectorAll('#main-nav [data-nav]').forEach(el => mainNavLinks[el.dataset.nav] = el);
-	const secondaryNavLinks = {};
-	document.querySelectorAll('#secondary-nav [data-nav]').forEach(el => secondaryNavLinks[el.dataset.nav] = el);
+
 
 	const headerLogoImg = document.getElementById('header-logo-img');
 	const appLogoUrlInput = document.getElementById('app-logo-url');
@@ -464,25 +550,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 			mobileNavLinks[pageId].classList.remove('text-gray-300');
 		}
 
-		// Actualizar estilos nav principal (escritorio)
-		Object.values(mainNavLinks).forEach(link => {
-			link.classList.remove('text-white', 'text-glow-white');
-			link.classList.add('text-gray-500', 'hover:text-white');
-		});
-		if (mainNavLinks[pageId]) {
-			mainNavLinks[pageId].classList.add('text-white', 'text-glow-white');
-			mainNavLinks[pageId].classList.remove('text-gray-500', 'hover:text-white');
-		}
 
-		// Actualizar estilos nav secundario (móvil bajo header)
-		Object.values(secondaryNavLinks).forEach(link => {
-			link.classList.remove('text-white', 'text-glow-white');
-			link.classList.add('text-gray-500', 'hover:text-white');
-		});
-		if (secondaryNavLinks[pageId]) {
-			secondaryNavLinks[pageId].classList.add('text-white', 'text-glow-white');
-			secondaryNavLinks[pageId].classList.remove('text-gray-500', 'hover:text-white');
-		}
 
 		mobileMenu.classList.add('hidden'); // Siempre cerrar menú móvil al navegar
 
