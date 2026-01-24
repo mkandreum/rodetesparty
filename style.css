@@ -94,7 +94,7 @@ header {
 }
 
 main {
-    padding-top: calc(var(--promo-banner-height) + var(--header-height) + 15px) !important;
+    padding-top: calc(var(--promo-banner-height) + var(--header-height) + 10px) !important;
     /* Balanced offset: Banner + Header + slim breathing room */
 }
 
