@@ -6203,89 +6203,93 @@ window.addEventListener('DOMContentLoaded', async () => {
 
 	// --- MOBILE UX LOGIC ---
 	function setupMobileUX() {
-		// 1. Bottom Navigation Logic
-		const bottomNavButtons = document.querySelectorAll('#mobile-bottom-nav .nav-btn[data-page]');
-		const allNavSvgs = document.querySelectorAll('#mobile-bottom-nav .nav-btn svg');
+		try {
+			// 1. Bottom Navigation Logic
+			const bottomNavButtons = document.querySelectorAll('#mobile-bottom-nav .nav-btn[data-page]');
+			const allNavSvgs = document.querySelectorAll('#mobile-bottom-nav .nav-btn svg');
 
-		const updateActiveNav = (pageId) => {
+			const updateActiveNav = (pageId) => {
+				bottomNavButtons.forEach(btn => {
+					const targetPage = btn.dataset.page;
+					// Home is active for both 'home' and 'events' pages
+					const isActive = (pageId === targetPage) || (pageId === 'events' && targetPage === 'home') || (pageId === '' && targetPage === 'home');
+
+					btn.classList.toggle('active', isActive);
+					const svg = btn.querySelector('svg');
+					if (isActive) {
+						svg.classList.add('text-neon-pink');
+						svg.classList.remove('text-gray-500');
+					} else {
+						svg.classList.remove('text-neon-pink');
+						svg.classList.add('text-gray-500');
+					}
+				});
+			};
+
 			bottomNavButtons.forEach(btn => {
-				const targetPage = btn.dataset.page;
-				// Home is active for both 'home' and 'events' pages
-				const isActive = (pageId === targetPage) || (pageId === 'events' && targetPage === 'home') || (pageId === '' && targetPage === 'home');
+				addTrackedListener(btn, 'click', (e) => {
+					const page = e.currentTarget.dataset.page;
+					showPage(page);
+					updateActiveNav(page);
+					triggerHaptic(10); // Feedback táctil
+				});
+			});
 
-				btn.classList.toggle('active', isActive);
-				const svg = btn.querySelector('svg');
-				if (isActive) {
-					svg.classList.add('text-neon-pink');
-					svg.classList.remove('text-gray-500');
-				} else {
-					svg.classList.remove('text-neon-pink');
-					svg.classList.add('text-gray-500');
+			// 2. Pull to Refresh Logic
+			let touchStartY = 0;
+			let isPulling = false;
+			const ptrIndicator = document.getElementById('pull-refresh-indicator');
+			const PULL_THRESHOLD = 80;
+
+			window.addEventListener('touchstart', (e) => {
+				if (window.scrollY === 0) {
+					touchStartY = e.touches[0].clientY;
+					isPulling = true;
 				}
-			});
-		};
+			}, { passive: true });
 
-		bottomNavButtons.forEach(btn => {
-			addTrackedListener(btn, 'click', (e) => {
-				const page = e.currentTarget.dataset.page;
-				showPage(page);
-				updateActiveNav(page);
-				triggerHaptic(10); // Feedback táctil
-			});
-		});
+			window.addEventListener('touchmove', (e) => {
+				if (!isPulling) return;
+				const touchY = e.touches[0].clientY;
+				const pullDist = touchY - touchStartY;
 
-		// 2. Pull to Refresh Logic
-		let touchStartY = 0;
-		let isPulling = false;
-		const ptrIndicator = document.getElementById('pull-refresh-indicator');
-		const PULL_THRESHOLD = 80;
+				if (pullDist > 0 && window.scrollY <= 0) {
+					// Resistance effect
+					const move = Math.min(pullDist * 0.4, 100);
+					ptrIndicator.style.opacity = Math.min(pullDist / PULL_THRESHOLD, 1);
+					ptrIndicator.style.transform = `translateY(${move}px)`;
+				}
+			}, { passive: true });
 
-		window.addEventListener('touchstart', (e) => {
-			if (window.scrollY === 0) {
-				touchStartY = e.touches[0].clientY;
-				isPulling = true;
-			}
-		}, { passive: true });
+			window.addEventListener('touchend', async (e) => {
+				if (!isPulling) return;
+				isPulling = false;
+				const touchY = e.changedTouches[0].clientY;
+				const pullDist = touchY - touchStartY;
 
-		window.addEventListener('touchmove', (e) => {
-			if (!isPulling) return;
-			const touchY = e.touches[0].clientY;
-			const pullDist = touchY - touchStartY;
+				if (pullDist > PULL_THRESHOLD && window.scrollY <= 0) {
+					// Trigger Refresh
+					ptrIndicator.style.transform = 'translateY(50px)'; // Hold position
+					triggerHaptic(20);
+					// Simular recarga visual si es muy rápida
+					const start = Date.now();
+					await loadInitialDataFromServer();
+					const elapsed = Date.now() - start;
+					const delay = Math.max(0, 800 - elapsed); // Mínimo 800ms para que se vea
 
-			if (pullDist > 0 && window.scrollY <= 0) {
-				// Resistance effect
-				const move = Math.min(pullDist * 0.4, 100);
-				ptrIndicator.style.opacity = Math.min(pullDist / PULL_THRESHOLD, 1);
-				ptrIndicator.style.transform = `translateY(${move}px)`;
-			}
-		}, { passive: true });
-
-		window.addEventListener('touchend', async (e) => {
-			if (!isPulling) return;
-			isPulling = false;
-			const touchY = e.changedTouches[0].clientY;
-			const pullDist = touchY - touchStartY;
-
-			if (pullDist > PULL_THRESHOLD && window.scrollY <= 0) {
-				// Trigger Refresh
-				ptrIndicator.style.transform = 'translateY(50px)'; // Hold position
-				triggerHaptic(20);
-				// Simular recarga visual si es muy rápida
-				const start = Date.now();
-				await loadInitialDataFromServer();
-				const elapsed = Date.now() - start;
-				const delay = Math.max(0, 800 - elapsed); // Mínimo 800ms para que se vea
-
-				setTimeout(() => {
+					setTimeout(() => {
+						ptrIndicator.style.transform = '';
+						ptrIndicator.style.opacity = '0';
+					}, delay);
+				} else {
+					// Reset
 					ptrIndicator.style.transform = '';
 					ptrIndicator.style.opacity = '0';
-				}, delay);
-			} else {
-				// Reset
-				ptrIndicator.style.transform = '';
-				ptrIndicator.style.opacity = '0';
-			}
-		});
+				}
+			});
+		} catch (e) {
+			console.error("Error initializing Mobile UX:", e);
+		}
 	}
 
 	// Haptic Feedback Utility

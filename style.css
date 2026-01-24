@@ -671,21 +671,63 @@ input[type="checkbox"]:hover {
 
 /* --- 9. MOBILE UX ENHANCEMENTS --- */
 
-/* Safe Area for Bottom Nav (iPhone Home Indicator) */
+/* Safe Area for Bottom Nav */
 .safe-pb {
-    padding-bottom: env(safe-area-inset-bottom);
+    padding-bottom: calc(env(safe-area-inset-bottom) + 80px);
+    /* Extra space for floating pill */
 }
 
-/* Ensure body has enough padding so content isn't hidden behind bottom nav */
+/* MOBILE LAYOUT RESET & PILL NAV */
 @media (max-width: 768px) {
-    body {
-        padding-bottom: 80px;
-        /* 64px nav + spacing */
-    }
 
-    /* Hide top hamburger menu on mobile since we have bottom nav */
+    /* Hide Desktop Header Completely */
+    header,
+    #secondary-nav-container,
     #mobile-menu-btn {
         display: none !important;
+    }
+
+    /* Remove Body Padding (Content starts at top) */
+    body {
+        padding-top: 10px !important;
+        padding-bottom: 100px !important;
+    }
+
+    body.promo-active {
+        padding-top: 40px !important;
+    }
+
+    /* PILL NAVIGATION STYLE */
+    #mobile-bottom-nav {
+        left: 50%;
+        width: 85%;
+        max-width: 350px;
+        bottom: 20px;
+        transform: translateX(-50%);
+        border-radius: 9999px;
+        /* Full rounded pill */
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8);
+        background: rgba(15, 15, 15, 0.9);
+        backdrop-filter: blur(12px);
+    }
+
+    /* Remove full width border from previous style */
+    #mobile-bottom-nav.border-t {
+        border-top: none;
+    }
+
+    /* Active State indicator dot */
+    #mobile-bottom-nav .nav-btn.active::after {
+        content: '';
+        position: absolute;
+        bottom: 8px;
+        /* Ajuste para píldora */
+        width: 4px;
+        height: 4px;
+        background-color: var(--neon-pink);
+        border-radius: 50%;
+        box-shadow: 0 0 6px var(--neon-pink);
     }
 }
 
@@ -696,14 +738,12 @@ input[type="checkbox"]:hover {
     overflow-x: auto;
     gap: 1rem;
     padding-bottom: 1rem;
-    /* Space for scrollbar if visible */
     -webkit-overflow-scrolling: touch;
 }
 
 .snap-center {
     scroll-snap-align: center;
     flex: 0 0 85%;
-    /* Cards take 85% width to show peek of next one */
 }
 
 /* Nav Active State */
