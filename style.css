@@ -11,9 +11,15 @@ html {
     --neon-cyan: #00FFFF;
     --neon-yellow: #FACC15;
     --bg-dark: #000000;
+    --promo-banner-height: 0px;
+    /* Default: No banner */
+    --header-height: 65px;
+    /* Consistent header height */
+}
+
+body.promo-active {
     --promo-banner-height: 30px;
-    --header-height: 60px;
-    /* Reduced from 75px to fit better with the new logic */
+    /* Active banner height */
 }
 
 /* --- VISUAL MODERNIZATION START --- */
@@ -80,8 +86,7 @@ body {
 }
 
 header {
-    height: 75px !important;
-    /* height + padding-top */
+    height: var(--header-height) !important;
     background: transparent !important;
     backdrop-filter: none !important;
     box-shadow: none !important;
@@ -89,8 +94,8 @@ header {
 }
 
 main {
-    padding-top: calc(var(--promo-banner-height) + var(--header-height) + 20px) !important;
-    /* Balanced offset: Banner + Header + breathing room */
+    padding-top: calc(var(--promo-banner-height) + var(--header-height) + 15px) !important;
+    /* Balanced offset: Banner + Header + slim breathing room */
 }
 
 #page-home h2,
@@ -99,8 +104,8 @@ main {
 #page-merch h2,
 #page-drags h2,
 #page-admin h2 {
-    margin-top: 45px !important;
-    /* Calibrated middle ground */
+    margin-top: 35px !important;
+    /* Slimmer spacing as requested */
     margin-bottom: 24px !important;
 }
 
