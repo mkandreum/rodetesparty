@@ -46,7 +46,16 @@ AddType image/webp .webp
 AddType image/png .png
 AddType image/jpeg .jpg .jpeg
 
+
 # Solo para manifest.json específico
 <Files "manifest.json">
     ForceType application/manifest+json
 </Files>
+
+# PHP Configuration
+<IfModule mod_php.c>
+    php_value upload_max_filesize 128M
+    php_value post_max_size 128M
+    php_value memory_limit 256M
+    php_flag display_errors Off
+</IfModule>

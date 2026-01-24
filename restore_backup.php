@@ -15,12 +15,41 @@ try {
     }
 
     if (!isset($_FILES['backup_file'])) {
+        // Detectar si el error es por exceder post_max_size
+        if (empty($_FILES) && empty($_POST) && isset($_SERVER['CONTENT_LENGTH']) && $_SERVER['CONTENT_LENGTH'] > 0) {
+            $maxPost = ini_get('post_max_size');
+            throw new Exception("El archivo excede el límite del servidor (post_max_size: $maxPost).", 413);
+        }
         throw new Exception('No se recibió el archivo de respaldo', 400);
     }
 
     $file = $_FILES['backup_file'];
     if ($file['error'] !== UPLOAD_ERR_OK) {
-        throw new Exception('Error en la subida: código ' . $file['error'], 400);
+        $msg = 'Error desconocido en subida';
+        switch ($file['error']) {
+            case UPLOAD_ERR_INI_SIZE:
+                $msg = 'El archivo excede upload_max_filesize';
+                break;
+            case UPLOAD_ERR_FORM_SIZE:
+                $msg = 'El archivo excede MAX_FILE_SIZE del formulario';
+                break;
+            case UPLOAD_ERR_PARTIAL:
+                $msg = 'Subida incompleta';
+                break;
+            case UPLOAD_ERR_NO_FILE:
+                $msg = 'No se subió ningún archivo';
+                break;
+            case UPLOAD_ERR_NO_TMP_DIR:
+                $msg = 'Falta carpeta temporal';
+                break;
+            case UPLOAD_ERR_CANT_WRITE:
+                $msg = 'Error escribiendo en disco';
+                break;
+            case UPLOAD_ERR_EXTENSION:
+                $msg = 'Una extensión de PHP detuvo la subida';
+                break;
+        }
+        throw new Exception($msg . ' (Código ' . $file['error'] . ')', 400);
     }
 
     // Verificar extensión ZIP
