@@ -1055,7 +1055,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 		const isValidHex = (color) => color && /^#[0-9A-F]{6}$/i.test(color);
 		const neonColor = isValidHex(appState.promoNeonColor) ? appState.promoNeonColor : defaultColor;
 
-		if (nextEvent && appState.promoEnabled && appState.promoCustomText) {
+		if (nextEvent && appState.promoEnabled) {
 			try {
 				const eventDate = new Date(nextEvent.date);
 				const shortDate = eventDate.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit' });

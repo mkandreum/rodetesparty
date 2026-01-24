@@ -107,55 +107,45 @@ $adminEmail = isset($_SESSION['admin_email']) ? $_SESSION['admin_email'] : '';
         }
 
         /* --- Estilos Banner Promo Neón --- */
+        :root {
+            --promo-neon-color: #F02D7D;
+        }
+
         #next-event-promo-container {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             z-index: 50;
-            /* Más alto que el header */
             background-color: #000;
             border-bottom: 2px solid var(--promo-neon-color);
             box-shadow: 0 0 10px var(--promo-neon-color), 0 0 20px var(--promo-neon-color);
             overflow: hidden;
-            /* Para el efecto marquee */
             height: 0;
-            /* Altura 0 por defecto */
             opacity: 0;
-            /* Opacidad 0 por defecto */
             transition: height 0.3s ease-in-out, opacity 0.3s ease-in-out;
-            /* Transición suave */
             display: flex;
-            /* Mantenemos flex para alinear el contenido */
             align-items: center;
         }
 
         #next-event-promo-container.promo-visible {
             height: 40px;
-            /* Altura deseada */
             opacity: 1;
-            /* Hacer visible */
         }
 
         .promo-banner-content {
             display: inline-block;
             white-space: nowrap;
             padding-left: 100%;
-            /* Empezar fuera de la pantalla */
             animation: marquee 10s linear infinite;
-            /* Animación más rápida */
             font-family: 'VT323', monospace, sans-serif;
-            /* Usar la fuente pixel */
             font-size: 24px;
             color: #fff;
             text-shadow:
                 0 0 5px #fff,
                 0 0 10px #fff,
                 0 0 15px var(--promo-neon-color),
-                0 0 20px var(--promo-neon-color),
-                0 0 25px var(--promo-neon-color),
-                0 0 30px var(--promo-neon-color),
-                0 0 35px var(--promo-neon-color);
+                0 0-20px var(--promo-neon-color);
         }
 
         @keyframes marquee {
@@ -168,7 +158,7 @@ $adminEmail = isset($_SESSION['admin_email']) ? $_SESSION['admin_email'] : '';
             }
         }
 
-        /* --- Ajustes de Layout (Header, Body, Nav Secundario) --- */
+        /* --- Layout Adjustments (Header & Gap) --- */
         .header-main {
             position: fixed;
             top: 0;
@@ -181,6 +171,15 @@ $adminEmail = isset($_SESSION['admin_email']) ? $_SESSION['admin_email'] : '';
 
         body.promo-active .header-main {
             top: 40px;
+        }
+
+        /* Support for dynamic safe-gap even without banner */
+        main {
+            transition: padding-top 0.3s ease-in-out;
+        }
+
+        body.promo-active main {
+            padding-top: calc(var(--header-height) + var(--safe-gap) + 40px) !important;
         }
 
         body {

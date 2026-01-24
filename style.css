@@ -11,17 +11,8 @@ html {
     --neon-cyan: #00FFFF;
     --neon-yellow: #FACC15;
     --bg-dark: #000000;
-    --promo-banner-height: 0px;
-    /* Default: No banner */
     --header-height: 65px;
-    /* Consistent header height */
     --safe-gap: 30px;
-    /* Increased slightly for better breathability */
-}
-
-body.promo-active {
-    --promo-banner-height: 30px;
-    /* Active banner height */
 }
 
 /* --- VISUAL MODERNIZATION START --- */
@@ -96,8 +87,7 @@ header {
 }
 
 main {
-    padding-top: calc(var(--promo-banner-height) + var(--header-height) + var(--safe-gap)) !important;
-    /* Synchronized offset for both Logo and Countdown */
+    padding-top: calc(var(--header-height) + var(--safe-gap)) !important;
 }
 
 #page-home h2,
@@ -575,49 +565,7 @@ header {
     top: 80px;
 }
 
-#next-event-promo-container {
-    flex-grow: 1;
-    min-width: 0;
-    overflow: hidden;
-    white-space: nowrap;
-    box-sizing: border-box;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 50;
-    height: 0;
-    opacity: 0;
-    background: #000;
-    transition: height 0.3s ease-in-out, opacity 0.3s ease-in-out;
-    display: flex;
-    align-items: center;
-}
-
-#next-event-promo-container.promo-visible {
-    height: var(--promo-banner-height);
-    opacity: 1;
-    border-bottom: 2px solid var(--promo-neon-color, var(--neon-pink));
-    box-shadow: 0 0 10px var(--promo-neon-color, var(--neon-pink)), 0 0 20px var(--promo-neon-color, var(--neon-pink));
-}
-
-#next-event-promo {
-    font-size: 0.95rem !important;
-    font-weight: bold;
-    letter-spacing: 0.02em;
-    line-height: var(--promo-banner-height) !important;
-    display: inline-block;
-    white-space: nowrap;
-    padding-left: 100%;
-    animation: marquee 10s linear infinite;
-    font-family: 'VT323', monospace;
-    color: #fff;
-    text-shadow:
-        0 0 5px #fff,
-        0 0 10px #fff,
-        0 0 15px var(--promo-neon-color, var(--neon-pink)),
-        0 0 20px var(--promo-neon-color, var(--neon-pink));
-}
+/* Banner styles moved to internal CSS in index.php for production parity */
 
 @keyframes marquee {
     0% {
