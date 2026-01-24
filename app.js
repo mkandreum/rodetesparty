@@ -168,7 +168,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 	// --- NUEVO: IntersectionObserver para scroll reveal ---
 	const observerOptions = {
 		root: null,
-		rootMargin: '0px',
+		rootMargin: '50px',
 		threshold: 0.1
 	};
 
@@ -176,8 +176,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 		entries.forEach(entry => {
 			if (entry.isIntersecting) {
 				entry.target.classList.add('visible');
-				// Opcional: dejar de observar si solo queremos la animación una vez
-				// observer.unobserve(entry.target); 
+				observer.unobserve(entry.target); // Stop observing for performance
 			}
 		});
 	}, observerOptions);

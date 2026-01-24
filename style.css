@@ -231,32 +231,48 @@ button:not(:disabled).neon-btn:hover,
     }
 }
 
-/* --- 6. SCROLL REVEAL --- */
+/* --- Optimized Scroll & Animations --- */
+
+/* Use GPU acceleration for animated elements */
+.reveal-on-scroll,
+.glitch-hover,
+.bg-gray-900,
+.bg-gray-800,
+.neon-btn {
+    will-change: transform, opacity;
+}
+
+/* Reduce paint cost on mobile for fixed headers */
+@media (max-width: 768px) {
+    header {
+        backdrop-filter: none;
+        background-color: rgba(0, 0, 0, 0.95);
+        /* Opaque fallback */
+    }
+}
+
+/* --- 2. GLITCH EFFECT (Optimized) --- */
+.glitch-hover {
+    position: relative;
+    display: inline-block;
+}
+
+/* ... existing glitch keyframes ... */
+
+/* --- 6. SCROLL REVEAL (Hardware Accelerated) --- */
 .reveal-on-scroll {
     opacity: 0;
-    transform: translateY(40px);
-    transition: all 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+    transform: translateY(40px) translateZ(0);
+    /* Force 3D layer */
+    transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .reveal-on-scroll.visible {
     opacity: 1;
-    transform: translateY(0);
-}
-
-/* --- 7. ENHANCED CARD HOVER EFFECTS --- */
-.bg-gray-900,
-.bg-gray-800 {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.bg-gray-900:hover,
-.bg-gray-800:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 10px 30px rgba(240, 45, 125, 0.3);
+    transform: translateY(0) translateZ(0);
 }
 
 /* --- Layout fixes & Components --- */
-
 header {
     position: fixed;
     top: 0;
@@ -264,8 +280,22 @@ header {
     right: 0;
     z-index: 40;
     background-color: rgba(0, 0, 0, 0.9);
-    backdrop-filter: blur(10px);
-    transition: backdrop-filter 0.3s;
+    /* backdrop-filter: blur(10px); -> Moved to media query for desktop only */
+    transition: background-color 0.3s;
+}
+
+@media (min-width: 769px) {
+    header {
+        backdrop-filter: blur(10px);
+    }
+}
+
+/* Content Visibility for performance in long lists */
+.event-list-container,
+.gallery-grid {
+    content-visibility: auto;
+    contain-intrinsic-size: 1000px;
+    /* Estimación */
 }
 
 #secondary-nav-container {
