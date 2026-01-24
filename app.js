@@ -1039,8 +1039,58 @@ window.addEventListener('DOMContentLoaded', async () => {
 		}
 	}
 	/**
+	 * Obtiene la URL del thumbnail según el tamaño
+	 * @param {string} imageUrl - URL de la imagen original
+	 * @param {string} size - 'small' (400px), 'medium' (800px), 'large' (1200px)
+	 * @returns {string} - URL del thumbnail o imagen original como fallback
+	 */
+	function getThumbnailUrl(imageUrl, size = 'medium') {
+		if (!imageUrl || imageUrl.includes('placehold.co')) return imageUrl;
+
+		// Si la imagen ya es WebP con thumbnail
+		if (imageUrl.includes('/thumbs/')) return imageUrl;
+
+		// Convertir a thumbnail
+		const sizeMap = { small: '400', medium: '800', large: '1200' };
+		const pixels = sizeMap[size] || '800';
+
+		// Extraer nombre de archivo
+		const parts = imageUrl.split('/');
+		const fileName = parts.pop();
+		const baseName = fileName.replace(/\.(jpg|jpeg|png|gif|webp)$/i, '');
+		const thumbUrl = parts.join('/') + '/thumbs/' + baseName + '_' + pixels + '.webp';
+
+		return thumbUrl;
+	}
+
+	/**
+	 * Determina el estado de un evento
+	 * @param {object} event - Objeto del evento
+	 * @returns {string} - 'ongoing' | 'finished' | 'future'
+	 */
+	function getEventStatus(event) {
+		if (!event || !event.date) return 'unknown';
+
+		const now = new Date();
+		const eventDate = new Date(event.date);
+
+		// Evento en curso: fecha de HOY (mismo día)
+		const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+		const eventDay = new Date(eventDate.getFullYear(), eventDate.getMonth(), eventDate.getDate());
+
+		if (eventDay.getTime() === today.getTime()) {
+			return 'ongoing';
+		} else if (eventDate < now) {
+			return 'finished';
+		} else {
+			return 'future';
+		}
+	}
+
+	/**
 	 * Renderiza los eventos destacados en la página de inicio.
-	 * MODIFICADO: Imagen completa, imagen y título clicables.
+	 * NUEVA LÓGICA: Evento en curso (hoy) + último finalizado
+	 * Si no hay en curso: último finalizado + tarjeta de galería
 	 */
 	function renderHomeEvents(events) {
 		clearDynamicListListeners('publicEvents');
@@ -1053,24 +1103,42 @@ window.addEventListener('DOMContentLoaded', async () => {
 		}
 
 		const now = new Date();
-		const activeEvents = events
-			.filter(e => e && !e.isArchived && e.date && new Date(e.date) > now)
+
+		// Clasificar eventos por estado
+		const ongoingEvents = events.filter(e => e && !e.isArchived && getEventStatus(e) === 'ongoing');
+		const futureEvents = events.filter(e => e && !e.isArchived && getEventStatus(e) === 'future')
 			.sort((a, b) => new Date(a.date) - new Date(b.date));
-		const nextActiveEvent = activeEvents[0] || null;
-
-		const pastEvents = events
-			.filter(e => e && !e.isArchived && e.date && new Date(e.date) < now)
+		const finishedEvents = events.filter(e => e && !e.isArchived && getEventStatus(e) === 'finished')
 			.sort((a, b) => new Date(b.date) - new Date(a.date));
-		const mostRecentPastEvent = pastEvents[0] || null;
 
-		const eventsToShow = [nextActiveEvent, mostRecentPastEvent].filter(Boolean); // Filtrar nulos
+		const ongoingEvent = ongoingEvents[0] || null;
+		const nextFutureEvent = futureEvents[0] || null;
+		const lastFinishedEvent = finishedEvents[0] || null;
+
+		// Determinar eventos a mostrar
+		let eventsToShow = [];
+		let showGalleryCard = false;
+
+		if (ongoingEvent) {
+			// HAY evento en curso (HOY): mostrar en curso + último finalizado
+			eventsToShow = [ongoingEvent, lastFinishedEvent].filter(Boolean);
+			showGalleryCard = false; // NO mostrar tarjeta de galería
+		} else if (nextFutureEvent) {
+			// NO hay en curso BUT sí futuro: mostrar próximo + último finalizado
+			eventsToShow = [nextFutureEvent, lastFinishedEvent].filter(Boolean);
+			showGalleryCard = false; // NO mostrar tarjeta de galería
+		} else if (lastFinishedEvent) {
+			// SOLO eventos finalizados: mostrar último finalizado + tarjeta galería
+			eventsToShow = [lastFinishedEvent];
+			showGalleryCard = true; // SÍ mostrar tarjeta de galería
+		}
 
 		// Mostrar botón "Ver Todos" si hay más eventos no archivados que los mostrados
 		const allNonArchivedEventsCount = events.filter(e => e && !e.isArchived).length;
 		const viewAllEventsContainer = document.getElementById('view-all-events-container');
 		viewAllEventsContainer?.classList.toggle('hidden', allNonArchivedEventsCount <= eventsToShow.length);
 
-		if (eventsToShow.length === 0) {
+		if (eventsToShow.length === 0 && !showGalleryCard) {
 			homeEventListContainer.innerHTML = '<p class="text-gray-400 text-center col-span-full font-pixel">NO HAY EVENTOS PROGRAMADOS POR AHORA.</p>';
 			return;
 		}
@@ -1078,29 +1146,35 @@ window.addEventListener('DOMContentLoaded', async () => {
 		eventsToShow.forEach(event => {
 			try {
 				const eventDate = new Date(event.date).toLocaleString('es-ES', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-				const isPastEvent = new Date(event.date) < now;
-				const isNextEvent = nextActiveEvent && event.id === nextActiveEvent.id;
+				const status = getEventStatus(event);
+				const isPastEvent = status === 'finished';
+				const isOngoing = status === 'ongoing';
 
 				let buttonHtml = '';
 				let statusBadgeHtml = '';
 				let cardBorderColor = 'border-white';
-				let nextEventLabelHtml = '';
-				let actionClass = ''; // Para hacer imagen/título clicables
-				let dataAttribute = `data-event-id="${event.id}"`; // Para imagen/título
+				let eventLabelHtml = '';
+				let actionClass = '';
+				let dataAttribute = `data-event-id="${event.id}"`;
 
-				if (isNextEvent) {
-					nextEventLabelHtml = `<div class="absolute top-0 left-0 text-white font-pixel text-sm px-2 py-1 rounded-none border-b border-r border-black z-10 shadow-md" style="background-color: #F02D7D;">PRÓXIMO EVENTO</div>`;
+				if (isOngoing) {
+					eventLabelHtml = `<div class="absolute top-0 left-0 bg-green-600 text-white font-pixel text-sm px-2 py-1 rounded-none border-b border-r border-black z-10 shadow-md animate-pulse">🔴 EN CURSO HOY</div>`;
+				} else if (ongoingEvent && !isOngoing) {
+					// Si hay evento en curso y este no lo es, mostrar como próximo
+					eventLabelHtml = `<div class="absolute top-0 left-0 text-white font-pixel text-sm px-2 py-1 rounded-none border-b border-r border-black z-10 shadow-md" style="background-color: #F02D7D;">PRÓXIMO EVENTO</div>`;
 				} else if (isPastEvent) {
 					statusBadgeHtml = '<div class="absolute top-0 left-0 bg-red-700 text-white font-pixel text-sm px-2 py-1 rounded-none border-b border-r border-black z-10 shadow-md">FINALIZADO</div>';
+				} else if (!ongoingEvent && nextFutureEvent && event.id === nextFutureEvent.id) {
+					eventLabelHtml = `<div class="absolute top-0 left-0 text-white font-pixel text-sm px-2 py-1 rounded-none border-b border-r border-black z-10 shadow-md" style="background-color: #F02D7D;">PRÓXIMO EVENTO</div>`;
 				}
 
 				if (isPastEvent) {
 					if (event.galleryImages && event.galleryImages.length > 0) {
 						buttonHtml = `<button data-event-id="${event.id}" class="gallery-link-btn w-full neon-btn text-white font-pixel text-2xl py-3 px-4 rounded-none">VER GALERÍA</button>`;
-						actionClass = 'gallery-link-btn cursor-pointer'; // <-- Acción clicable
+						actionClass = 'gallery-link-btn cursor-pointer';
 					} else {
 						buttonHtml = `<button disabled class="w-full bg-gray-800 text-gray-500 font-pixel text-2xl py-3 px-4 rounded-none border border-gray-700 cursor-not-allowed">EVENTO FINALIZADO</button>`;
-						dataAttribute = ''; // <-- Sin acción clicable
+						dataAttribute = '';
 					}
 				} else {
 					// Comprobar capacidad antes de mostrar botón activo
@@ -1108,27 +1182,27 @@ window.addEventListener('DOMContentLoaded', async () => {
 					const sold = event.ticketsSold || 0;
 					if (capacity > 0 && sold >= capacity) {
 						buttonHtml = `<button disabled class="w-full bg-red-800 text-red-300 font-pixel text-2xl py-3 px-4 rounded-none border border-red-700 cursor-not-allowed">AGOTADO</button>`;
-						dataAttribute = ''; // <-- Sin acción clicable
+						dataAttribute = '';
 					} else {
 						buttonHtml = `<button data-event-id="${event.id}" class="get-ticket-btn w-full neon-btn font-pixel text-2xl py-3 px-4 rounded-none">CONSEGUIR ENTRADA</button>`;
-						actionClass = 'get-ticket-btn cursor-pointer'; // <-- Acción clicable
+						actionClass = 'get-ticket-btn cursor-pointer';
 					}
 				}
 
 				const card = document.createElement('div');
 				card.className = `relative bg-gray-900 rounded-none ${cardBorderColor} overflow-hidden flex flex-col transform transition-all hover:border-gray-300 hover:shadow-white/30 duration-300 reveal-on-scroll`;
 
-				const imageUrl = event.posterImageUrl || `https://placehold.co/400x200/000000/ffffff?text=${encodeURIComponent(event.name || 'Evento')}&font=vt323`;
+				// Usar thumbnail medium (800px) para portada
+				const originalImageUrl = event.posterImageUrl || `https://placehold.co/400x200/000000/ffffff?text=${encodeURIComponent(event.name || 'Evento')}&font=vt323`;
+				const imageUrl = getThumbnailUrl(originalImageUrl, 'medium');
 				const price = (event.price || 0).toFixed(2);
 
 				card.innerHTML = `
-						${nextEventLabelHtml || statusBadgeHtml}
-						<!-- MODIFICADO: Sin altura fija, con actionClass y dataAttribute -->
+						${eventLabelHtml || statusBadgeHtml}
 						<div class="w-full bg-black border-b ${cardBorderColor} overflow-hidden ${actionClass}" ${dataAttribute}>
-							<img src="${imageUrl}" alt="${event.name || 'Evento'}" class="w-full ${isPastEvent ? 'opacity-60' : ''}" onerror="this.onerror=null;this.src='https://placehold.co/400x200/000/fff?text=Error&font=vt323';">
+							<img src="${imageUrl}" alt="${event.name || 'Evento'}" loading="lazy" class="w-full ${isPastEvent ? 'opacity-60' : ''}" onerror="this.onerror=null;this.src='${originalImageUrl}';">
 						</div>
 						<div class="p-6 flex flex-col flex-grow">
-							<!-- MODIFICADO: con actionClass y dataAttribute -->
 							<h3 class="text-3xl font-pixel ${isPastEvent ? 'text-gray-500' : 'text-white text-glow-white'} mb-2 ${actionClass} glitch-hover" ${dataAttribute}>
 							   ${event.name || 'Evento sin nombre'}
 							</h3>
@@ -1145,11 +1219,35 @@ window.addEventListener('DOMContentLoaded', async () => {
 				homeEventListContainer.appendChild(card);
 			} catch (e) {
 				console.error(`Error renderizando evento ${event?.id} en home:`, e);
-				// Opcional: añadir un card de error
 			}
 		});
 
-		// Re-adjuntar listeners (ya incluye los nuevos elementos clicables)
+		// Renderizar tarjeta de galería si corresponde
+		if (showGalleryCard && lastFinishedEvent && lastFinishedEvent.galleryImages && lastFinishedEvent.galleryImages.length > 0) {
+			const galleryCard = document.createElement('button');
+			galleryCard.className = "w-full bg-gray-900 rounded-none border border-white overflow-hidden flex flex-col text-left transform transition-all hover:border-gray-300 hover:shadow-white/30 duration-300 reveal-on-scroll gallery-link-btn";
+			galleryCard.dataset.eventId = lastFinishedEvent.id;
+
+			const coverImageOriginal = lastFinishedEvent.galleryImages[0];
+			const coverImage = getThumbnailUrl(coverImageOriginal, 'medium');
+			const eventDateStr = new Date(lastFinishedEvent.date).toLocaleDateString('es-ES', { year: 'numeric', month: 'long' });
+			const photoCount = lastFinishedEvent.galleryImages.length;
+
+			galleryCard.innerHTML = `
+				<div class="absolute top-0 left-0 bg-purple-700 text-white font-pixel text-sm px-2 py-1 rounded-none border-b border-r border-black z-10 shadow-md">📸 GALERÍA</div>
+				<div class="w-full bg-black border-b border-white overflow-hidden">
+					<img src="${coverImage}" alt="${lastFinishedEvent.name || 'Galería'}" loading="lazy" class="w-full" onerror="this.onerror=null;this.src='${coverImageOriginal}';">
+				</div>
+				<div class="p-6">
+					<h3 class="text-3xl font-pixel text-white text-glow-white truncate glitch-hover">${lastFinishedEvent.name || 'Evento sin nombre'}</h3>
+					<p class="text-sm text-gray-500 font-pixel">${eventDateStr || 'Fecha desconocida'}</p>
+					<p class="text-gray-400 font-pixel text-lg mt-1">${photoCount} FOTO${photoCount !== 1 ? 'S' : ''}</p>
+				</div>`;
+
+			homeEventListContainer.appendChild(galleryCard);
+		}
+
+		// Re-adjuntar listeners
 		homeEventListContainer.querySelectorAll('.get-ticket-btn').forEach(btn => addTrackedListener(btn, 'click', handleGetTicket));
 		homeEventListContainer.querySelectorAll('.gallery-link-btn').forEach(btn => addTrackedListener(btn, 'click', handleGalleryLink));
 
@@ -1157,6 +1255,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 		observeRevealElements();
 		if (typeof startEventCountdowns === 'function') startEventCountdowns();
 	}
+
 
 
 	/**
@@ -1442,7 +1541,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 
 	/**
 	 * Renderiza las galerías de eventos pasados en la página de inicio.
-	 * MODIFICADO: Imagen completa.
+	 * NUEVO: Solo muestra si NO hay evento en curso. Usa thumbnails para performance.
 	 */
 	function renderPastGalleries(events) {
 		if (!pastGalleriesGrid) return;
@@ -1454,9 +1553,22 @@ window.addEventListener('DOMContentLoaded', async () => {
 			return;
 		}
 
+		// NUEVO: Verificar si hay evento en curso (hoy)
+		const ongoingEvents = events.filter(e => e && !e.isArchived && getEventStatus(e) === 'ongoing');
+		if (ongoingEvents.length > 0) {
+			// NO mostrar sección de galerías pasadas si hay evento en curso
+			const parentSection = pastGalleriesGrid.closest('section, div.px-4');
+			if (parentSection) parentSection.classList.add('hidden');
+			return;
+		} else {
+			// Mostrar sección si la habíamos ocultado antes
+			const parentSection = pastGalleriesGrid.closest('section, div.px-4');
+			if (parentSection) parentSection.classList.remove('hidden');
+		}
+
 		const now = new Date();
 		const pastEventsWithGalleries = events
-			.filter(e => e && e.date && new Date(e.date) < now && e.galleryImages && e.galleryImages.length > 0) // Robustez
+			.filter(e => e && e.date && new Date(e.date) < now && e.galleryImages && e.galleryImages.length > 0)
 			.sort((a, b) => new Date(b.date) - new Date(a.date)); // Más recientes primero
 
 		if (pastEventsWithGalleries.length === 0) {
@@ -1470,14 +1582,15 @@ window.addEventListener('DOMContentLoaded', async () => {
 				card.className = "past-gallery-event-btn w-full bg-gray-900 rounded-none border border-white overflow-hidden flex flex-col text-left transform transition-all hover:border-gray-300 hover:shadow-white/30 duration-300";
 				card.dataset.eventId = event.id;
 
-				const coverImage = event.galleryImages[0] || `https://placehold.co/600x400/000/fff?text=${encodeURIComponent(event.name || 'Galería')}&font=vt323`;
+				// Usar thumbnail small (400px) para grid de galerías
+				const coverImageOriginal = event.galleryImages[0] || `https://placehold.co/600x400/000/fff?text=${encodeURIComponent(event.name || 'Galería')}&font=vt323`;
+				const coverImage = getThumbnailUrl(coverImageOriginal, 'small');
 				const eventDateStr = new Date(event.date).toLocaleDateString('es-ES', { year: 'numeric', month: 'long' });
 				const photoCount = event.galleryImages.length;
 
 				card.innerHTML = `
-						<!-- MODIFICADO: Sin altura fija, sin object-contain -->
 						<div class="w-full bg-black border-b border-white overflow-hidden">
-							<img src="${coverImage}" alt="${event.name || 'Evento'}" class="w-full" onerror="this.onerror=null;this.src='https://placehold.co/600x400/000/fff?text=Error&font=vt323';">
+							<img src="${coverImage}" alt="${event.name || 'Evento'}" loading="lazy" class="w-full" onerror="this.onerror=null;this.src='${coverImageOriginal}';">
 						</div>
 						<div class="p-6">
 							<h3 class="text-3xl font-pixel text-white text-glow-white truncate glitch-hover">${event.name || 'Evento sin nombre'}</h3>
@@ -1512,6 +1625,10 @@ window.addEventListener('DOMContentLoaded', async () => {
 	/**
 	 * Renderiza las imágenes de una galería específica.
 	 */
+	/**
+	 * Renderiza las imágenes de una galería específica.
+	 * NUEVO: Usa thumbnails en grid, carga full image solo en modal
+	 */
 	function renderGalleryImages(eventId) {
 		clearDynamicListListeners('eventGalleryImages');
 
@@ -1519,7 +1636,6 @@ window.addEventListener('DOMContentLoaded', async () => {
 
 		const event = appState.events.find(e => e.id === eventId);
 		if (!event) {
-			// Mostrar error o volver a la lista
 			console.error(`Evento ${eventId} no encontrado para mostrar galería.`);
 			renderGalleryEventList(); // Volver a la lista
 			return;
@@ -1538,13 +1654,16 @@ window.addEventListener('DOMContentLoaded', async () => {
 		}
 
 		galleryUrls.forEach((url, index) => {
-			if (!url) return; // Saltar URLs vacías/inválidas
+			if (!url) return;
 			const imgWrapper = document.createElement('button');
-			imgWrapper.className = "event-gallery-img-btn rounded-none overflow-hidden border border-gray-700 transform transition-all hover:border-gray-300 duration-300 aspect-square"; // Forzar cuadrado
+			imgWrapper.className = "event-gallery-img-btn rounded-none overflow-hidden border border-gray-700 transform transition-all hover:border-gray-300 duration-300 aspect-square";
 
-			imgWrapper.innerHTML = `<img src="${url}" alt="Foto de ${event.name || 'evento'}" loading="lazy" class="w-full h-full object-cover" onerror="this.onerror=null;this.src='https://placehold.co/300x300/000/fff?text=Error&font=vt323';">`;
+			// Usar thumbnail small (400px) para grid de galería
+			const thumbnailUrl = getThumbnailUrl(url, 'small');
+			imgWrapper.innerHTML = `<img src="${thumbnailUrl}" alt="Foto de ${event.name || 'evento'}" loading="lazy" class="w-full h-full object-cover" onerror="this.onerror=null;this.src='${url}';">`;
 			galleryImageViewGrid.appendChild(imgWrapper);
 
+			// Pasar URL completa al modal para imagen en alta calidad
 			addTrackedListener(imgWrapper, 'click', () => showImageModal(url, galleryUrls, index));
 		});
 	}

@@ -1,6 +1,7 @@
 <?php
 /**
  * upload.php - Subida robusta de archivos para Rodetes
+ * CON OPTIMIZACIÓN AUTOMÁTICA: WebP + Thumbnails
  */
 
 // Desactivar visualización de errores para que no rompan el JSON
@@ -10,9 +11,142 @@ ini_set('display_errors', 0);
 session_start();
 header('Content-Type: application/json');
 
-function sendResponse($success, $message, $extra = []) {
+function sendResponse($success, $message, $extra = [])
+{
     echo json_encode(array_merge(['success' => $success, 'message' => $message], $extra));
     exit;
+}
+
+/**
+ * Convierte una imagen a WebP y genera thumbnails
+ * @param string $sourcePath Ruta de la imagen original
+ * @param string $baseName Nombre base para los archivos de salida
+ * @return array URLs de imagen principal y thumbnails
+ */
+function processImage($sourcePath, $baseName)
+{
+    $uploadDir = 'uploads/';
+    $thumbDir = $uploadDir . 'thumbs/';
+
+    // Crear directorio de thumbnails si no existe
+    if (!is_dir($thumbDir)) {
+        mkdir($thumbDir, 0777, true);
+    }
+
+    // Detectar tipo de imagen
+    $imageInfo = getimagesize($sourcePath);
+    if (!$imageInfo) {
+        throw new Exception('No se pudo leer la información de la imagen');
+    }
+
+    $mimeType = $imageInfo['mime'];
+    $originalWidth = $imageInfo[0];
+    $originalHeight = $imageInfo[1];
+
+    // Cargar imagen según tipo
+    switch ($mimeType) {
+        case 'image/jpeg':
+            $sourceImage = imagecreatefromjpeg($sourcePath);
+            break;
+        case 'image/png':
+            $sourceImage = imagecreatefrompng($sourcePath);
+            break;
+        case 'image/gif':
+            $sourceImage = imagecreatefromgif($sourcePath);
+            break;
+        case 'image/webp':
+            $sourceImage = imagecreatefromwebp($sourcePath);
+            break;
+        default:
+            throw new Exception('Formato de imagen no soportado: ' . $mimeType);
+    }
+
+    if (!$sourceImage) {
+        throw new Exception('Error al cargar la imagen');
+    }
+
+    // Generar nombre sin extensión
+    $nameWithoutExt = pathinfo($baseName, PATHINFO_FILENAME);
+
+    // Configuración de thumbnails (ancho máximo en px)
+    $thumbSizes = [
+        'small' => 400,
+        'medium' => 800,
+        'large' => 1200
+    ];
+
+    $result = [];
+
+    // Generar imagen principal optimizada (máximo 1920px)
+    $mainMaxWidth = 1920;
+    if ($originalWidth > $mainMaxWidth) {
+        $mainImage = resizeImage($sourceImage, $originalWidth, $originalHeight, $mainMaxWidth);
+    } else {
+        $mainImage = $sourceImage;
+    }
+
+    $mainPath = $uploadDir . $nameWithoutExt . '.webp';
+    imagewebp($mainImage, $mainPath, 85); // Calidad 85%
+    $result['url'] = $mainPath;
+
+    if ($mainImage !== $sourceImage) {
+        imagedestroy($mainImage);
+    }
+
+    // Generar thumbnails
+    foreach ($thumbSizes as $sizeName => $maxWidth) {
+        if ($originalWidth > $maxWidth) {
+            $thumbImage = resizeImage($sourceImage, $originalWidth, $originalHeight, $maxWidth);
+            $thumbPath = $thumbDir . $nameWithoutExt . '_' . $maxWidth . '.webp';
+            imagewebp($thumbImage, $thumbPath, 80); // Calidad 80% para thumbnails
+            $result['thumb_' . $sizeName] = $thumbPath;
+            imagedestroy($thumbImage);
+        } else {
+            // Si la imagen original es más pequeña que el thumbnail, usar la principal
+            $result['thumb_' . $sizeName] = $mainPath;
+        }
+    }
+
+    // Liberar memoria
+    imagedestroy($sourceImage);
+
+    // Eliminar archivo temporal original si no es WebP
+    if ($mimeType !== 'image/webp') {
+        @unlink($sourcePath);
+    }
+
+    return $result;
+}
+
+/**
+ * Redimensiona una imagen manteniendo aspecto
+ */
+function resizeImage($sourceImage, $originalWidth, $originalHeight, $maxWidth)
+{
+    $ratio = $originalWidth / $originalHeight;
+    $newWidth = $maxWidth;
+    $newHeight = (int) ($maxWidth / $ratio);
+
+    $newImage = imagecreatetruecolor($newWidth, $newHeight);
+
+    // Preservar transparencia para PNG
+    imagealphablending($newImage, false);
+    imagesavealpha($newImage, true);
+
+    imagecopyresampled(
+        $newImage,
+        $sourceImage,
+        0,
+        0,
+        0,
+        0,
+        $newWidth,
+        $newHeight,
+        $originalWidth,
+        $originalHeight
+    );
+
+    return $newImage;
 }
 
 try {
@@ -30,12 +164,24 @@ try {
         $errorMsg = 'No se recibió archivo';
         if (isset($_FILES['file'])) {
             switch ($_FILES['file']['error']) {
-                case UPLOAD_ERR_INI_SIZE:   $errorMsg = 'El archivo excede upload_max_filesize'; break;
-                case UPLOAD_ERR_FORM_SIZE:  $errorMsg = 'El archivo excede MAX_FILE_SIZE'; break;
-                case UPLOAD_ERR_PARTIAL:    $errorMsg = 'Subida incompleta'; break;
-                case UPLOAD_ERR_NO_FILE:     $errorMsg = 'No se subió ningún archivo'; break;
-                case UPLOAD_ERR_NO_TMP_DIR: $errorMsg = 'Falta carpeta temporal'; break;
-                case UPLOAD_ERR_CANT_WRITE:  $errorMsg = 'Error al escribir en disco'; break;
+                case UPLOAD_ERR_INI_SIZE:
+                    $errorMsg = 'El archivo excede upload_max_filesize';
+                    break;
+                case UPLOAD_ERR_FORM_SIZE:
+                    $errorMsg = 'El archivo excede MAX_FILE_SIZE';
+                    break;
+                case UPLOAD_ERR_PARTIAL:
+                    $errorMsg = 'Subida incompleta';
+                    break;
+                case UPLOAD_ERR_NO_FILE:
+                    $errorMsg = 'No se subió ningún archivo';
+                    break;
+                case UPLOAD_ERR_NO_TMP_DIR:
+                    $errorMsg = 'Falta carpeta temporal';
+                    break;
+                case UPLOAD_ERR_CANT_WRITE:
+                    $errorMsg = 'Error al escribir en disco';
+                    break;
             }
         }
         sendResponse(false, $errorMsg);
@@ -62,15 +208,32 @@ try {
     $mimeType = finfo_file($finfo, $file['tmp_name']);
     finfo_close($finfo);
 
-    if (strpos($mimeType, 'image/') !== 0 && strpos($mimeType, 'video/') !== 0) {
-        sendResponse(false, 'Tipo de archivo no permitido: ' . $mimeType);
-    }
+    // Procesar según tipo
+    if (strpos($mimeType, 'image/') === 0) {
+        // Es una imagen - procesar con optimización
+        if (!move_uploaded_file($file['tmp_name'], $targetPath)) {
+            http_response_code(500);
+            sendResponse(false, 'Error al mover el archivo subido.');
+        }
 
-    if (move_uploaded_file($file['tmp_name'], $targetPath)) {
-        sendResponse(true, 'Archivo subido con éxito', ['url' => $targetPath]);
+        try {
+            $result = processImage($targetPath, $targetName);
+            sendResponse(true, 'Imagen optimizada y subida con éxito', $result);
+        } catch (Exception $e) {
+            // Si falla la optimización, devolver imagen original
+            sendResponse(true, 'Imagen subida (sin optimizar): ' . $e->getMessage(), ['url' => $targetPath]);
+        }
+
+    } elseif (strpos($mimeType, 'video/') === 0) {
+        // Es un video - subir sin procesar
+        if (move_uploaded_file($file['tmp_name'], $targetPath)) {
+            sendResponse(true, 'Video subido con éxito', ['url' => $targetPath]);
+        } else {
+            http_response_code(500);
+            sendResponse(false, 'Error al mover el archivo subido.');
+        }
     } else {
-        http_response_code(500);
-        sendResponse(false, 'Error al mover el archivo subido al destino final.');
+        sendResponse(false, 'Tipo de archivo no permitido: ' . $mimeType);
     }
 
 } catch (Exception $e) {
