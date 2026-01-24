@@ -15,8 +15,8 @@ html {
     /* Default: No banner */
     --header-height: 65px;
     /* Consistent header height */
-    --safe-gap: 25px;
-    /* Unified gap for consistent spacing */
+    --safe-gap: 30px;
+    /* Increased slightly for better breathability */
 }
 
 body.promo-active {
@@ -63,8 +63,8 @@ body {
     border-bottom: none !important;
     backdrop-filter: none !important;
     pointer-events: none;
-    padding-top: 5px;
-    /* Spacing between banner and Logo */
+    padding-top: 12px;
+    /* Spacing between banner/top and Logo */
     position: fixed;
     top: var(--promo-banner-height);
     /* Synchronized with banner */
