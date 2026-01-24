@@ -4621,16 +4621,15 @@ window.addEventListener('DOMContentLoaded', async () => {
 		const newAppLogoUrl = appLogoUrlInput?.value.trim() || '';
 		const newTicketLogoUrl = ticketLogoUrlInput?.value.trim() || '';
 		const newBannerUrl = bannerUrlInput?.value.trim() || '';
-		appState.promoEnabled = promoEnableCheckbox?.checked || false;
-		appState.promoCustomText = promoTextInput.value.trim();
-		appState.promoNeonColor = promoNeonColorInput.value.trim();
+		const newPromoEnabled = promoEnableCheckbox?.checked || false;
+		const newPromoText = promoTextInput?.value.trim() || '';
+		const newPromoNeonColor = promoNeonColorInput?.value.trim() || '#F02D7D';
 
-		appState.countdownEnabled = countdownEnableCheckbox.checked;
-		appState.countdownTitle = countdownTitleInput.value.trim();
-		appState.countdownTargetDate = countdownTargetDateInput.value;
-		appState.countdownDateText = countdownDateTextInput.value.trim();
+		const newCountdownEnabled = countdownEnableCheckbox?.checked || false;
+		const newCountdownTitle = countdownTitleInput?.value.trim() || '';
+		const newCountdownTargetDate = countdownTargetDateInput?.value || '';
+		const newCountdownDateText = countdownDateTextInput?.value.trim() || '';
 
-		showLoading(true); // <-- AÑADIDO
 		const domainsInput = document.getElementById('allowed-domains-input');
 		const newAllowedDomains = (domainsInput?.value || '')
 			.split('\n')
@@ -4662,7 +4661,13 @@ window.addEventListener('DOMContentLoaded', async () => {
 			appState.bannerVideoUrl = newBannerUrl;
 			appState.promoEnabled = newPromoEnabled;
 			appState.promoCustomText = newPromoText;
-			appState.promoNeonColor = newPromoNeonColor; // <-- AÑADIDO
+			appState.promoNeonColor = newPromoNeonColor;
+
+			appState.countdownEnabled = newCountdownEnabled;
+			appState.countdownTitle = newCountdownTitle;
+			appState.countdownTargetDate = newCountdownTargetDate;
+			appState.countdownDateText = newCountdownDateText;
+
 			appState.allowedDomains = newAllowedDomains;
 
 			// Guardar en servidor
