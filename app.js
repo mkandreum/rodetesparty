@@ -650,7 +650,9 @@ window.addEventListener('DOMContentLoaded', async () => {
 				appLogoUrl: appState.appLogoUrl,
 				ticketLogoUrl: appState.ticketLogoUrl,
 				bannerVideoUrl: appState.bannerVideoUrl,
+				promoEnabled: appState.promoEnabled, // <-- AÑADIDO
 				promoNeonColor: appState.promoNeonColor,
+				promoCustomText: appState.promoCustomText, // <-- AÑADIDO (también faltaba)
 				countdownEnabled: appState.countdownEnabled,
 				countdownTitle: appState.countdownTitle,
 				countdownTargetDate: appState.countdownTargetDate,
