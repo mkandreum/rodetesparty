@@ -1128,6 +1128,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 			if (distance < 0) {
 				if (countdownTimer) countdownTimer.textContent = "00:00:00:00";
 				clearInterval(countdownInterval);
+				renderNextEventPromo(); // Refrescar banner al terminar cuenta atrás
 				return;
 			}
 
@@ -4565,8 +4566,12 @@ window.addEventListener('DOMContentLoaded', async () => {
 		if (ticketLogoUrlInput) ticketLogoUrlInput.value = appState.ticketLogoUrl || '';
 		if (bannerUrlInput) bannerUrlInput.value = appState.bannerVideoUrl || '';
 		if (promoEnableCheckbox) promoEnableCheckbox.checked = appState.promoEnabled || false;
-		if (promoTextInput) promoTextInput.value = appState.promoCustomText || '';
-		if (promoNeonColorInput) promoNeonColorInput.value = appState.promoNeonColor || '';
+		if (promoTextInput) {
+			// Pre-rellenar con el template si está vacío para facilitar la edición
+			const defaultTemplate = '¡PRÓXIMO EVENTO: {eventName} - {eventDate}! Consigue tus entradas ya.';
+			promoTextInput.value = appState.promoCustomText || defaultTemplate;
+		}
+		if (promoNeonColorInput) promoNeonColorInput.value = appState.promoNeonColor || '#F02D7D';
 
 		if (countdownEnableCheckbox) countdownEnableCheckbox.checked = appState.countdownEnabled === true;
 		if (countdownTitleInput) countdownTitleInput.value = appState.countdownTitle || '';
@@ -4826,11 +4831,17 @@ window.addEventListener('DOMContentLoaded', async () => {
 		// Validar fecha (evitar mover futuro a pasado)
 		try {
 			const inputDate = new Date(eventDate);
-			if (isNaN(inputDate.getTime())) throw new Error("Formato de fecha inválido."); // Chequeo extra
+			if (isNaN(inputDate.getTime())) throw new Error("Formato de fecha inválido.");
 			const originalEvent = eventIdToSave ? appState.events.find(ev => ev.id === eventIdToSave) : null;
+
 			// Si estamos EDITANDO un evento FUTURO y la NUEVA fecha es en el PASADO, bloquear.
 			if (originalEvent && originalEvent.date && new Date(originalEvent.date) > new Date() && inputDate < new Date()) {
 				showInfoModal("No puedes mover un evento futuro al pasado.", true); return;
+			}
+
+			// AUTOMÁTICO: Si es un evento futuro, activamos el banner automáticamente
+			if (inputDate > new Date()) {
+				appState.promoEnabled = true;
 			}
 		} catch (dateError) {
 			showInfoModal(`Error con la fecha introducida: ${dateError.message}`, true); return;
