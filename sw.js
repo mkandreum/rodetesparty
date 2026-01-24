@@ -1,6 +1,5 @@
 const CACHE_NAME = 'rodetes-party-v1';
 const urlsToCache = [
-    '/',
     '/index.php',
     '/style.css',
     '/app.js',
