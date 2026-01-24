@@ -1,8 +1,6 @@
 const CACHE_NAME = 'rodetes-party-v1';
-const RUNTIME_CACHE = 'rodetes-runtime';
-
-// Essential assets to cache immediately
 const urlsToCache = [
+    '/',
     '/index.php',
     '/style.css',
     '/app.js',
@@ -11,80 +9,65 @@ const urlsToCache = [
     '/icons/icon-512x512.png'
 ];
 
-// Install event - cache essential resources
+// Install event - cache assets
 self.addEventListener('install', (event) => {
-    console.log('[ServiceWorker] Install');
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then((cache) => {
-                console.log('[ServiceWorker] Caching app shell');
+                console.log('Opened cache');
                 return cache.addAll(urlsToCache);
-            })
-            .catch((error) => {
-                console.error('[ServiceWorker] Cache addAll error:', error);
             })
     );
     self.skipWaiting();
 });
 
+// Fetch event - Network First Strategy (Prioritize fresh content)
+self.addEventListener('fetch', (event) => {
+    // Only handle GET requests
+    if (event.request.method !== 'GET') return;
+
+    event.respondWith(
+        fetch(event.request)
+            .then((networkResponse) => {
+                // Network success: return response and update cache
+                if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
+                    return networkResponse;
+                }
+
+                // Clone response for cache
+                const responseToCache = networkResponse.clone();
+
+                // Cache static assets, ignore API
+                if (!event.request.url.includes('/api/')) {
+                    caches.open(CACHE_NAME)
+                        .then((cache) => {
+                            cache.put(event.request, responseToCache);
+                        });
+                }
+
+                return networkResponse;
+            })
+            .catch(() => {
+                // Network failure: fallback to cache (Offline Mode)
+                console.log('Network failed, serving from cache:', event.request.url);
+                return caches.match(event.request);
+            })
+    );
+});
+
 // Activate event - clean up old caches
 self.addEventListener('activate', (event) => {
-    console.log('[ServiceWorker] Activate');
+    const cacheWhitelist = [CACHE_NAME];
     event.waitUntil(
         caches.keys().then((cacheNames) => {
             return Promise.all(
                 cacheNames.map((cacheName) => {
-                    if (cacheName !== CACHE_NAME && cacheName !== RUNTIME_CACHE) {
-                        console.log('[ServiceWorker] Deleting old cache:', cacheName);
+                    if (cacheWhitelist.indexOf(cacheName) === -1) {
                         return caches.delete(cacheName);
                     }
                 })
             );
         })
     );
-    return self.clients.claim();
-});
-
-// Fetch event - CRITICAL for PWA installability
-// Network-first strategy for dynamic content, cache fallback
-self.addEventListener('fetch', (event) => {
-    // Skip cross-origin requests
-    if (!event.request.url.startsWith(self.location.origin)) {
-        return;
-    }
-
-    event.respondWith(
-        fetch(event.request)
-            .then((response) => {
-                // Clone the response
-                const responseToCache = response.clone();
-
-                // Cache successful responses
-                if (response.status === 200) {
-                    caches.open(RUNTIME_CACHE).then((cache) => {
-                        cache.put(event.request, responseToCache);
-                    });
-                }
-
-                return response;
-            })
-            .catch(() => {
-                // Network failed, try cache
-                return caches.match(event.request).then((cachedResponse) => {
-                    if (cachedResponse) {
-                        return cachedResponse;
-                    }
-
-                    // Return offline page for navigation requests
-                    if (event.request.mode === 'navigate') {
-                        return caches.match('/index.php');
-                    }
-
-                    return new Response('Network error', {
-                        status: 408,
-                        headers: { 'Content-Type': 'text/plain' }
-                    });
-                });
-            })
-    );
+    self.clients.claim();
 });
