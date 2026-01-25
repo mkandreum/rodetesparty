@@ -1,10 +1,15 @@
 FROM php:8.2-apache
 
-# Instalar dependencias necesarias (ej. zip para backups)
+# Instalar dependencias necesarias (ej. zip para backups, librerías para GD)
 RUN apt-get update && apt-get install -y \
     libzip-dev \
     unzip \
-    && docker-php-ext-install zip
+    libpng-dev \
+    libjpeg-dev \
+    libfreetype6-dev \
+    libwebp-dev \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
+    && docker-php-ext-install -j$(nproc) gd zip
 
 # Habilitar mod_rewrite y mod_headers
 RUN a2enmod rewrite headers
