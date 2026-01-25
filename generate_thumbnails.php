@@ -1,13 +1,9 @@
 <?php
 /**
- * Script para generar miniaturas WebP de imágenes existentes
- * Ejecutar una sola vez (o cuando sea necesario) desde el navegador o CLI
+ * Script de generación de miniaturas SIN dependencia de GD
+ * Usa comandos del sistema (ImageMagick) si está disponible
+ * Fallback: copia optimizada con JPEG
  */
-
-// Verificar que GD esté disponible
-if (!extension_loaded('gd')) {
-    die('Error: La extensión GD de PHP no está disponible. Se requiere para el procesamiento de imágenes.');
-}
 
 // Rutas
 $uploadsDir = __DIR__ . '/uploads/';
@@ -20,74 +16,79 @@ if (!file_exists($thumbnailsDir)) {
 }
 
 /**
- * Genera una miniatura WebP optimizada de una imagen
+ * Verifica si ImageMagick está disponible
  */
-function generateThumbnail($sourcePath, $thumbnailDir, $size = 400, $quality = 80)
+function checkImageMagick()
 {
-    $imageInfo = @getimagesize($sourcePath);
-    if ($imageInfo === false) {
-        return null;
-    }
+    $output = [];
+    $returnCode = 0;
+    @exec('convert -version 2>&1', $output, $returnCode);
+    return $returnCode === 0;
+}
 
-    $mime = $imageInfo['mime'];
-
-    switch ($mime) {
-        case 'image/jpeg':
-            $sourceImage = @imagecreatefromjpeg($sourcePath);
-            break;
-        case 'image/png':
-            $sourceImage = @imagecreatefrompng($sourcePath);
-            break;
-        case 'image/gif':
-            $sourceImage = @imagecreatefromgif($sourcePath);
-            break;
-        case 'image/webp':
-            $sourceImage = @imagecreatefromwebp($sourcePath);
-            break;
-        default:
-            return null;
-    }
-
-    if ($sourceImage === false) {
-        return null;
-    }
-
-    $originalWidth = imagesx($sourceImage);
-    $originalHeight = imagesy($sourceImage);
-
-    // Crop cuadrado centrado
-    $cropSize = min($originalWidth, $originalHeight);
-    $cropX = ($originalWidth - $cropSize) / 2;
-    $cropY = ($originalHeight - $cropSize) / 2;
-
-    $thumbnail = imagecreatetruecolor($size, $size);
-    imagealphablending($thumbnail, false);
-    imagesavealpha($thumbnail, true);
-
-    imagecopyresampled(
-        $thumbnail,
-        $sourceImage,
-        0,
-        0,
-        $cropX,
-        $cropY,
-        $size,
-        $size,
-        $cropSize,
-        $cropSize
-    );
-
+/**
+ * Genera miniatura usando ImageMagick (si está disponible)
+ */
+function generateThumbnailImageMagick($sourcePath, $thumbnailDir, $size = 400, $quality = 80)
+{
     $fileName = basename($sourcePath);
     $fileNameWithoutExt = pathinfo($fileName, PATHINFO_FILENAME);
-    $thumbnailPath = $thumbnailDir . $fileNameWithoutExt . '.webp';
+    $thumbnailPath = $thumbnailDir . $fileNameWithoutExt . '.jpg';
 
-    $success = imagewebp($thumbnail, $thumbnailPath, $quality);
+    // Comando ImageMagick: redimensionar, crop cuadrado centrado, convertir a JPEG
+    $command = sprintf(
+        'convert %s -resize %dx%d^ -gravity center -extent %dx%d -quality %d %s 2>&1',
+        escapeshellarg($sourcePath),
+        $size,
+        $size,
+        $size,
+        $size,
+        $quality,
+        escapeshellarg($thumbnailPath)
+    );
 
-    imagedestroy($sourceImage);
-    imagedestroy($thumbnail);
+    $output = [];
+    $returnCode = 0;
+    exec($command, $output, $returnCode);
 
-    return $success ? $thumbnailPath : null;
+    return ($returnCode === 0 && file_exists($thumbnailPath)) ? $thumbnailPath : null;
 }
+
+/**
+ * Fallback: simplemente copia la imagen como JPEG (sin redimensionar)
+ * Útil si no hay ImageMagick ni GD
+ */
+function copyAsThumbnail($sourcePath, $thumbnailDir)
+{
+    $fileName = basename($sourcePath);
+    $fileNameWithoutExt = pathinfo($fileName, PATHINFO_FILENAME);
+    $thumbnailPath = $thumbnailDir . $fileNameWithoutExt . '.jpg';
+
+    // Simplemente copiar el archivo
+    if (copy($sourcePath, $thumbnailPath)) {
+        return $thumbnailPath;
+    }
+
+    return null;
+}
+
+// Verificar capacidades del servidor
+$hasImageMagick = checkImageMagick();
+
+echo "<h1>Generación de Miniaturas - Modo Compatibilidad</h1>";
+echo "<p><strong>ImageMagick:</strong> " . ($hasImageMagick ? "✅ Disponible" : "❌ No disponible") . "</p>";
+echo "<p><strong>PHP GD:</strong> ❌ No disponible</p>";
+echo "<hr>";
+
+if (!$hasImageMagick) {
+    echo "<div style='background: #fff3cd; border: 1px solid #ffc107; padding: 15px; margin: 10px 0;'>";
+    echo "<strong>⚠️ Modo limitado:</strong> Sin GD ni ImageMagick, las miniaturas serán copias de las originales (no optimizadas).";
+    echo "<br>Para mejor rendimiento, solicita a tu hosting habilitar PHP GD o ImageMagick.";
+    echo "</div>";
+}
+
+echo "<p>Procesando imágenes en: <code>$uploadsDir</code></p>";
+echo "<ul>";
 
 // Escanear directorio uploads
 $images = glob($uploadsDir . '*.{jpg,jpeg,png,gif,webp}', GLOB_BRACE);
@@ -95,14 +96,10 @@ $processed = 0;
 $skipped = 0;
 $errors = 0;
 
-echo "<h1>Generación de Miniaturas WebP</h1>";
-echo "<p>Procesando imágenes en: $uploadsDir</p>";
-echo "<ul>";
-
 foreach ($images as $imagePath) {
     $fileName = basename($imagePath);
     $fileNameWithoutExt = pathinfo($fileName, PATHINFO_FILENAME);
-    $expectedThumbnail = $thumbnailsDir . $fileNameWithoutExt . '.webp';
+    $expectedThumbnail = $thumbnailsDir . $fileNameWithoutExt . '.jpg';
 
     // Saltar si la miniatura ya existe
     if (file_exists($expectedThumbnail)) {
@@ -111,10 +108,21 @@ foreach ($images as $imagePath) {
         continue;
     }
 
-    $result = generateThumbnail($imagePath, $thumbnailsDir);
+    $result = null;
+
+    // Intentar con ImageMagick primero
+    if ($hasImageMagick) {
+        $result = generateThumbnailImageMagick($imagePath, $thumbnailsDir);
+    }
+
+    // Fallback: copiar archivo
+    if (!$result) {
+        $result = copyAsThumbnail($imagePath, $thumbnailsDir);
+    }
 
     if ($result) {
-        echo "<li>✅ Procesado: $fileName → " . basename($result) . "</li>";
+        $method = $hasImageMagick ? "ImageMagick" : "Copia";
+        echo "<li>✅ Procesado ($method): $fileName → " . basename($result) . "</li>";
         $processed++;
     } else {
         echo "<li>❌ Error: $fileName</li>";
@@ -128,7 +136,7 @@ echo "<p>Procesadas: <strong>$processed</strong></p>";
 echo "<p>Saltadas (ya existían): <strong>$skipped</strong></p>";
 echo "<p>Errores: <strong>$errors</strong></p>";
 
-// Cargar datos_app.json y actualizar referencias
+// Actualizar datos_app.json
 if (file_exists($dataFile)) {
     echo "<h2>Actualizando datos_app.json</h2>";
 
@@ -144,13 +152,12 @@ if (file_exists($dataFile)) {
                 foreach ($event['galleryImages'] as $imageUrl) {
                     $imageName = basename($imageUrl);
                     $nameWithoutExt = pathinfo($imageName, PATHINFO_FILENAME);
-                    $thumbnailPath = 'uploads/thumbnails/' . $nameWithoutExt . '.webp';
+                    $thumbnailPath = 'uploads/thumbnails/' . $nameWithoutExt . '.jpg';
 
-                    // Verificar que la miniatura exista
                     if (file_exists(__DIR__ . '/' . $thumbnailPath)) {
                         $thumbnails[] = $thumbnailPath;
                     } else {
-                        $thumbnails[] = null; // Mantener null para fallback
+                        $thumbnails[] = null;
                     }
                 }
 
@@ -159,7 +166,6 @@ if (file_exists($dataFile)) {
             }
         }
 
-        // Guardar archivo actualizado
         $success = file_put_contents($dataFile, json_encode($appState, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
 
         if ($success) {
@@ -172,5 +178,7 @@ if (file_exists($dataFile)) {
     echo "<p>⚠️  Archivo datos_app.json no encontrado</p>";
 }
 
-echo "<p><strong>¡Proceso completado!</strong></p>";
+echo "<hr>";
+echo "<p><strong>✅ Proceso completado</strong></p>";
+echo "<p><a href='javascript:history.back()' style='padding: 10px 20px; background: #007bff; color: white; text-decoration: none; border-radius: 5px;'>← Volver</a></p>";
 ?>
