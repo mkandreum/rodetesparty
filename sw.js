@@ -1,4 +1,4 @@
-const CACHE_NAME = 'rodetes-party-v7';
+const CACHE_NAME = 'rodetes-party-v8';
 const urlsToCache = [
     './',
     './index.php',

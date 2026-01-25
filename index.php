@@ -1509,7 +1509,7 @@ $adminEmail = isset($_SESSION['admin_email']) ? $_SESSION['admin_email'] : '';
             <!-- Progress Bar Container -->
             <div class="w-full h-8 border-2 border-white p-1 mb-2 relative">
                 <!-- Progress Fill -->
-                <div id="loading-progress-bar" class="h-full bg-white transition-all duration-200 ease-out"
+                <div id="loading-progress-bar" class="h-full bg-green-500 transition-all duration-200 ease-out"
                     style="width: 0%;"></div>
             </div>
 
