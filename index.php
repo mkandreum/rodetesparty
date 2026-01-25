@@ -1548,7 +1548,7 @@ $adminEmail = isset($_SESSION['admin_email']) ? $_SESSION['admin_email'] : '';
     </script>
 
     <!--  App Principal (Carga diferida) -->
-    <script src="app_v6.js?v=1" defer></script>
+    <script src="app.js?v=20260125206" defer></script>
 
     <!-- PWA Service Worker Registration -->
     <script>
