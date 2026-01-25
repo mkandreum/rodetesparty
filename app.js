@@ -4957,15 +4957,25 @@ window.addEventListener('DOMContentLoaded', async () => {
 		const hiddenInputId = 'gallery-urls-input'; // ID del input oculto
 		const containerId = 'admin-gallery-preview-grid'; // ID de la rejilla
 
+
 		let imageUrls = []; // Array vacío por defecto
+		let thumbnailUrls = []; // Array vacío por defecto
 
 		if (!isNaN(eventId)) {
 			const event = appState.events.find(e => e.id === eventId);
 			imageUrls = event?.galleryImages || []; // Obtener URLs o array vacío
+			thumbnailUrls = event?.galleryThumbnails || []; // Obtener Thumbnails
+		}
+
+		// Pre-popular el input de thumbnails
+		const thumbnailInput = document.getElementById('gallery-thumbnails-input');
+		if (thumbnailInput) {
+			thumbnailInput.value = thumbnailUrls.join('\n');
 		}
 
 		// Renderizar la rejilla (mostrará mensaje si imageUrls está vacío)
-		renderAdminGalleryGrid(containerId, hiddenInputId, imageUrls);
+		// Pasamos 'gallery-thumbnails-input' para que la rejilla se mantenga sincronizada al borrar
+		renderAdminGalleryGrid(containerId, hiddenInputId, imageUrls, 'gallery-thumbnails-input');
 
 		// Limpiar input file al cambiar evento
 		if (galleryUploadInput) galleryUploadInput.value = '';
