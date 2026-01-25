@@ -29,14 +29,14 @@ if (!file_exists($thumbnailDir)) {
  * @param string $thumbnailDir Directorio donde guardar la miniatura
  * @param int $size Tamaño de la miniatura (cuadrado)
  * @param int $quality Calidad WebP (0-100)
- * @return string|null Ruta de la miniatura o null si falla
+ * @return array Array with ['path' => string|null, 'error' => string|null]
  */
 function generateWebPThumbnail($sourcePath, $thumbnailDir, $size = 400, $quality = 80)
 {
     // Verificar que GD está disponible
     if (!extension_loaded('gd')) {
         error_log('PHP GD extension not available for thumbnail generation');
-        return null;
+        return ['path' => null, 'error' => 'PHP GD extension not available'];
     }
 
     // Generar nombre de archivo para miniatura (WebP)
@@ -111,18 +111,21 @@ function generateWebPThumbnail($sourcePath, $thumbnailDir, $size = 400, $quality
         imagedestroy($thumbnail);
 
         if ($success && file_exists($thumbnailPath)) {
-            return $thumbnailPath;
+            return ['path' => $thumbnailPath, 'error' => null];
         } else {
-            throw new Exception('No se pudo guardar la miniatura WebP');
+            throw new Exception('No se pudo guardar la miniatura WebP (imagewebp returned false)');
         }
     } catch (Exception $e) {
         error_log('Error generating WebP thumbnail: ' . $e->getMessage());
-        return null;
+        return ['path' => null, 'error' => $e->getMessage()];
     }
 }
 
 // 3. Procesar archivo
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Aumentar memoria para procesamiento de imágenes
+    ini_set('memory_limit', '512M');
+
     if (isset($_FILES['file']) && $_FILES['file']['error'] === UPLOAD_ERR_OK) {
         $file = $_FILES['file'];
         $fileName = basename($file['name']);
@@ -151,14 +154,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if (move_uploaded_file($fileTmpPath, $destPath)) {
             // Generar miniatura (con PHP GD generando WebP)
-            $thumbnailPath = generateWebPThumbnail($destPath, $thumbnailDir);
+            $thumbResult = generateWebPThumbnail($destPath, $thumbnailDir);
+            $thumbnailPath = $thumbResult['path'];
+            $thumbnailError = $thumbResult['error'];
 
             // Éxito
             echo json_encode([
                 'success' => true,
                 'message' => 'Archivo subido correctamente.',
                 'url' => $destPath, // Ruta de imagen completa
-                'thumbnail' => $thumbnailPath // Ruta de miniatura WebP (o null si falló)
+                'thumbnail' => $thumbnailPath, // Ruta de miniatura WebP (o null si falló)
+                'thumbnail_error' => $thumbnailError // Debug info
             ]);
         } else {
             http_response_code(500);
