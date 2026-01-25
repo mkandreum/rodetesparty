@@ -1034,29 +1034,52 @@ window.addEventListener('DOMContentLoaded', async () => {
 	 * @param {string} hiddenInputId - ID del input oculto donde se guardan las URLs (p.ej., 'gallery-urls-input').
 	 * @param {string[]} imageUrls - Array de URLs de las imágenes a mostrar.
 	 */
-	function renderAdminGalleryGrid(containerId, hiddenInputId, imageUrls) {
+	/**
+	 * Renderiza una rejilla de miniaturas con botones de borrar para galerías en admin.
+	 * @param {string} containerId - ID del elemento contenedor de la rejilla.
+	 * @param {string} hiddenInputId - ID del input oculto donde se guardan las URLs.
+	 * @param {string[]} imageUrls - Array de URLs de las imágenes a mostrar.
+	 * @param {string} thumbnailInputId - (Opcional) ID del input oculto de thumbnails.
+	 */
+	function renderAdminGalleryGrid(containerId, hiddenInputId, imageUrls, thumbnailInputId = null) {
 		const gridContainer = document.getElementById(containerId);
 		const hiddenInput = document.getElementById(hiddenInputId);
+		const thumbnailInput = thumbnailInputId ? document.getElementById(thumbnailInputId) : null;
+
 		if (!gridContainer || !hiddenInput) {
 			console.error(`Error: Contenedor (${containerId}) o input oculto (${hiddenInputId}) no encontrados.`);
 			return;
 		}
 
 		// Limpiar listeners antiguos específicos de esta rejilla
-		// Usaremos un identificador único para los listeners de borrado
 		const listenerType = `delete-img-${containerId}`;
-		clearDynamicListListeners(listenerType); // Modificaremos clearDynamicListListeners luego
+		clearDynamicListListeners(listenerType);
 
 		gridContainer.innerHTML = ''; // Limpiar rejilla
 
 		if (!imageUrls || imageUrls.length === 0) {
 			gridContainer.innerHTML = `<p class="text-gray-500 font-pixel text-center col-span-full self-center">No hay imágenes en esta galería.</p>`;
 			hiddenInput.value = ''; // Asegurar que el input oculto esté vacío
+			if (thumbnailInput) thumbnailInput.value = '';
 			return;
 		}
 
 		// Actualizar el input oculto con las URLs actuales
 		hiddenInput.value = imageUrls.join('\n');
+
+		// Recuperar thumbnails actuales si existe input, o asegurar sync
+		let thumbnailUrls = [];
+		if (thumbnailInput) {
+			thumbnailUrls = thumbnailInput.value ? thumbnailInput.value.split('\n') : [];
+			// Sync length
+			while (thumbnailUrls.length < imageUrls.length) {
+				thumbnailUrls.push(imageUrls[thumbnailUrls.length]);
+			}
+			if (thumbnailUrls.length > imageUrls.length) {
+				thumbnailUrls = thumbnailUrls.slice(0, imageUrls.length);
+			}
+			thumbnailInput.value = thumbnailUrls.join('\n');
+		}
 
 		// Crear y añadir cada miniatura
 		imageUrls.forEach((url, index) => {
@@ -1064,24 +1087,35 @@ window.addEventListener('DOMContentLoaded', async () => {
 
 			const item = document.createElement('div');
 			item.className = 'admin-gallery-item';
+
+			// Usar miniatura para previsualizar si existe y es WebP, si no la original
+			const previewUrl = (thumbnailUrls[index] && thumbnailUrls[index].endsWith('.webp')) ? thumbnailUrls[index] : url;
+
 			item.innerHTML = `
-					<img src="${url}" alt="Miniatura ${index + 1}" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/100x100/000/fff?text=Error&font=vt323';">
-					<button type="button" class="delete-img-btn" data-url="${url}" data-index="${index}" title="Eliminar imagen">&times;</button>
-				`;
+				<img src="${previewUrl}" alt="Miniatura ${index + 1}" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/100x100/000/fff?text=Error&font=vt323';">
+				<button type="button" class="delete-img-btn" data-url="${url}" data-index="${index}" title="Eliminar imagen">&times;</button>
+			`;
 			gridContainer.appendChild(item);
 
 			// Añadir listener al botón de borrar
 			const deleteBtn = item.querySelector('.delete-img-btn');
 			if (deleteBtn) {
-				// Añadir un listener que se pueda identificar y limpiar después
 				addTrackedListener(deleteBtn, 'click', (e) => {
 					e.preventDefault();
-					const urlToDelete = e.currentTarget.dataset.url;
-					// Filtrar la URL del array actual
-					const updatedUrls = imageUrls.filter(imgUrl => imgUrl !== urlToDelete);
-					// Volver a renderizar la rejilla con las URLs actualizadas
-					renderAdminGalleryGrid(containerId, hiddenInputId, updatedUrls);
-				}, listenerType); // Pasamos el tipo único
+					const indexToDelete = parseInt(e.currentTarget.dataset.index, 10);
+
+					// Filtrar por índice para asegurar que borramos par imagen-thumbnail correcto
+					const updatedUrls = imageUrls.filter((_, i) => i !== indexToDelete);
+
+					// Actualizar thumbnails también
+					if (thumbnailInput) {
+						const updatedThumbnails = thumbnailUrls.filter((_, i) => i !== indexToDelete);
+						thumbnailInput.value = updatedThumbnails.join('\n');
+					}
+
+					// Volver a renderizar
+					renderAdminGalleryGrid(containerId, hiddenInputId, updatedUrls, thumbnailInputId);
+				}, listenerType);
 			}
 		});
 	}
