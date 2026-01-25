@@ -1385,6 +1385,12 @@ $adminEmail = isset($_SESSION['admin_email']) ? $_SESSION['admin_email'] : '';
             class="relative max-w-3xl max-h-[90vh] w-full h-full flex items-center justify-center modal-content-scale-in">
             <button data-close-modal="image-modal"
                 class="absolute top-2 right-2 text-white bg-black bg-opacity-50 rounded-full h-8 w-8 flex items-center justify-center border-2 border-white text-2xl font-bold leading-none hover:bg-opacity-75 z-30 transition-opacity">&times;</button>
+            <!-- NUEVO: Botón descargar foto con logo -->
+            <button id="download-image-btn"
+                class="absolute top-2 right-12 bg-pink-500 hover:bg-pink-600 text-white font-pixel text-sm px-3 py-1 rounded-none border border-pink-400 z-30 transition-all hover:scale-105"
+                title="Descargar foto con logo Rodetes">
+                ⬇ DESCARGAR
+            </button>
             <img id="image-modal-content" src="" alt="Vista ampliada" class="max-w-full max-h-full object-contain">
             <button id="image-modal-prev"
                 class="hidden absolute top-1/2 left-2 -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-75 transition-opacity text-3xl z-20">&lt;</button>

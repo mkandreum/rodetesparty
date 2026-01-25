@@ -914,6 +914,106 @@ window.addEventListener('DOMContentLoaded', async () => {
 		currentImageModalIndex = (currentImageModalIndex - 1 + currentImageModalGallery.length) % currentImageModalGallery.length;
 		imageModalContent.src = currentImageModalGallery[currentImageModalIndex];
 	}
+
+	/**
+	 * Helper para cargar imágenes como Promise
+	 * @param {string} src - URL de la imagen
+	 * @returns {Promise<HTMLImageElement>}
+	 */
+	function loadImage(src) {
+		return new Promise((resolve, reject) => {
+			const img = new Image();
+			img.crossOrigin = 'anonymous'; // Para evitar CORS
+			img.onload = () => resolve(img);
+			img.onerror = reject;
+			img.src = src;
+		});
+	}
+
+	/**
+	 * Descarga la imagen actualmente mostrada en el modal con el logo de Rodetes como marca de agua
+	 */
+	async function downloadImageWithWatermark() {
+		if (!imageModalContent) {
+			showInfoModal('No hay imagen para descargar.', true);
+			return;
+		}
+
+		// Verificar que haya logo configurado
+		if (!appState || !appState.appLogoUrl) {
+			showInfoModal('Configure el logo de la web en Ajustes para poder descargar fotos con marca de agua.', true);
+			return;
+		}
+
+		const imgSrc = imageModalContent.src;
+
+		try {
+			showLoading(true);
+
+			// Crear canvas
+			const canvas = document.createElement('canvas');
+			const ctx = canvas.getContext('2d');
+
+			// Cargar imagen original
+			const img = await loadImage(imgSrc);
+			canvas.width = img.width;
+			canvas.height = img.height;
+
+			// Dibujar imagen original
+			ctx.drawImage(img, 0, 0);
+
+			// Cargar logo
+			const logo = await loadImage(appState.appLogoUrl);
+
+			// Calcular tamaño del logo (máximo 15% de la altura de la imagen)
+			const maxLogoHeight = Math.min(100, canvas.height * 0.15);
+			const logoHeight = maxLogoHeight;
+			const logoWidth = logo.width * (logoHeight / logo.height);
+
+			// Posición: centro horizontal, parte inferior con padding
+			const x = (canvas.width - logoWidth) / 2;
+			const y = canvas.height - logoHeight - 30; // 30px de padding desde abajo
+
+			// Dibujar logo
+			ctx.drawImage(logo, x, y, logoWidth, logoHeight);
+
+			// Convertir a blob y descargar
+			canvas.toBlob((blob) => {
+				if (!blob) {
+					showInfoModal('Error al procesar la imagen.', true);
+					showLoading(false);
+					return;
+				}
+
+				const url = URL.createObjectURL(blob);
+				const a = document.createElement('a');
+				a.href = url;
+				a.download = `rodetes-party-${Date.now()}.jpg`;
+				document.body.appendChild(a);
+				a.click();
+				document.body.removeChild(a);
+				URL.revokeObjectURL(url);
+
+				showLoading(false);
+				showInfoModal('¡Foto descargada con logo de Rodetes!', false);
+			}, 'image/jpeg', 0.95);
+
+		} catch (error) {
+			console.error('Error descargando imagen con marca de agua:', error);
+			let errorMsg = 'Error al descargar la imagen.';
+
+			// Mensajes de error más específicos
+			if (error.message && error.message.includes('CORS')) {
+				errorMsg = 'Error de permisos al cargar la imagen. Contacta al administrador.';
+			} else if (error.message && error.message.includes('Failed to fetch')) {
+				errorMsg = 'Error al cargar el logo. Verifica la configuración en Ajustes.';
+			}
+
+			showInfoModal(errorMsg, true);
+			showLoading(false);
+		}
+	}
+
 	// --- NUEVA FUNCIÓN ---
 	/**
 	 * Renderiza una rejilla de miniaturas con botones de borrar para galerías en admin.
@@ -1582,7 +1682,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 				card.innerHTML = `
 						<!-- MODIFICADO: Sin altura fija, sin object-contain -->
 						<div class="w-full bg-black border-b border-white overflow-hidden">
-							<img src="${coverImage}" alt="${event.name || 'Evento'}" class="w-full" onerror="this.onerror=null;this.src='https://placehold.co/600x400/000/fff?text=Error&font=vt323';">
+							<img src="${coverImage}" alt="${event.name || 'Evento'}" class="w-full" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/600x400/000/fff?text=Error&font=vt323';">
 						</div>
 						<div class="p-6">
 							<h3 class="text-3xl font-pixel text-white text-glow-white truncate glitch-hover">${event.name || 'Evento sin nombre'}</h3>
@@ -6337,6 +6437,9 @@ window.addEventListener('DOMContentLoaded', async () => {
 	});
 	if (imageModalPrevBtn) addTrackedListener(imageModalPrevBtn, 'click', (e) => { e.stopPropagation(); handleImageModalPrev(); });
 	if (imageModalNextBtn) addTrackedListener(imageModalNextBtn, 'click', (e) => { e.stopPropagation(); handleImageModalNext(); });
+	// NUEVO: Listener para descargar imagen con marca de agua
+	const downloadImageBtn = document.getElementById('download-image-btn');
+	if (downloadImageBtn) addTrackedListener(downloadImageBtn, 'click', (e) => { e.stopPropagation(); downloadImageWithWatermark(); });
 
 	// Listeners Merch Público (Formulario compra, botón descarga QR)
 	if (merchPurchaseForm) addTrackedListener(merchPurchaseForm, 'submit', handleMerchPurchaseSubmit);
