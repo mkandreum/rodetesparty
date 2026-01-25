@@ -1,6 +1,11 @@
 <?php
 // --- PHP: Cargar Datos del Servidor ---
 
+// Prevenir Cache del Navegador (CRÍTICO para PWA updates)
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+header("Cache-Control: post-check=0, pre-check=0", false);
+header("Pragma: no-cache");
+
 // --- Seguridad: Evitar acceso directo a PHP ---
 // Se asume que la autenticación/sesión se maneja en login.php, logout.php, save.php, etc.
 
