@@ -1809,6 +1809,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 		galleryImageViewGrid.innerHTML = ''; // Limpiar grid
 
 		const galleryUrls = event.galleryImages || [];
+		const thumbnailUrls = event.galleryThumbnails || [];
 
 		if (galleryUrls.length === 0) {
 			galleryImageViewGrid.innerHTML = '<p class="text-gray-400 text-center col-span-full font-pixel">NO HAY FOTOS EN ESTA GALERÍA.</p>';
@@ -1820,7 +1821,10 @@ window.addEventListener('DOMContentLoaded', async () => {
 			const imgWrapper = document.createElement('button');
 			imgWrapper.className = "event-gallery-img-btn rounded-none overflow-hidden border border-gray-700 transform transition-all hover:border-gray-300 duration-300 aspect-square"; // Forzar cuadrado
 
-			imgWrapper.innerHTML = `<img src="${url}" alt="Foto de ${event.name || 'evento'}" loading="lazy" class="w-full h-full object-cover" onerror="this.onerror=null;this.src='https://placehold.co/300x300/000/fff?text=Error&font=vt323';">`;
+			// Usar miniatura si existe, sino usar imagen completa
+			const thumbnailUrl = thumbnailUrls[index] || url;
+
+			imgWrapper.innerHTML = `<img src="${thumbnailUrl}" alt="Foto de ${event.name || 'evento'}" loading="lazy" class="w-full h-full object-cover" onerror="this.onerror=null;this.src='https://placehold.co/300x300/000/fff?text=Error&font=vt323';">`;
 			galleryImageViewGrid.appendChild(imgWrapper);
 
 			addTrackedListener(imgWrapper, 'click', () => showImageModal(url, galleryUrls, index));
