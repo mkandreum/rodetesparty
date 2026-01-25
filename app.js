@@ -965,14 +965,27 @@ window.addEventListener('DOMContentLoaded', async () => {
 			// Cargar logo
 			const logo = await loadImage(appState.appLogoUrl);
 
-			// Calcular tamaño del logo (máximo 15% de la altura de la imagen)
-			const maxLogoHeight = Math.min(100, canvas.height * 0.15);
-			const logoHeight = maxLogoHeight;
+			// Calcular tamaño del logo de forma inteligente según resolución
+			let logoHeightPercentage;
+			if (canvas.height < 1000) {
+				logoHeightPercentage = 0.08; // Fotos pequeñas: 8%
+			} else if (canvas.height < 2500) {
+				logoHeightPercentage = 0.10; // Fotos medianas: 10%
+			} else {
+				logoHeightPercentage = 0.12; // Fotos grandes: 12%
+			}
+
+			// Aplicar límites min/max para asegurar legibilidad
+			const calculatedHeight = canvas.height * logoHeightPercentage;
+			const logoHeight = Math.max(60, Math.min(300, calculatedHeight)); // 60-300px
 			const logoWidth = logo.width * (logoHeight / logo.height);
+
+			// Padding proporcional (2% de altura, entre 20-50px)
+			const padding = Math.max(20, Math.min(50, canvas.height * 0.02));
 
 			// Posición: centro horizontal, parte inferior con padding
 			const x = (canvas.width - logoWidth) / 2;
-			const y = canvas.height - logoHeight - 30; // 30px de padding desde abajo
+			const y = canvas.height - logoHeight - padding;
 
 			// Dibujar logo
 			ctx.drawImage(logo, x, y, logoWidth, logoHeight);
