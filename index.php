@@ -1499,9 +1499,23 @@ $adminEmail = isset($_SESSION['admin_email']) ? $_SESSION['admin_email'] : '';
     <!-- ==== FIN MODALES ==== -->
 
     <!-- Modal: Loading -->
+    <!-- Modal: Loading (Progress Bar) -->
     <div id="loading-modal"
-        class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-[60] modal-backdrop-fade-in">
-        <div class="spinner w-16 h-16 border-4 border-gray-700 border-t-white rounded-full"></div>
+        class="hidden fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-[60] modal-backdrop-fade-in p-4">
+        <div
+            class="bg-black border-2 border-white max-w-sm w-full p-6 flex flex-col items-center shadow-[0_0_20px_rgba(255,255,255,0.2)]">
+            <h3 id="loading-title" class="text-xl text-white font-pixel mb-4 text-center">CARGANDO...</h3>
+
+            <!-- Progress Bar Container -->
+            <div class="w-full h-8 border-2 border-white p-1 mb-2 relative">
+                <!-- Progress Fill -->
+                <div id="loading-progress-bar" class="h-full bg-white transition-all duration-200 ease-out"
+                    style="width: 0%;"></div>
+            </div>
+
+            <!-- Percentage Text -->
+            <p id="loading-percent" class="text-white font-pixel text-right w-full">0%</p>
+        </div>
     </div>
     <!-- Modal: Info (Alertas) -->
     <div id="info-modal"

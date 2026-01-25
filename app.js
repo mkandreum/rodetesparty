@@ -813,10 +813,83 @@ window.addEventListener('DOMContentLoaded', async () => {
 		}
 	}
 
-	// --- Modals (sin cambios funcionales, solo asegurar que selectores existan) ---
-	function showLoading(isLoading) {
-		loadingModal?.classList.toggle('hidden', !isLoading);
+	// --- Modals (Actualizado con Barra de Progreso) ---
+	function showLoading(isLoading, message = "Cargando...", percent = null) {
+		const modal = loadingModal;
+		const title = document.getElementById('loading-title');
+		const progressBarCtx = document.getElementById('loading-progress-bar');
+		const percentText = document.getElementById('loading-percent');
+
+		if (!modal) return;
+
+		if (isLoading) {
+			if (title) title.textContent = message.toUpperCase();
+
+			// Si se pasa porcentaje, actualizar barra
+			if (percent !== null && progressBarCtx && percentText) {
+				const pct = Math.round(percent);
+				progressBarCtx.style.width = `${pct}%`;
+				percentText.textContent = `${pct}%`;
+			} else {
+				// Estado indeterminado (reset o spinner si quisiéramos)
+				if (progressBarCtx) progressBarCtx.style.width = '0%';
+				if (percentText) percentText.textContent = '';
+			}
+
+			modal.classList.remove('hidden');
+		} else {
+			modal.classList.add('hidden');
+			// Reset para la próxima
+			if (progressBarCtx) progressBarCtx.style.width = '0%';
+			if (percentText) percentText.textContent = '0%';
+		}
 	}
+
+	// --- Helper de Subida con Progreso (XHR) ---
+	function uploadFileWithProgress(file, type, onProgress) {
+		return new Promise((resolve, reject) => {
+			const formData = new FormData();
+			formData.append('file', file);
+			formData.append('type', type);
+
+			const xhr = new XMLHttpRequest();
+			xhr.open('POST', UPLOAD_URL, true);
+
+			// Progreso
+			xhr.upload.onprogress = (e) => {
+				if (e.lengthComputable) {
+					const percentComplete = (e.loaded / e.total) * 100;
+					if (onProgress) onProgress(percentComplete);
+				}
+			};
+
+			// Completado
+			xhr.onload = () => {
+				if (xhr.status >= 200 && xhr.status < 300) {
+					try {
+						const result = JSON.parse(xhr.responseText);
+						resolve({ ok: true, status: xhr.status, result });
+					} catch (e) {
+						reject(new Error("Error parsing JSON response"));
+					}
+				} else {
+					// Intentar leer respuesta JSON de error
+					try {
+						const result = JSON.parse(xhr.responseText);
+						resolve({ ok: false, status: xhr.status, result });
+					} catch (e) {
+						resolve({ ok: false, status: xhr.status, result: { message: xhr.statusText } });
+					}
+				}
+			};
+
+			// Error red
+			xhr.onerror = () => reject(new Error("Network Error"));
+
+			xhr.send(formData);
+		});
+	}
+
 	let onInfoModalClose = null;
 	function showInfoModal(message, isError = false, onClose = null) {
 		if (!infoModal || !infoModalText) { alert(message); return; } // Fallback si no existe
@@ -834,7 +907,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 		onInfoModalClose = onClose;
 		infoModal.classList.remove('hidden');
 	}
-
+	// ... (rest of modal functions) ...
 	function closeModal(modalId) {
 		const modal = document.getElementById(modalId);
 		modal?.classList.add('hidden');
@@ -881,6 +954,179 @@ window.addEventListener('DOMContentLoaded', async () => {
 		// Limpieza específica para modal de ticket (QR)
 		if (modalId === 'ticket-modal' && ticketQrCode) {
 			ticketQrCode.innerHTML = '';
+		}
+	}
+
+	// ... (Handle File Upload Refactor) ...
+
+	/**
+	 * Maneja la subida de un solo archivo (imagen o vídeo) al servidor.
+	 * Llama a upload.php.
+	 */
+	async function handleFileUpload(event, targetInput) {
+		const file = event.target.files?.[0]; // Usar optional chaining
+		if (!file || !targetInput) return;
+
+		let acceptTypes = ['image/'];
+		let fileTypeForUpload = 'image';
+		const isBannerInput = targetInput === bannerUrlInput;
+
+		// Determinar tipo aceptado y tipo para PHP
+		if (isBannerInput) {
+			acceptTypes = ['image/', 'video/mp4', 'video/webm']; // Banner acepta vídeo
+			if (file.type.startsWith('video/')) {
+				fileTypeForUpload = 'video';
+			}
+		} // Otros inputs solo aceptan imagen
+
+		// Validar tipo MIME
+		if (!acceptTypes.some(type => file.type.startsWith(type))) {
+			showInfoModal(`Tipo de archivo no permitido. ${isBannerInput ? 'Sube imagen o vídeo MP4/WebM.' : 'Sube una imagen.'}`, true);
+			event.target.value = ''; return;
+		}
+
+		// Validar tamaño
+		const maxSizeMB = fileTypeForUpload === 'video' ? 10 : 5; // 10MB vídeo, 5MB imagen
+		const maxSizeBytes = maxSizeMB * 1024 * 1024;
+		if (file.size > maxSizeBytes) {
+			showInfoModal(`Archivo "${file.name}" demasiado grande (Máx ${maxSizeMB}MB).`, true);
+			event.target.value = ''; return;
+		}
+
+		showLoading(true, "Iniciando subida...", 0);
+
+		try {
+			const { ok, status, result } = await uploadFileWithProgress(file, fileTypeForUpload, (percent) => {
+				showLoading(true, `Subiendo ${file.name}...`, percent);
+			});
+
+			if (!ok) {
+				// Manejar errores HTTP y de PHP (incluido 403 si sesión expiró)
+				let errorMessage = `Error HTTP ${status}.`;
+				if (status === 403) {
+					errorMessage = "Acceso denegado. Tu sesión puede haber expirado.";
+					handleLogout(false);
+				} else if (result && result.message) {
+					errorMessage = result.message;
+				}
+				throw new Error(errorMessage);
+			}
+
+			if (result.success && result.url) {
+				targetInput.value = result.url; // Poner la URL devuelta por PHP en el input
+				showInfoModal(`${fileTypeForUpload === 'video' ? 'Vídeo' : 'Imagen'} "${file.name}" subido. Guarda los cambios del formulario.`, false);
+			} else {
+				throw new Error(result.message || 'Error desconocido del servidor al subir.');
+			}
+		} catch (error) {
+			console.error("Error uploading file:", error);
+			showInfoModal(`Error al subir "${file.name}": ${error.message}`, true);
+			event.target.value = ''; // Limpiar input file si falla
+		} finally {
+			showLoading(false);
+		}
+	}
+
+
+	/**
+	 * Maneja la subida de múltiples imágenes al servidor.
+	 * Llama a upload.php para cada archivo.
+	 * MODIFICADO: Acepta input de thumbnails para guardarlos en paralelo.
+	 */
+	async function handleMultipleFileUpload(event, hiddenInputId, gridContainerId, thumbnailInputId = null) {
+		const files = Array.from(event.target.files || []);
+		const targetHiddenInput = document.getElementById(hiddenInputId);
+		const targetThumbnailInput = thumbnailInputId ? document.getElementById(thumbnailInputId) : null;
+
+		if (!files || files.length === 0 || !targetHiddenInput) return;
+
+		showLoading(true, `Preparando ${files.length} archivos...`, 0);
+
+		const uploadResults = [];
+		let successCount = 0;
+		let errorCount = 0;
+		const totalFiles = files.length;
+		const maxSizeMB = 5;
+		const maxSizeBytes = maxSizeMB * 1024 * 1024;
+
+		// Procesar ficheros secuencialmente para que la barra de progreso tenga sentido global
+		// (O podríamos hacer paralelo y calcular el total de bytes, pero secuencial es más claro visualmente)
+
+		for (let i = 0; i < totalFiles; i++) {
+			const file = files[i];
+			const currentNum = i + 1;
+
+			showLoading(true, `Subiendo ${currentNum} de ${totalFiles}: ${file.name}`, 0);
+
+			if (!file.type.startsWith('image/')) {
+				console.warn("Omitiendo archivo no imagen:", file.name);
+				errorCount++;
+				showInfoModal(`"${file.name}" no es una imagen y fue omitido.`, true);
+				continue;
+			}
+			if (file.size > maxSizeBytes) {
+				console.warn(`Omitiendo archivo grande: ${file.name} (Máx ${maxSizeMB}MB)`);
+				errorCount++;
+				showInfoModal(`Error: "${file.name}" excede el límite (${maxSizeMB}MB).`, true);
+				continue;
+			}
+
+			try {
+				const { ok, status, result } = await uploadFileWithProgress(file, 'image', (percent) => {
+					// Progreso del archivo actual
+					showLoading(true, `Subiendo ${currentNum}/${totalFiles}: ${file.name}`, percent);
+				});
+
+				if (ok && result.success && result.url) {
+					successCount++;
+					uploadResults.push({ url: result.url, thumbnail: result.thumbnail || result.url });
+				} else {
+					errorCount++;
+					let errorMessage = `Error subiendo ${file.name}: `;
+					if (status === 403) errorMessage += "Acceso denegado.";
+					else errorMessage += result.message || `Error HTTP ${status}.`;
+					console.warn(errorMessage);
+				}
+			} catch (err) {
+				errorCount++;
+				console.error(`Error de red subiendo ${file.name}:`, err);
+			}
+		}
+
+		// Procesar resultados
+		try {
+			if (uploadResults.length > 0) {
+				const newUrls = uploadResults.map(r => r.url);
+				const newThumbnails = uploadResults.map(r => r.thumbnail);
+
+				// Actualizar input principal
+				const existingUrls = targetHiddenInput.value.trim();
+				targetHiddenInput.value = existingUrls + (existingUrls ? '\n' : '') + newUrls.join('\n');
+
+				// Actualizar input thumbnails si existe
+				if (targetThumbnailInput) {
+					const existingThumbnails = targetThumbnailInput.value.trim();
+					targetThumbnailInput.value = existingThumbnails + (existingThumbnails ? '\n' : '') + newThumbnails.join('\n');
+				}
+
+				// Actualizar rejilla
+				if (gridContainerId) {
+					const currentUrls = targetHiddenInput.value.split('\n').filter(Boolean);
+					// Si podemos, pasamos los thumbnails, si no renderAdminGalleryGrid los inferirá
+					renderAdminGalleryGrid(gridContainerId, hiddenInputId, currentUrls, thumbnailInputId);
+				}
+			}
+
+			let message = `${successCount} imagin(es) añadida(s). Pulsa Guardar.`;
+			if (errorCount > 0) message += ` (${errorCount} fallaron).`;
+			showInfoModal(message, errorCount > 0 && successCount === 0);
+
+		} catch (error) {
+			console.error("Error procesando subidas:", error);
+			showInfoModal("Error inesperado en subidas.", true);
+		} finally {
+			showLoading(false);
+			event.target.value = '';
 		}
 	}
 
