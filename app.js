@@ -4863,6 +4863,12 @@ window.addEventListener('DOMContentLoaded', async () => {
 			.split('\n')
 			.filter(url => url); // Filtrar líneas vacías por si acaso
 
+		// Obtener Thumbnails del input oculto
+		const hiddenThumbnailInput = document.getElementById('gallery-thumbnails-input');
+		const newThumbnailUrls = (hiddenThumbnailInput?.value || '')
+			.split('\n')
+			.filter(url => url);
+
 		showLoading(true);
 		try {
 			// Actualizar galería en el evento
@@ -4870,6 +4876,9 @@ window.addEventListener('DOMContentLoaded', async () => {
 				appState.events[eventIndex].galleryImages = []; // Asegurar array
 			}
 			appState.events[eventIndex].galleryImages = newGalleryUrls;
+
+			// Guardar thumbnails
+			appState.events[eventIndex].galleryThumbnails = newThumbnailUrls;
 			currentEvents = [...appState.events]; // Actualizar copia local
 
 			// Guardar estado completo
@@ -6472,7 +6481,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 	if (appLogoUploadInput && appLogoUrlInput) addTrackedListener(appLogoUploadInput, 'change', (e) => handleFileUpload(e, appLogoUrlInput));
 	if (ticketLogoUploadInput && ticketLogoUrlInput) addTrackedListener(ticketLogoUploadInput, 'change', (e) => handleFileUpload(e, ticketLogoUrlInput));
 	if (bannerUploadInput && bannerUrlInput) addTrackedListener(bannerUploadInput, 'change', (e) => handleFileUpload(e, bannerUrlInput));
-	if (galleryUploadInput) addTrackedListener(galleryUploadInput, 'change', (e) => handleMultipleFileUpload(e, 'gallery-urls-input', 'admin-gallery-preview-grid')); // <-- MODIFICADO
+	if (galleryUploadInput) addTrackedListener(galleryUploadInput, 'change', (e) => handleMultipleFileUpload(e, 'gallery-urls-input', 'admin-gallery-preview-grid', 'gallery-thumbnails-input')); // <-- MODIFICADO
 	if (dragCoverUploadInput && dragCoverUrlInput) addTrackedListener(dragCoverUploadInput, 'change', (e) => handleFileUpload(e, dragCoverUrlInput));
 	if (dragGalleryUploadInput) addTrackedListener(dragGalleryUploadInput, 'change', (e) => handleMultipleFileUpload(e, 'drag-gallery-urls', 'admin-drag-gallery-preview-grid')); // <-- MODIFICADO
 	// Los botones para forzar subida ya no son necesarios si se sube al seleccionar
