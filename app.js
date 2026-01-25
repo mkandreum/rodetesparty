@@ -5608,94 +5608,107 @@ window.addEventListener('DOMContentLoaded', async () => {
 		 * Llama a upload.php para cada archivo.
 		 * MODIFICADO: Acepta ID del input oculto y ID de la rejilla para actualizarla.
 		 */
-	async function handleMultipleFileUpload(event, hiddenInputId, gridContainerId) { // <-- AÑADIDOS PARÁMETROS
+	/**
+	 * Maneja la subida de múltiples imágenes al servidor.
+	 * Llama a upload.php para cada archivo.
+	 * MODIFICADO: Acepta input de thumbnails para guardarlos en paralelo.
+	 */
+	async function handleMultipleFileUpload(event, hiddenInputId, gridContainerId, thumbnailInputId = null) {
 		const files = event.target.files;
-		const targetHiddenInput = document.getElementById(hiddenInputId); // Obtener input oculto
+		const targetHiddenInput = document.getElementById(hiddenInputId);
+		const targetThumbnailInput = thumbnailInputId ? document.getElementById(thumbnailInputId) : null;
 
-		if (!files || files.length === 0 || !targetHiddenInput) return; // Validar input oculto
+		if (!files || files.length === 0 || !targetHiddenInput) return;
 
 		showLoading(true);
 		const uploadPromises = [];
 		let successCount = 0;
 		let errorCount = 0;
-		const maxSizeMB = 5; // Límite por imagen
+		const maxSizeMB = 5;
 		const maxSizeBytes = maxSizeMB * 1024 * 1024;
 
-		// Crear promesas de subida para cada archivo válido
 		for (const file of files) {
 			if (!file.type.startsWith('image/')) {
 				console.warn("Omitiendo archivo no imagen:", file.name);
-				errorCount++; // Contar como error si se seleccionó archivo no válido
-				showInfoModal(`"${file.name}" no es una imagen y fue omitido.`, true); // Notificar
-				continue; // Saltar este archivo
+				errorCount++;
+				showInfoModal(`"${file.name}" no es una imagen y fue omitido.`, true);
+				continue;
 			}
 			if (file.size > maxSizeBytes) {
 				console.warn(`Omitiendo archivo grande: ${file.name} (Máx ${maxSizeMB}MB)`);
 				errorCount++;
 				showInfoModal(`Error: "${file.name}" excede el límite (${maxSizeMB}MB).`, true);
-				continue; // Saltar este archivo
+				continue;
 			}
 
 			const formData = new FormData();
 			formData.append('file', file);
-			formData.append('type', 'image'); // Siempre 'image' para múltiple
+			formData.append('type', 'image');
 
 			uploadPromises.push(
 				fetch(UPLOAD_URL, { method: 'POST', body: formData })
-					.then(response => response.json().then(result => ({ ok: response.ok, status: response.status, result }))) // Parsear siempre y pasar estado ok
+					.then(response => response.json().then(result => ({ ok: response.ok, status: response.status, result })))
 					.then(({ ok, status, result }) => {
 						if (ok && result.success && result.url) {
 							successCount++;
-							return result.url; // Devolver URL si éxito
+							// Devolver objeto con ambas URLs
+							return { url: result.url, thumbnail: result.thumbnail || result.url };
 						} else {
 							errorCount++;
 							let errorMessage = `Error subiendo ${file.name}: `;
-							if (status === 403) errorMessage += "Acceso denegado (sesión?).";
+							if (status === 403) errorMessage += "Acceso denegado.";
 							else errorMessage += result.message || `Error HTTP ${status}.`;
 							console.warn(errorMessage);
-							showInfoModal(errorMessage, true); // Mostrar error específico
-							return null; // Indicar fallo
+							showInfoModal(errorMessage, true);
+							return null;
 						}
 					})
 					.catch(err => {
 						errorCount++;
 						console.error(`Error de red subiendo ${file.name}:`, err);
 						showInfoModal(`Error de red subiendo ${file.name}.`, true);
-						return null; // Indicar fallo
+						return null;
 					})
 			);
 		}
 
-		// Esperar a que todas las subidas terminen
 		try {
 			const results = await Promise.all(uploadPromises);
-			const newUrls = results.filter(url => url !== null); // Filtrar fallos
+			const validResults = results.filter(res => res !== null);
 
-			if (newUrls.length > 0) {
-				// Añadir nuevas URLs al input oculto, manteniendo las existentes
+			if (validResults.length > 0) {
+				const newUrls = validResults.map(r => r.url);
+				const newThumbnails = validResults.map(r => r.thumbnail);
+
+				// Actualizar input principal
 				const existingUrls = targetHiddenInput.value.trim();
 				targetHiddenInput.value = existingUrls + (existingUrls ? '\n' : '') + newUrls.join('\n');
 
-				// --- NUEVO: Actualizar la rejilla visual ---
+				// Actualizar input thumbnails si existe
+				if (targetThumbnailInput) {
+					const existingThumbnails = targetThumbnailInput.value.trim();
+					targetThumbnailInput.value = existingThumbnails + (existingThumbnails ? '\n' : '') + newThumbnails.join('\n');
+				}
+
+				// Actualizar rejilla
 				if (gridContainerId) {
 					const currentUrls = targetHiddenInput.value.split('\n').filter(Boolean);
-					renderAdminGalleryGrid(gridContainerId, hiddenInputId, currentUrls);
+					const currentThumbnails = targetThumbnailInput ? targetThumbnailInput.value.split('\n').filter(Boolean) : null;
+					// Si podemos, pasamos los thumbnails, si no renderAdminGalleryGrid los inferirá del input value o fallará graceful
+					renderAdminGalleryGrid(gridContainerId, hiddenInputId, currentUrls, thumbnailInputId);
 				}
-				// --- FIN NUEVO ---
 			}
 
-			// Mostrar resumen
-			let message = `${successCount} imágen(es) añadida(s) a la lista.`;
-			if (errorCount > 0) message += ` (${errorCount} fallaron o fueron omitidas).`;
-			if (successCount > 0) message += " Pulsa Guardar para confirmar los cambios.";
-			showInfoModal(message, errorCount > 0 && successCount === 0); // Error solo si NADA subió
+			let message = `${successCount} imagin(es) añadida(s). Pulsa Guardar.`;
+			if (errorCount > 0) message += ` (${errorCount} fallaron).`;
+			showInfoModal(message, errorCount > 0 && successCount === 0);
 
-		} catch (error) { // Error inesperado en Promise.all (raro)
-			console.error("Error procesando subidas múltiples:", error);
-			showInfoModal("Error inesperado al procesar las subidas.", true);
+		} catch (error) {
+			console.error("Error procesando subidas:", error);
+			showInfoModal("Error inesperado en subidas.", true);
 		} finally {
 			showLoading(false);
-			event.target.value = ''; // Limpiar input file siempre
+			event.target.value = '';
 		}
 	}
 
