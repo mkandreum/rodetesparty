@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Miniaturas - Cliente</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 10px;
+            padding: 40px;
+            max-width: 800px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+
+        .info-box h3 {
+            color: #1976d2;
+            margin-bottom: 5px;
+            font-size: 16px;
+        }
+
+        .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            font-family: 'Courier New', monospace;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: all 0.3s;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .btn:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        #progress {
+            margin-top: 20px;
+            display: none;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #f0f0f0;
+            border-radius: 15px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .log {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 5px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+
+        .log-item {
+            padding: 5px 0;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .log-item:last-child {
+            border-bottom: none;
+        }
+
+        .success {
+            color: #4caf50;
+        }
+
+        .error {
+            color: #f44336;
+        }
+
+        .warning {
+            color: #ff9800;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🖼️ Generador de Miniaturas</h1>
+        <p class="subtitle">Generación en navegador - Sin dependencias del servidor</p>
+
+        <div class="info-box">
+            <h3>ℹ️ Cómo funciona</h3>
+            <p>Este script procesará todas las imágenes de la galería directamente en tu navegador,
+                creando miniaturas de 400x400px en formato JPEG optimizado. Las miniaturas se subirán
+                automáticamente al servidor.</p>
+        </div>
+
+        <button id="startBtn" class="btn" onclick="startProcessing()">
+            Iniciar Generación de Miniaturas
+        </button>
+
+        <div id="progress">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill" style="width: 0%">0%</div>
+            </div>
+            <div class="log" id="log"></div>
+        </div>
+    </div>
+
+    <script>
+        let processedCount = 0;
+        let totalImages = 0;
+        let errors = 0;
+
+        function addLog(message, type = 'info') {
+            const log = document.getElementById('log');
+            const item = document.createElement('div');
+            item.className = `log-item ${type}`;
+            item.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            log.appendChild(item);
+            log.scrollTop = log.scrollHeight;
+        }
+
+        function updateProgress() {
+            const percent = Math.round((processedCount / totalImages) * 100);
+            const fill = document.getElementById('progressFill');
+            fill.style.width = percent + '%';
+            fill.textContent = percent + '%';
+        }
+
+        async function loadImageFromUrl(url) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.crossOrigin = 'anonymous';
+                img.onload = () => resolve(img);
+                img.onerror = reject;
+                img.src = url;
+            });
+        }
+
+        function createThumbnail(img, size = 400, quality = 0.8) {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+
+            // Crop cuadrado centrado
+            const minDim = Math.min(img.width, img.height);
+            const sx = (img.width - minDim) / 2;
+            const sy = (img.height - minDim) / 2;
+
+            canvas.width = size;
+            canvas.height = size;
+
+            ctx.drawImage(img, sx, sy, minDim, minDim, 0, 0, size, size);
+
+            return new Promise(resolve => {
+                canvas.toBlob(resolve, 'image/jpeg', quality);
+            });
+        }
+
+        async function uploadThumbnail(blob, originalFilename) {
+            const formData = new FormData();
+            const thumbnailName = originalFilename.replace(/\.[^/.]+$/, '') + '_thumb.jpg';
+            formData.append('file', blob, thumbnailName);
+            formData.append('type', 'thumbnail');
+
+            const response = await fetch('upload.php', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+            const result = await response.json();
+            if (!result.success) throw new Error(result.message || 'Upload failed');
+
+            return result.url;
+        }
+
+        async function processImage(imageUrl) {
+            try {
+                addLog(`Procesando: ${imageUrl}`, 'info');
+
+                // Cargar imagen
+                const img = await loadImageFromUrl(imageUrl);
+
+                // Crear miniatura
+                const thumbnailBlob = await createThumbnail(img);
+
+                // Subir al servidor
+                const filename = imageUrl.split('/').pop();
+                const thumbnailUrl = await uploadThumbnail(thumbnailBlob, filename);
+
+                addLog(`✓ Miniatura creada: ${thumbnailUrl}`, 'success');
+                processedCount++;
+                updateProgress();
+
+                return thumbnailUrl;
+            } catch (error) {
+                addLog(`✗ Error: ${imageUrl} - ${error.message}`, 'error');
+                errors++;
+                processedCount++;
+                updateProgress();
+                return null;
+            }
+        }
+
+        async function updateDatosApp(galleryData) {
+            try {
+                const response = await fetch('update_gallery_thumbnails.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(galleryData)
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    addLog('✓ datos_app.json actualizado correctamente', 'success');
+                } else {
+                    addLog('⚠ Error al actualizar datos_app.json: ' + result.message, 'error');
+                }
+            } catch (error) {
+                addLog('⚠ Error al actualizar datos_app.json: ' + error.message, 'error');
+            }
+        }
+
+        async function startProcessing() {
+            const startBtn = document.getElementById('startBtn');
+            const progress = document.getElementById('progress');
+
+            startBtn.disabled = true;
+            progress.style.display = 'block';
+
+            addLog('Iniciando proceso...', 'info');
+
+            try {
+                // Obtener lista de eventos con galerías
+                addLog('Cargando datos de eventos...', 'info');
+                const response = await fetch('datos_app.json');
+                const appData = await response.json();
+
+                const events = appData.events || [];
+                const galleryMapping = {};
+
+                // Recopilar todas las imágenes
+                const allImages = [];
+                events.forEach(event => {
+                    if (event.galleryImages && event.galleryImages.length > 0) {
+                        event.galleryImages.forEach(url => {
+                            if (url && url.trim()) {
+                                allImages.push({ eventId: event.id, url: url.trim() });
+                            }
+                        });
+                    }
+                });
+
+                totalImages = allImages.length;
+                addLog(`Encontradas ${totalImages} imágenes para procesar`, 'info');
+
+                if (totalImages === 0) {
+                    addLog('No hay imágenes para procesar', 'warning');
+                    startBtn.disabled = false;
+                    return;
+                }
+
+                // Procesar cada imagen
+                for (const item of allImages) {
+                    const thumbnailUrl = await processImage(item.url);
+
+                    if (!galleryMapping[item.eventId]) {
+                        galleryMapping[item.eventId] = { images: [], thumbnails: [] };
+                    }
+                    galleryMapping[item.eventId].images.push(item.url);
+                    galleryMapping[item.eventId].thumbnails.push(thumbnailUrl || item.url);
+
+                    // Pequeña pausa para no saturar
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                }
+
+                // Actualizar datos_app.json
+                addLog('Actualizando referencias en datos_app.json...', 'info');
+                await updateDatosApp(galleryMapping);
+
+                // Resumen final
+                addLog('━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'info');
+                addLog(`✓ Proceso completado`, 'success');
+                addLog(`  - Procesadas: ${processedCount - errors}`, 'success');
+                addLog(`  - Errores: ${errors}`, errors > 0 ? 'error' : 'info');
+                addLog('━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'info');
+
+            } catch (error) {
+                addLog(`✗ Error fatal: ${error.message}`, 'error');
+            } finally {
+                startBtn.disabled = false;
+                startBtn.textContent = 'Volver a procesar';
+            }
+        }
+    </script>
+</body>
+
+</html>
