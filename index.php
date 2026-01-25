@@ -788,6 +788,7 @@ $adminEmail = isset($_SESSION['admin_email']) ? $_SESSION['admin_email'] : '';
                                         un evento para ver/añadir imágenes.</p>
                                 </div>
                                 <input type="hidden" id="gallery-urls-input" name="gallery-urls-input">
+                                <input type="hidden" id="gallery-thumbnails-input" name="gallery-thumbnails-input">
                             </div>
                             <div class="mb-6 space-y-2">
                                 <label for="gallery-upload"
