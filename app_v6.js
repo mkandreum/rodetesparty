@@ -859,7 +859,10 @@ window.addEventListener('DOMContentLoaded', async () => {
 			xhr.upload.onprogress = (e) => {
 				if (e.lengthComputable) {
 					const percentComplete = (e.loaded / e.total) * 100;
+					console.log(`Upload Progress: ${percentComplete}%`); // Debug log
 					if (onProgress) onProgress(percentComplete);
+				} else {
+					console.warn("Upload length not computable");
 				}
 			};
 
