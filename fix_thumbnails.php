@@ -46,16 +46,45 @@ if (empty($jpgFiles)) {
         }
 
         try {
-            $img = @imagecreatefromjpeg($jpgPath);
-            if ($img === false)
-                throw new Exception("Error cargando JPG");
+            if (filesize($jpgPath) === 0)
+                throw new Exception("Archivo vacío (0 bytes)");
+
+            $info = getimagesize($jpgPath);
+            if ($info === false)
+                throw new Exception("No es una imagen válida");
+
+            $type = $info[2]; // IMAGETYPE_JOEG, etc.
+            $img = null;
+
+            switch ($type) {
+                case IMAGETYPE_JPEG:
+                    $img = imagecreatefromjpeg($jpgPath);
+                    break;
+                case IMAGETYPE_PNG:
+                    $img = imagecreatefrompng($jpgPath);
+                    echo "  ! Detectado PNG con extensión JPG: $filename\n";
+                    break;
+                case IMAGETYPE_WEBP:
+                    $img = imagecreatefromwebp($jpgPath);
+                    echo "  ! Detectado WebP con extensión JPG: $filename\n";
+                    break;
+                default:
+                    throw new Exception("Tipo de imagen no soportado para conversión ($type)");
+            }
+
+            if (!$img)
+                throw new Exception("Falló la carga de la imagen");
+
+            // Convertir a WebP
+            imagepalettetotruecolor($img); // Para PNGs con transparencia
+            imagealphablending($img, true);
+            imagesavealpha($img, true);
 
             $success = imagewebp($img, $webpPath, 80);
             imagedestroy($img);
 
             if ($success) {
                 echo "  ✓ Convertido: $filename -> " . basename($webpPath) . "\n";
-                // Opcional: Borrar original? Mejor conservarlo por seguridad en este script
                 $converted++;
             } else {
                 throw new Exception("Falló imagewebp");
