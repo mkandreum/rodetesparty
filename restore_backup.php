@@ -70,7 +70,7 @@ try {
 
     // Asegurar directorio data_private
     if (!is_dir($dataDir)) {
-        if (!mkdir($dataDir, 0777, true)) {
+        if (!mkdir($dataDir, 0750, true)) {
             throw new Exception("No se pudo crear el directorio de datos privados.", 500);
         }
     }
@@ -92,7 +92,7 @@ try {
         if (substr($filename, -5) === '.json') {
             $targetPath = $dataDir . $baseName;
             if (file_put_contents($targetPath, $content) !== false) {
-                chmod($targetPath, 0666);
+                chmod($targetPath, 0640);
                 $filesProcessed[] = "Data: " . $baseName;
             } else {
                 $errors[] = "Error escribiendo: " . $baseName;
@@ -103,8 +103,7 @@ try {
         if (preg_match('/\.(jpg|jpeg|png|gif|webp|svg|mp4|webm|ogv)$/i', $filename)) {
             $uploadsDir = __DIR__ . '/uploads/';
             if (!is_dir($uploadsDir)) {
-                mkdir($uploadsDir, 0777, true);
-                chmod($uploadsDir, 0777);
+                mkdir($uploadsDir, 0755, true);
             }
 
             // Normalizar ruta relativa (quitar prefijo uploads/ si existe)
@@ -123,8 +122,7 @@ try {
             $targetDir = dirname($targetPath);
 
             if (!is_dir($targetDir)) {
-                mkdir($targetDir, 0777, true);
-                chmod($targetDir, 0777);
+                mkdir($targetDir, 0755, true);
             }
 
             if (file_put_contents($targetPath, $content) !== false) {
