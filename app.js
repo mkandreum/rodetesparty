@@ -2353,7 +2353,10 @@ window.addEventListener('DOMContentLoaded', async () => {
 		if (dragsWithMerch.length === 0) {
 			dragsMerchListContainer.innerHTML = '<p class="text-gray-400 text-center col-span-full font-pixel">Ninguna drag tiene merch disponible aún.</p>';
 		} else {
-			dragsWithMerch.forEach(drag => {
+			// Aleatoriedad para que el orden varíe en cada carga
+			const randomDragsWithMerch = shuffleArray(dragsWithMerch);
+
+			randomDragsWithMerch.forEach(drag => {
 				const card = document.createElement('div');
 				const cardColor = drag.cardColor && /^#[0-9A-F]{6}$/i.test(drag.cardColor) ? drag.cardColor : '#FFFFFF';
 				card.className = `bg-gray-900 rounded-none border overflow-hidden flex flex-col transform transition-all hover:border-gray-300 hover:shadow-white/30 duration-300`;

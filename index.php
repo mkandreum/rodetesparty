@@ -478,19 +478,19 @@ $adminEmail = isset($_SESSION['admin_email']) ? $_SESSION['admin_email'] : '';
             <h2 class="text-3xl sm:text-4xl md:text-5xl font-pixel text-white mb-8 text-center text-glow-white glitch-hover"
                 data-text="MERCHANDISING">MERCHANDISING</h2>
 
-            <!-- Sección: Web Merch -->
-            <div id="web-merch-section" class="mb-12">
-                <h3 class="text-3xl font-pixel text-white mb-6 border-b border-gray-700 pb-2">RODETES OFICIAL</h3>
-                <div id="public-web-merch-list-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    <p class="text-gray-400 text-center col-span-full font-pixel">Cargando merch oficial...</p>
-                </div>
-            </div>
-
             <!-- Sección: Drags Merch -->
-            <div id="drags-merch-section">
+            <div id="drags-merch-section" class="mb-12">
                 <h3 class="text-3xl font-pixel text-white mb-6 border-b border-gray-700 pb-2">MERCH DRAGS</h3>
                 <div id="drags-merch-list-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     <p class="text-gray-400 text-center col-span-full font-pixel">Cargando merch de drags...</p>
+                </div>
+            </div>
+
+            <!-- Sección: Web Merch -->
+            <div id="web-merch-section">
+                <h3 class="text-3xl font-pixel text-white mb-6 border-b border-gray-700 pb-2">RODETES OFICIAL</h3>
+                <div id="public-web-merch-list-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <p class="text-gray-400 text-center col-span-full font-pixel">Cargando merch oficial...</p>
                 </div>
             </div>
         </div>
