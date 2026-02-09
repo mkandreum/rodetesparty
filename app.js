@@ -2323,6 +2323,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 		console.log("=== renderMerchPage called ===");
 		const webMerchListContainer = document.getElementById('public-web-merch-list-container');
 		const dragsMerchListContainer = document.getElementById('drags-merch-list-container');
+		const merchDragsNavBar = document.getElementById('merch-drags-nav-bar');
 
 		if (!webMerchListContainer || !dragsMerchListContainer) {
 			console.error("Merch containers not found!");
@@ -2356,11 +2357,49 @@ window.addEventListener('DOMContentLoaded', async () => {
 			// Aleatoriedad para que el orden varíe en cada carga
 			const randomDragsWithMerch = shuffleArray(dragsWithMerch);
 
+			// Limpiar barra de navegación
+			if (merchDragsNavBar) merchDragsNavBar.innerHTML = '';
+
 			randomDragsWithMerch.forEach(drag => {
 				const card = document.createElement('div');
 				const cardColor = drag.cardColor && /^#[0-9A-F]{6}$/i.test(drag.cardColor) ? drag.cardColor : '#FFFFFF';
+
+				// ID Único para Scroll
+				const cardScrollId = `merch-drag-card-${drag.id}`;
+				card.id = cardScrollId;
+
 				card.className = `bg-gray-900 rounded-none border overflow-hidden flex flex-col transform transition-all hover:border-gray-300 hover:shadow-white/30 duration-300`;
 				card.style.borderColor = cardColor;
+
+				// Generar Botón de Navegación (Chip)
+				if (merchDragsNavBar) {
+					const navChip = document.createElement('button');
+					navChip.textContent = drag.name || 'Drag';
+					navChip.className = "font-pixel text-sm px-3 py-1 bg-transparent border-2 text-white transition-all duration-300 hover:text-black hover:scale-105";
+					navChip.style.borderColor = cardColor;
+
+					// Efecto Hover
+					navChip.addEventListener('mouseenter', () => {
+						navChip.style.backgroundColor = cardColor;
+						navChip.style.color = '#000'; // Contraste simple
+					});
+					navChip.addEventListener('mouseleave', () => {
+						navChip.style.backgroundColor = 'transparent';
+						navChip.style.color = '#fff';
+					});
+
+					// Implementar Scroll al hacer click
+					navChip.onclick = () => {
+						const targetCard = document.getElementById(cardScrollId);
+						if (targetCard) {
+							targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+							// Efecto visual de enfoque (opcional)
+							targetCard.classList.add('ring-2', 'ring-white');
+							setTimeout(() => targetCard.classList.remove('ring-2', 'ring-white'), 1500);
+						}
+					};
+					merchDragsNavBar.appendChild(navChip);
+				}
 
 				const imageUrl = drag.coverImageUrl || `https://placehold.co/400x400/000/fff?text=${encodeURIComponent(drag.name || 'Drag')}&font=vt323`;
 				const merchItems = drag.merchItems || [];

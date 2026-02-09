@@ -481,6 +481,10 @@ $adminEmail = isset($_SESSION['admin_email']) ? $_SESSION['admin_email'] : '';
             <!-- Sección: Drags Merch -->
             <div id="drags-merch-section" class="mb-12">
                 <h3 class="text-3xl font-pixel text-white mb-6 border-b border-gray-700 pb-2">MERCH DRAGS</h3>
+                
+                <!-- Barra de Navegación de Drags con Merch (Chips) -->
+                <div id="merch-drags-nav-bar" class="mb-8 flex flex-wrap justify-center gap-4 px-2"></div>
+
                 <div id="drags-merch-list-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     <p class="text-gray-400 text-center col-span-full font-pixel">Cargando merch de drags...</p>
                 </div>
