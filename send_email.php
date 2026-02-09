@@ -398,4 +398,66 @@ function generateSellerNotificationHTML($saleData, $itemData, $isWebMerch, $logo
 
     return $html;
 }
+
+// Función para generar HTML del email de notificación al GANADOR del sorteo
+function generateWinnerEmailHTML($winnerName, $eventName, $logoUrl = '')
+{
+    $winnerName = htmlspecialchars($winnerName);
+    $eventName = htmlspecialchars($eventName);
+    $logoUrl = ensureAbsoluteUrl($logoUrl);
+    if (empty($logoUrl)) {
+        $logoUrl = 'https://rodetesparty.sytes.net/uploads/logo.png';
+    }
+
+    $html = "
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset='UTF-8'>
+        <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header-logo { text-align: center; padding-bottom: 20px; background: #000; }
+            .header-title { background: #000; color: #F02D7D; padding: 10px 20px 20px; text-align: center; }
+            .content { background: #f4f4f4; padding: 30px; }
+            .winner-box { background: #fff; padding: 20px; margin: 20px 0; border: 4px solid #F02D7D; text-align: center; }
+            .footer { text-align: center; padding: 20px; color: #666; font-size: 12px; }
+            h1 { margin: 0; font-size: 24px; text-transform: uppercase; }
+            .highlight { color: #F02D7D; font-weight: bold; font-size: 1.2em; }
+        </style>
+    </head>
+    <body>
+        <div class='container'>
+            <div class='header-logo'>
+                 <img src='$logoUrl' alt='Rodetes Party' style='max-height: 50px; display: block; margin: 0 auto;' onerror='this.style.display=\"none\"'>
+            </div>
+            <div class='header-title'>
+                <h1>👑 ¡HAS GANADO! 👑</h1>
+            </div>
+            <div class='content'>
+                <p>¡Hola <strong>$winnerName</strong>!</p>
+                <p>¡Tenemos grandes noticias para ti!</p>
+                
+                <div class='winner-box'>
+                    <p style='font-size: 1.1em;'>Has sido el ganador/a del sorteo del evento:</p>
+                    <p class='highlight'>$eventName</p>
+                </div>
+                
+                <p>Por favor, <strong>acércate a la Drag presentadora</strong> (o al puesto de control) ahora mismo para recoger tu premio. 🎉</p>
+                
+                <p>¡Corre, te estamos esperando!</p>
+                
+                <p style='margin-top: 30px;'>¡Felicidades! 💖</p>
+                <p><strong>Rodetes Party</strong></p>
+            </div>
+            <div class='footer'>
+                <p>Este es un email automático. Por favor no respondas.</p>
+            </div>
+        </div>
+    </body>
+    </html>
+    ";
+
+    return $html;
+}
 ?>

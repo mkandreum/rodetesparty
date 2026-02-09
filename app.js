@@ -5039,6 +5039,10 @@ window.addEventListener('DOMContentLoaded', async () => {
 	 * Realiza el sorteo para un evento seleccionado.
 	 * MODIFICADO: Ahora sortea sobre registros de tickets, no emails únicos.
 	 */
+	/**
+	 * Realiza el sorteo para un evento seleccionado.
+	 * MODIFICADO: Ahora sortea sobre registros de tickets, no emails únicos.
+	 */
 	function handleGiveawayClick(e) {
 		const eventId = parseInt(e.target.dataset.eventId, 10);
 		if (isNaN(eventId) || !appState || !appState.events || !allTickets || !giveawayWinnerResult) return;
@@ -5070,15 +5074,67 @@ window.addEventListener('DOMContentLoaded', async () => {
 			const winnerName = `${winningTicket.nombre || ''} ${winningTicket.apellidos || ''}`.trim() || 'Nombre N/A';
 
 			showLoading(false);
+
+			// DISEÑO MEJORADO PARA MÓVIL Y BOTÓN EMAIL
 			giveawayWinnerResult.innerHTML = `
-					<p class="text-gray-300 font-pixel text-xl sm:text-2xl mb-2">EL GANADOR PARA</p>
-					<h4 class="text-3xl sm:text-4xl font-pixel text-white text-glow-white mb-4 break-words">${event.name || 'Evento'}</h4>
-					<p class="text-gray-300 font-pixel text-xl sm:text-2xl mb-2">ES:</p>
-					<!-- MODIFICADO: Mostrar nombre completo -->
-					<p class="text-4xl sm:text-5xl font-pixel text-green-400 text-glow-white mb-2 break-all">${winnerName}</p>
-					<p class="text-lg text-gray-400 font-pixel mb-4 break-all">(${winningEmail})</p>
-					<p class="text-gray-400 font-pixel text-base sm:text-lg">(Ticket ID: ${ticketIdShort}... | Cantidad: ${quantity})</p>`;
+					<div class="flex flex-col items-center gap-4 w-full animate-fade-in-up">
+						<div class="text-center w-full px-2">
+							<p class="text-gray-400 font-pixel text-sm sm:text-lg mb-1">EL GANADOR PARA</p>
+							<h4 class="text-xl sm:text-2xl font-pixel text-white text-glow-white mb-4 break-words leading-tight border-b border-gray-700 pb-2 inline-block">${event.name || 'Evento'}</h4>
+							
+							<p class="text-gray-400 font-pixel text-sm sm:text-lg mb-2">ES:</p>
+							<p class="text-3xl sm:text-5xl font-pixel text-green-400 text-glow-white mb-2 break-words leading-tight py-2">${winnerName}</p>
+							
+							<div class="bg-gray-800/50 p-4 rounded border border-gray-600 w-full max-w-md mx-auto mt-2 shadow-lg">
+								<p class="text-sm sm:text-base text-gray-300 font-pixel break-all mb-1 font-bold">${winningEmail}</p>
+								<p class="text-xs sm:text-sm text-gray-500 font-pixel mt-1">Ticket: ${ticketIdShort}... | Cant: ${quantity}</p>
+							</div>
+						</div>
+
+						<button id="send-winner-email-btn" class="mt-6 bg-pink-600 hover:bg-pink-500 text-white font-pixel py-3 px-6 rounded-none text-base sm:text-lg border border-pink-400 shadow-[0_0_15px_rgba(240,45,125,0.4)] transition-all w-full sm:w-auto flex items-center justify-center gap-2">
+							<span>📧</span> ENVIAR EMAIL PREMIO
+						</button>
+					</div>`;
+
+			// Añadir listener al botón dinámicamente
+			const sendBtn = document.getElementById('send-winner-email-btn');
+			if (sendBtn) {
+				sendBtn.onclick = () => sendWinnerNotification(winnerName, winningEmail, event.name);
+			}
+
 		}, 300); // 300ms delay
+	}
+
+	/**
+	 * Envía un correo de notificación al ganador del sorteo.
+	 */
+	async function sendWinnerNotification(name, email, eventName) {
+		if (!confirm(`¿Enviar correo de confirmación de premio a ${name}?`)) return;
+
+		showLoading(true, "Enviando notificación...");
+		try {
+			const response = await fetch('send_winner_notification.php', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					winnerName: name,
+					winnerEmail: email,
+					eventName: eventName
+				})
+			});
+			const result = await response.json();
+
+			if (result.success) {
+				showInfoModal(`¡Correo enviado a ${name} exitosamente!`, false);
+			} else {
+				showInfoModal(`Error al enviar correo: ${result.message}`, true);
+			}
+		} catch (error) {
+			console.error("Error sending winner email:", error);
+			showInfoModal("Error de red al enviar el correo.", true);
+		} finally {
+			showLoading(false);
+		}
 	}
 
 	/**
