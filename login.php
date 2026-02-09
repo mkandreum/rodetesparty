@@ -15,7 +15,8 @@ $validPassword = getenv('ADMIN_PASSWORD') ?: 'admin';
 // Leer entrada JSON
 $input = json_decode(file_get_contents('php://input'), true);
 $email = trim($input['email'] ?? '');
-$clientPassword = $input['password'] ?? ''; // Changed from hash to password
+// Support both 'password' and 'hash' for backward compatibility
+$clientPassword = $input['password'] ?? $input['hash'] ?? '';
 $csrfToken = $input['csrf_token'] ?? '';
 
 // Validate CSRF token (except for first login when no session exists)
