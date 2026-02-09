@@ -814,6 +814,11 @@ window.addEventListener('DOMContentLoaded', async () => {
 	}
 
 	// --- Modals (Actualizado con Barra de Progreso) ---
+
+	// Variables para simular progreso indeterminado
+	let loadingTimer = null;
+	let currentSimPercent = 0;
+
 	function showLoading(isLoading, message = "Cargando...", percent = null) {
 		const modal = loadingModal;
 		const title = document.getElementById('loading-title');
@@ -823,25 +828,56 @@ window.addEventListener('DOMContentLoaded', async () => {
 		if (!modal) return;
 
 		if (isLoading) {
+			modal.classList.remove('hidden');
 			if (title) title.textContent = message.toUpperCase();
 
-			// Si se pasa porcentaje, actualizar barra
-			if (percent !== null && progressBarCtx && percentText) {
-				const pct = Math.round(percent);
-				progressBarCtx.style.width = `${pct}%`;
-				percentText.textContent = `${pct}%`;
+			if (percent !== null) {
+				// MODO PROGRESO REAL (Upload explícito)
+				// Detener simulación si estaba activa
+				if (loadingTimer) { clearInterval(loadingTimer); loadingTimer = null; }
+
+				if (progressBarCtx && percentText) {
+					const pct = Math.round(percent);
+					progressBarCtx.style.width = `${pct}%`;
+					percentText.textContent = `${pct}%`;
+				}
 			} else {
-				// Estado indeterminado (reset o spinner si quisiéramos)
-				if (progressBarCtx) progressBarCtx.style.width = '0%';
-				if (percentText) percentText.textContent = '';
+				// MODO PROGRESO SIMULADO (Fetch/Indeterminado)
+				// Solo iniciar si no hay ya una simulación corriendo
+				if (!loadingTimer) {
+					currentSimPercent = 10; // Empezar con algo visible
+					if (progressBarCtx) progressBarCtx.style.width = '10%';
+					if (percentText) percentText.textContent = '10%';
+
+					loadingTimer = setInterval(() => {
+						if (currentSimPercent < 95) {
+							// Incremento aleatorio suave
+							currentSimPercent += Math.random() * 5;
+							if (currentSimPercent > 95) currentSimPercent = 95; // Tope en 95% hasta que termine
+
+							if (progressBarCtx) progressBarCtx.style.width = `${currentSimPercent}%`;
+							if (percentText) percentText.textContent = `${Math.round(currentSimPercent)}%`;
+						}
+					}, 300); // Actualizar cada 300ms
+				}
 			}
 
-			modal.classList.remove('hidden');
 		} else {
-			modal.classList.add('hidden');
-			// Reset para la próxima
-			if (progressBarCtx) progressBarCtx.style.width = '0%';
-			if (percentText) percentText.textContent = '0%';
+			// OCULTAR / FINALIZAR
+			if (loadingTimer) { clearInterval(loadingTimer); loadingTimer = null; }
+
+			// Completar visualmente al 100% antes de cerrar
+			if (progressBarCtx) progressBarCtx.style.width = '100%';
+			if (percentText) percentText.textContent = '100%';
+
+			// Pequeño delay para satisfacción visual
+			setTimeout(() => {
+				modal.classList.add('hidden');
+				// Resetear para la próxima
+				if (progressBarCtx) progressBarCtx.style.width = '0%';
+				if (percentText) percentText.textContent = '0%';
+				currentSimPercent = 0;
+			}, 300);
 		}
 	}
 
