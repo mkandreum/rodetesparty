@@ -2404,11 +2404,16 @@ window.addEventListener('DOMContentLoaded', async () => {
 				}
 
 				card.innerHTML = `
-					<div class="w-full bg-black border-b overflow-hidden" style="border-color: ${cardColor};">
-						<img src="${imageUrl}" alt="${drag.name || 'Drag'}" class="w-full" onerror="this.onerror=null;this.src='https://placehold.co/400x400/000/fff?text=Error&font=vt323';">
+					<div class="w-full bg-black border-b p-6 flex items-center gap-4" style="border-color: ${cardColor};">
+						<!-- Imagen pequeña de la drag -->
+						<div class="flex-shrink-0 w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden border-2" style="border-color: ${cardColor};">
+							<img src="${imageUrl}" alt="${drag.name || 'Drag'}" class="w-full h-full object-cover" onerror="this.onerror=null;this.src='https://placehold.co/100x100/000/fff?text=Error&font=vt323';">
+						</div>
+						<!-- Nombre grande de la drag -->
+						<h3 class="text-3xl sm:text-4xl md:text-5xl font-pixel font-bold flex-grow glitch-hover" style="color: ${cardColor}; text-shadow: 0 0 10px ${cardColor}, 0 0 20px ${cardColor};">${drag.name || 'Drag'}</h3>
 					</div>
 					<div class="p-6 flex flex-col flex-grow">
-						<h3 class="text-3xl font-pixel text-white text-glow-white mb-2 truncate glitch-hover">${drag.name || 'Drag'}</h3>
+
 						<div class="space-y-3 mt-auto">
 							<!-- Carrusel Merch -->
 							${merchCarouselHtml}
