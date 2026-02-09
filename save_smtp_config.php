@@ -49,7 +49,7 @@ if (empty($config['password'])) {
 // Asegurar directorio
 $dir = dirname($dataFile);
 if (!is_dir($dir)) {
-    mkdir($dir, 0777, true);
+    mkdir($dir, 0750, true);
 }
 
 // Guardar configuración

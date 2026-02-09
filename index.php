@@ -1,6 +1,14 @@
 <?php
 // --- PHP: Cargar Datos del Servidor ---
 
+require_once __DIR__ . '/security_config.php';
+
+// Start secure session
+startSecureSession();
+
+// Set security headers
+setSecurityHeaders();
+
 // Prevenir Cache del Navegador (CRÍTICO para PWA updates)
 header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
 header("Cache-Control: post-check=0, pre-check=0", false);
@@ -47,12 +55,11 @@ $initialTicketsJson = readJsonFile($ticketsFile);
 $initialMerchSalesJson = readJsonFile($merchSalesFile);
 
 // --- Cargar estado de sesión ---
-// Asegúrate de que session_start() se llame antes de acceder a $_SESSION
-if (session_status() == PHP_SESSION_NONE) {
-    session_start();
-}
 $isLoggedIn = isset($_SESSION['is_logged_in']) && $_SESSION['is_logged_in'] === true;
 $adminEmail = isset($_SESSION['admin_email']) ? $_SESSION['admin_email'] : '';
+
+// Generate CSRF token if logged in
+$csrfToken = $isLoggedIn ? generateCSRFToken() : '';
 
 ?>
 <!DOCTYPE html>
@@ -60,7 +67,7 @@ $adminEmail = isset($_SESSION['admin_email']) ? $_SESSION['admin_email'] : '';
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="theme-color" content="#000000">
     <meta name="description" content="La mejor fiesta queer de Albacete">
 
@@ -1549,6 +1556,7 @@ $adminEmail = isset($_SESSION['admin_email']) ? $_SESSION['admin_email'] : '';
         // Inyectar estado de login para que JS lo sepa al cargar
         window.PHP_IS_LOGGED_IN = <?php echo json_encode($isLoggedIn); ?>;
         window.PHP_ADMIN_EMAIL = <?php echo json_encode($adminEmail); ?>;
+        window.PHP_CSRF_TOKEN = <?php echo json_encode($csrfToken); ?>;
     </script>
 
     <!--  App Principal (Carga diferida) -->

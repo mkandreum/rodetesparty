@@ -40,7 +40,7 @@ if (!$isAdmin) {
 // Asegurar directorio
 $dir = dirname($dataFile);
 if (!is_dir($dir)) {
-    mkdir($dir, 0777, true);
+    mkdir($dir, 0750, true);
 }
 
 if (file_put_contents($dataFile, json_encode($newTickets, JSON_PRETTY_PRINT)) !== false) {
