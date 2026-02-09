@@ -8,6 +8,7 @@ let adminEmail = ''; // Email del admin logueado - Obtenido de PHP_ADMIN_EMAIL
 let pendingEventId = null;
 let editingEventId = null;
 let editingDragId = null;
+let currentEventFilter = 'all'; // Estado del filtro de eventos admin
 let editingMerchItemId = null;
 let currentAdminMerchDragId = null;
 
@@ -4669,77 +4670,105 @@ window.addEventListener('DOMContentLoaded', async () => {
 	 * MODIFICADO: Ahora calcula el total de entradas vendidas (totalQuantitySold)
 	 * directamente desde 'allTickets' para asegurar precisión y evitar discrepancias.
 	 */
-	function renderAdminEvents(events) {
+	function renderAdminEvents(unusedEvents = []) {
 		clearDynamicListListeners('adminEvents');
 		if (!adminEventListUl) return;
 		adminEventListUl.innerHTML = ''; // Limpiar
 
-		if (!Array.isArray(events)) {
-			adminEventListUl.innerHTML = '<li class="text-red-400 text-center font-pixel">Error cargando eventos.</li>';
-			return;
+		// USAR appState.events + FILTRO GLOBAL
+		let eventsToShow = [...(appState.events || [])];
+
+		// Actualizar estado visual de botones de filtro
+		document.querySelectorAll('.event-filter-btn').forEach(btn => {
+			const type = btn.dataset.filter;
+			if (type === currentEventFilter) { // Lógica estricta
+				btn.classList.remove('bg-gray-700', 'text-white', 'hover:bg-gray-600');
+				btn.classList.add('bg-white', 'text-black', 'border-gray-400');
+			} else {
+				btn.classList.add('bg-gray-700', 'text-white', 'hover:bg-gray-600');
+				btn.classList.remove('bg-white', 'text-black', 'border-gray-400');
+			}
+		});
+
+		// Aplicar Filtro
+		const now = new Date();
+		if (currentEventFilter === 'upcoming') {
+			eventsToShow = eventsToShow.filter(e => !e.isArchived && new Date(e.date) >= now);
+		} else if (currentEventFilter === 'past') {
+			eventsToShow = eventsToShow.filter(e => !e.isArchived && new Date(e.date) < now);
+		} else if (currentEventFilter === 'archived') {
+			eventsToShow = eventsToShow.filter(e => e.isArchived === true);
+		} else {
+			// 'all' (por defecto): Mostrar NO archivados (activos + pasados)
+			// Si quisieras mostrar TODO incluyendo archivados des-comenta la siguiente línea y comenta la filtro
+			// eventsToShow = eventsToShow; 
+			eventsToShow = eventsToShow.filter(e => !e.isArchived);
 		}
-		if (events.length === 0) {
-			adminEventListUl.innerHTML = '<li class="text-gray-400 text-center font-pixel">NO HAY EVENTOS CREADOS.</li>';
+
+		if (eventsToShow.length === 0) {
+			adminEventListUl.innerHTML = '<li class="text-gray-400 text-center font-pixel py-4">NO HAY EVENTOS EN ESTA CATEGORÍA.</li>';
 			return;
 		}
 
-		// Ordenar: No archivados primero, luego por fecha descendente
-		[...events].sort((a, b) => {
-			if (a.isArchived !== b.isArchived) return a.isArchived ? 1 : -1;
-			return (b.date && a.date) ? new Date(b.date) - new Date(a.date) : 0;
-		}).forEach(event => {
+		// Ordenar: Por fecha descendente (más reciente primero)
+		eventsToShow.sort((a, b) => {
+			if (!a.date) return 1;
+			if (!b.date) return -1;
+			return new Date(b.date) - new Date(a.date);
+		});
+
+		eventsToShow.forEach(event => {
 			try {
 				const isArchived = event.isArchived || false;
 				const eventDate = event.date ? new Date(event.date).toLocaleString('es-ES', { dateStyle: 'short', timeStyle: 'short' }) : 'Fecha N/A';
 				const capacity = event.ticketCapacity || 0;
 
-				// --- MODIFICACIÓN CLAVE ---
-				// Calcular contadores SIEMPRE desde allTickets (la fuente real)
+				// Calcular contadores desde allTickets
 				const ticketsForEvent = allTickets.filter(t => t.eventId === event.id);
-				const purchasedTicketsCount = ticketsForEvent.length; // Número de registros de compra
-				const totalQuantitySold = ticketsForEvent.reduce((sum, t) => sum + (t.quantity || 0), 0); // Suma real de cantidades
-				// --- FIN MODIFICACIÓN ---
+				const purchasedTicketsCount = ticketsForEvent.length;
+				const totalQuantitySold = ticketsForEvent.reduce((sum, t) => sum + (t.quantity || 0), 0);
 
-				// Usar el 'totalQuantitySold' real para la barra de capacidad
 				let barWidthPercent = capacity > 0 ? Math.min((totalQuantitySold / capacity) * 100, 100) : 0;
 				const capacityText = capacity > 0 ? capacity : 'Ilimitado';
 
-				// Ya no necesitamos la comprobación de discrepancia aquí,
-				// porque 'totalQuantitySold' es el valor correcto.
-				// Y 'event.ticketsSold' fue corregido en memoria por syncTicketCounters().
-
-
 				const item = document.createElement('li');
 				item.className = `bg-gray-800 p-4 border ${isArchived ? 'border-gray-700' : 'border-gray-500'} ${isArchived ? 'opacity-60' : ''}`;
+
+				// LAYOUT CORREGIDO PARA MÓVIL (Flex Column en sm, Row en md)
 				item.innerHTML = `
-						<div class="flex flex-wrap justify-between items-center mb-3 gap-y-2">
-							<div class="flex-grow min-w-0 mr-4">
-								<span class="font-pixel text-xl ${isArchived ? 'text-gray-500 line-through' : 'text-white'}">${event.name || 'Evento sin nombre'}</span>
-								<span class="text-sm ${isArchived ? 'text-gray-500' : 'text-gray-400'} ml-2 block sm:inline">(${eventDate})</span>
+						<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-3 gap-y-3">
+							<div class="flex-grow min-w-0 mr-4 w-full sm:w-auto">
+								<div class="flex items-center flex-wrap gap-2">
+									<span class="font-pixel text-xl ${isArchived ? 'text-gray-500 line-through' : 'text-white'} break-words">${event.name || 'Evento sin nombre'}</span>
+									<span class="text-lg text-blue-400 font-bold ml-auto sm:ml-2">${(event.price || 0).toFixed(2)}€</span>
+								</div>
+								<span class="text-sm ${isArchived ? 'text-gray-500' : 'text-gray-400'} block">(${eventDate})</span>
 							</div>
-							<div class="flex-shrink-0 flex items-center flex-wrap gap-2">
-								<span class="text-lg text-blue-400 font-bold">${(event.price || 0).toFixed(2)}€</span>
-								<!-- Usar totalQuantitySold para el botón -->
-								<button data-event-id="${event.id}" class="view-tickets-btn bg-green-600 hover:bg-green-500 text-white px-3 py-1 rounded-none text-sm font-pixel ${purchasedTicketsCount === 0 ? 'opacity-50 cursor-not-allowed' : ''}" ${purchasedTicketsCount === 0 ? 'disabled' : ''}>LISTA (${totalQuantitySold})</button>
-								${!isArchived ? `<button data-event-id="${event.id}" class="edit-event-btn bg-blue-600 hover:bg-blue-500 text-white px-3 py-1 rounded-none text-sm font-pixel">EDITAR</button>` : ''}
-								<button data-event-id="${event.id}" class="archive-event-btn ${isArchived ? 'bg-gray-500 cursor-not-allowed' : 'bg-yellow-600 hover:bg-yellow-500'} text-white px-3 py-1 rounded-none text-sm font-pixel" ${isArchived ? 'disabled' : ''}>
+							
+							<!-- BOTONES: Grid en móvil para aprovechar espacio, Flex en desktop -->
+							<div class="w-full sm:w-auto grid grid-cols-2 sm:flex sm:flex-wrap gap-2 mt-2 sm:mt-0">
+								<button data-event-id="${event.id}" class="view-tickets-btn bg-green-600 hover:bg-green-500 text-white px-2 py-2 rounded-none text-xs sm:text-sm font-pixel w-full sm:w-auto ${purchasedTicketsCount === 0 ? 'opacity-50 cursor-not-allowed' : ''}" ${purchasedTicketsCount === 0 ? 'disabled' : ''}>
+									LISTA (${totalQuantitySold})
+								</button>
+								${!isArchived ? `<button data-event-id="${event.id}" class="edit-event-btn bg-blue-600 hover:bg-blue-500 text-white px-2 py-2 rounded-none text-xs sm:text-sm font-pixel w-full sm:w-auto">EDITAR</button>` : ''}
+								<button data-event-id="${event.id}" class="archive-event-btn ${isArchived ? 'bg-gray-500 cursor-not-allowed' : 'bg-yellow-600 hover:bg-yellow-500'} text-white px-2 py-2 rounded-none text-xs sm:text-sm font-pixel w-full sm:w-auto" ${isArchived ? 'disabled' : ''}>
 									${isArchived ? 'ARCHIVADO' : 'ARCHIVAR'}
 								</button>
-								<button data-event-id="${event.id}" class="delete-event-btn bg-red-600 hover:bg-red-500 text-white px-3 py-1 rounded-none text-sm font-pixel">ELIMINAR</button>
+								<button data-event-id="${event.id}" class="delete-event-btn bg-red-600 hover:bg-red-500 text-white px-2 py-2 rounded-none text-xs sm:text-sm font-pixel w-full sm:w-auto">
+									ELIMINAR
+								</button>
 							</div>
 						</div>
 						<div class="mt-2">
 							<div class="flex justify-between items-center text-sm font-pixel ${isArchived ? 'text-gray-500' : 'text-gray-300'} mb-1">
-								<span>ENTRADAS VENDIDAS (TOTAL)</span>
-								<!-- Usar totalQuantitySold para la barra -->
+								<span>ENTRADAS VENDIDAS</span>
 								<span>[${totalQuantitySold} / ${capacityText}]</span>
 							</div>
 							<div class="w-full bg-gray-600 rounded-none h-4 border border-gray-400 overflow-hidden">
 								<div class="bg-green-500 h-full rounded-none transition-all duration-300" style="width: ${barWidthPercent}%;"></div>
 							</div>
-							<div class="text-sm ${isArchived ? 'text-gray-500' : 'text-gray-300'} mt-1">
-								<!-- Usar purchasedTicketsCount para los registros -->
-								Registros de compra: <strong>${purchasedTicketsCount}</strong>
+							<div class="text-sm ${isArchived ? 'text-gray-500' : 'text-gray-300'} mt-1 flex justify-between">
+								<span>Compras: <strong>${purchasedTicketsCount}</strong></span>
 							</div>
 						</div>`;
 				adminEventListUl.appendChild(item);
@@ -6807,6 +6836,15 @@ window.addEventListener('DOMContentLoaded', async () => {
 	document.querySelectorAll('[data-admin-page]').forEach(el => adminPages[el.dataset.adminPage] = el);
 	document.querySelectorAll('[data-admin-nav]').forEach(el => adminNavLinks[el.dataset.adminNav] = el);
 	document.querySelectorAll('#mobile-menu a[data-nav]').forEach(el => mobileNavLinks[el.dataset.nav] = el);
+
+	// Listeners Filtros de Eventos Admin
+	document.querySelectorAll('.event-filter-btn').forEach(btn => {
+		addTrackedListener(btn, 'click', (e) => {
+			e.preventDefault();
+			currentEventFilter = e.currentTarget.dataset.filter;
+			renderAdminEvents(); // Re-renderizar con el nuevo filtro
+		});
+	});
 
 	// Listener de navegación principal, móvil y secundario
 	document.querySelectorAll('[data-nav]').forEach(link => {
