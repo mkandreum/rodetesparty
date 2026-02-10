@@ -20,7 +20,7 @@ if ($data === null) {
 // Validate CSRF token for admin users
 if ($isAdmin) {
     $csrfToken = $data['csrf_token'] ?? '';
-    if (empty($csrfToken) || !validateCSRFToken($csrfToken)) {
+    if (!validateCSRFToken($csrfToken)) {
         http_response_code(403);
         echo json_encode(['success' => false, 'message' => 'Token de seguridad inválido']);
         exit;
