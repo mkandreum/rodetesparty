@@ -17,7 +17,7 @@ if ($data === null) {
     exit;
 }
 
-// Validate CSRF token if present (for logged in users)
+// Validate CSRF token for admin users
 if ($isAdmin) {
     $csrfToken = $data['csrf_token'] ?? '';
     if (!validateCSRFToken($csrfToken)) {

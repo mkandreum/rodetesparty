@@ -748,7 +748,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 			}
 
 			const dataToSave = {
-				csrf_token: window.PHP_CSRF_TOKEN,
+				csrf_token: window.PHP_CSRF_TOKEN || '',
 				tickets: allTickets || []
 			};
 			const response = await fetch(SAVE_TICKETS_URL, {
@@ -809,7 +809,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 			}
 
 			const dataToSave = {
-				csrf_token: window.PHP_CSRF_TOKEN,
+				csrf_token: window.PHP_CSRF_TOKEN || '',
 				sales: allMerchSales || []
 			};
 			const response = await fetch(SAVE_MERCH_SALES_URL, {
