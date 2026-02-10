@@ -664,8 +664,8 @@ window.addEventListener('DOMContentLoaded', async () => {
 	 */
 	async function saveAppState() {
 		try {
-			// Check CSRF token is available
-			if (!window.PHP_CSRF_TOKEN) {
+			// Check CSRF token is available (required for admin operations)
+			if (!window.PHP_CSRF_TOKEN || window.PHP_CSRF_TOKEN === '') {
 				console.error('CSRF token not available');
 				showInfoModal("Error de seguridad: token de sesión no disponible. Por favor, recarga la página.", true);
 				return;
@@ -742,8 +742,10 @@ window.addEventListener('DOMContentLoaded', async () => {
 	 */
 	async function saveTicketState() {
 		try {
-			// Note: window.PHP_CSRF_TOKEN is empty string for non-admin users, 
-			// valid token for admins. PHP validates only for admins.
+			// Note: window.PHP_CSRF_TOKEN is:
+			// - Valid token string for admin users (required for validation)
+			// - Empty string "" for non-admin users (validation skipped in PHP)
+			// The || '' fallback handles edge cases where the variable might be undefined
 			const dataToSave = {
 				csrf_token: window.PHP_CSRF_TOKEN || '',
 				tickets: allTickets || []
@@ -800,8 +802,10 @@ window.addEventListener('DOMContentLoaded', async () => {
 	 */
 	async function saveMerchSalesState() {
 		try {
-			// Note: window.PHP_CSRF_TOKEN is empty string for non-admin users,
-			// valid token for admins. PHP validates only for admins.
+			// Note: window.PHP_CSRF_TOKEN is:
+			// - Valid token string for admin users (required for validation)
+			// - Empty string "" for non-admin users (validation skipped in PHP)
+			// The || '' fallback handles edge cases where the variable might be undefined
 			const dataToSave = {
 				csrf_token: window.PHP_CSRF_TOKEN || '',
 				sales: allMerchSales || []
