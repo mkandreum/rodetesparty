@@ -665,7 +665,8 @@ window.addEventListener('DOMContentLoaded', async () => {
 	async function saveAppState() {
 		try {
 			// Check CSRF token is available (required for admin operations)
-			if (!window.PHP_CSRF_TOKEN || window.PHP_CSRF_TOKEN === '') {
+			// Note: Empty string is falsy, so this catches both undefined and ""
+			if (!window.PHP_CSRF_TOKEN) {
 				console.error('CSRF token not available');
 				showInfoModal("Error de seguridad: token de sesión no disponible. Por favor, recarga la página.", true);
 				return;

@@ -28,8 +28,9 @@ if ($isAdmin) {
 }
 
 // Extract sales from data structure
-// Backward compatibility: The 'sales' key will exist in the new format (sent by app.js).
-// Fallback to $data handles legacy code or direct API calls that might send sales array directly.
+// New format from app.js: {csrf_token: "...", sales: [...]}
+// Legacy/direct API format: [...] (array sent directly)
+// The ?? fallback ensures we handle both formats correctly
 $newSales = $data['sales'] ?? $data;
 if (!is_array($newSales)) {
     http_response_code(400);

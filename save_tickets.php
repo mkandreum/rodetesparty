@@ -28,8 +28,9 @@ if ($isAdmin) {
 }
 
 // Extract tickets from data structure
-// Backward compatibility: The 'tickets' key will exist in the new format (sent by app.js).
-// Fallback to $data handles legacy code or direct API calls that might send tickets array directly.
+// New format from app.js: {csrf_token: "...", tickets: [...]}
+// Legacy/direct API format: [...] (array sent directly)
+// The ?? fallback ensures we handle both formats correctly
 $newTickets = $data['tickets'] ?? $data;
 if (!is_array($newTickets)) {
     http_response_code(400);
