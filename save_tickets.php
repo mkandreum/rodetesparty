@@ -28,6 +28,8 @@ if ($isAdmin) {
 }
 
 // Extract tickets from data structure
+// For backward compatibility: if 'tickets' key exists (new format with CSRF token),
+// use it; otherwise fall back to $data itself (old format for non-admin ticket purchases)
 $newTickets = $data['tickets'] ?? $data;
 if (!is_array($newTickets)) {
     http_response_code(400);

@@ -664,6 +664,13 @@ window.addEventListener('DOMContentLoaded', async () => {
 	 */
 	async function saveAppState() {
 		try {
+			// Check CSRF token is available
+			if (!window.PHP_CSRF_TOKEN) {
+				console.error('CSRF token not available');
+				showInfoModal("Error de seguridad: token de sesión no disponible. Por favor, recarga la página.", true);
+				return;
+			}
+
 			// Prepara los datos a guardar
 			const stateToSave = {
 				csrf_token: window.PHP_CSRF_TOKEN,
@@ -735,6 +742,11 @@ window.addEventListener('DOMContentLoaded', async () => {
 	 */
 	async function saveTicketState() {
 		try {
+			// Check CSRF token is available (for admin operations)
+			if (!window.PHP_CSRF_TOKEN) {
+				console.warn('CSRF token not available - may fail if admin is modifying tickets');
+			}
+
 			const dataToSave = {
 				csrf_token: window.PHP_CSRF_TOKEN,
 				tickets: allTickets || []
@@ -791,6 +803,11 @@ window.addEventListener('DOMContentLoaded', async () => {
 	 */
 	async function saveMerchSalesState() {
 		try {
+			// Check CSRF token is available (for admin operations)
+			if (!window.PHP_CSRF_TOKEN) {
+				console.warn('CSRF token not available - may fail if admin is modifying sales');
+			}
+
 			const dataToSave = {
 				csrf_token: window.PHP_CSRF_TOKEN,
 				sales: allMerchSales || []

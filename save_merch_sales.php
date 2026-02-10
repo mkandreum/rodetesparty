@@ -28,6 +28,8 @@ if ($isAdmin) {
 }
 
 // Extract sales from data structure
+// For backward compatibility: if 'sales' key exists (new format with CSRF token),
+// use it; otherwise fall back to $data itself (old format for non-admin purchases)
 $newSales = $data['sales'] ?? $data;
 if (!is_array($newSales)) {
     http_response_code(400);
