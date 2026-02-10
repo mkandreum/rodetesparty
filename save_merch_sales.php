@@ -28,8 +28,8 @@ if ($isAdmin) {
 }
 
 // Extract sales from data structure
-// For backward compatibility: if 'sales' key exists (new format with CSRF token),
-// use it; otherwise fall back to $data itself (old format for non-admin purchases)
+// Backward compatibility: The 'sales' key will exist in the new format (sent by app.js).
+// Fallback to $data handles legacy code or direct API calls that might send sales array directly.
 $newSales = $data['sales'] ?? $data;
 if (!is_array($newSales)) {
     http_response_code(400);

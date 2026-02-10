@@ -28,8 +28,8 @@ if ($isAdmin) {
 }
 
 // Extract tickets from data structure
-// For backward compatibility: if 'tickets' key exists (new format with CSRF token),
-// use it; otherwise fall back to $data itself (old format for non-admin ticket purchases)
+// Backward compatibility: The 'tickets' key will exist in the new format (sent by app.js).
+// Fallback to $data handles legacy code or direct API calls that might send tickets array directly.
 $newTickets = $data['tickets'] ?? $data;
 if (!is_array($newTickets)) {
     http_response_code(400);

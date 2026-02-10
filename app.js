@@ -742,10 +742,10 @@ window.addEventListener('DOMContentLoaded', async () => {
 	 */
 	async function saveTicketState() {
 		try {
-			// Note: window.PHP_CSRF_TOKEN is:
-			// - Valid token string for admin users (required for validation)
-			// - Empty string "" for non-admin users (validation skipped in PHP)
-			// The || '' fallback handles edge cases where the variable might be undefined
+			// Note: window.PHP_CSRF_TOKEN is set by index.php (line 62):
+			// - Valid token string for logged-in admin users (required for CSRF validation)
+			// - Explicitly set to empty string "" for non-logged-in users by PHP
+			// The || '' fallback handles unlikely edge cases (script load order issues)
 			const dataToSave = {
 				csrf_token: window.PHP_CSRF_TOKEN || '',
 				tickets: allTickets || []
@@ -802,10 +802,10 @@ window.addEventListener('DOMContentLoaded', async () => {
 	 */
 	async function saveMerchSalesState() {
 		try {
-			// Note: window.PHP_CSRF_TOKEN is:
-			// - Valid token string for admin users (required for validation)
-			// - Empty string "" for non-admin users (validation skipped in PHP)
-			// The || '' fallback handles edge cases where the variable might be undefined
+			// Note: window.PHP_CSRF_TOKEN is set by index.php (line 62):
+			// - Valid token string for logged-in admin users (required for CSRF validation)
+			// - Explicitly set to empty string "" for non-logged-in users by PHP
+			// The || '' fallback handles unlikely edge cases (script load order issues)
 			const dataToSave = {
 				csrf_token: window.PHP_CSRF_TOKEN || '',
 				sales: allMerchSales || []
