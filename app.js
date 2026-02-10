@@ -742,11 +742,8 @@ window.addEventListener('DOMContentLoaded', async () => {
 	 */
 	async function saveTicketState() {
 		try {
-			// Check CSRF token is available (for admin operations)
-			if (!window.PHP_CSRF_TOKEN) {
-				console.warn('CSRF token not available - may fail if admin is modifying tickets');
-			}
-
+			// Note: window.PHP_CSRF_TOKEN is empty string for non-admin users, 
+			// valid token for admins. PHP validates only for admins.
 			const dataToSave = {
 				csrf_token: window.PHP_CSRF_TOKEN || '',
 				tickets: allTickets || []
@@ -803,11 +800,8 @@ window.addEventListener('DOMContentLoaded', async () => {
 	 */
 	async function saveMerchSalesState() {
 		try {
-			// Check CSRF token is available (for admin operations)
-			if (!window.PHP_CSRF_TOKEN) {
-				console.warn('CSRF token not available - may fail if admin is modifying sales');
-			}
-
+			// Note: window.PHP_CSRF_TOKEN is empty string for non-admin users,
+			// valid token for admins. PHP validates only for admins.
 			const dataToSave = {
 				csrf_token: window.PHP_CSRF_TOKEN || '',
 				sales: allMerchSales || []
