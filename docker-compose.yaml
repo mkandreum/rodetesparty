@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  rodetes-app:
+    build: .
+    restart: always
+    expose:
+      - "80"
+    environment:
+      - ADMIN_EMAIL=${ADMIN_EMAIL:-admin@rodetes.com}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin}
+    volumes:
+      - ./data_private:/var/www/data_private
+      - ./uploads:/var/www/html/uploads

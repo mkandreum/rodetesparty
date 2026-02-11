@@ -1,0 +1,56 @@
+# Dependencies
+node_modules/
+vendor/
+
+# Environment variables
+.env
+.env.local
+docker/.env
+
+# Data files (contienen información sensible)
+/var/www/data_private/
+*.json
+!manifest.json
+!package.json
+
+# Uploads (archivos subidos por usuarios)
+uploads/*
+!uploads/.gitkeep
+
+# Logs
+*.log
+error_log
+access_log
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Backups
+*.bak
+*.backup
+backups/
+
+# PHP
+composer.phar
+composer.lock
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Sensitive config
+smtp_config.json
+login_attempts.json
+datos_app.json
+entradas_db.json
+merch_vendido.json
