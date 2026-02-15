@@ -280,7 +280,7 @@ Frontend (app.js)
 **Funcionalidades**:
 - ✅ Upload de imágenes (JPEG, PNG, GIF, WebP)
 - ✅ Validación de tipo MIME
-- ✅ Validación de tamaño (max 5MB)
+- ✅ Validación de tamaño (max 10MB)
 - ✅ Generación automática de thumbnails WebP 400x400
 - ✅ Nombres únicos (uniqid)
 - ✅ Solo accesible por admin

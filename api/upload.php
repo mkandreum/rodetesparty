@@ -159,8 +159,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit;
         }
 
-        // Validar tamaño (Max 10MB para video, 5MB para imagen)
-        $maxSize = ($uploadType === 'video') ? 10 * 1024 * 1024 : 5 * 1024 * 1024;
+        // Validar tamaño (Max 10MB para video, 10MB para imagen)
+        $maxSize = ($uploadType === 'video') ? 10 * 1024 * 1024 : 10 * 1024 * 1024;
         if ($fileSize > $maxSize) {
             http_response_code(400);
             $maxSizeMB = $maxSize / (1024 * 1024);

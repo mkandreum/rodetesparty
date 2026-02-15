@@ -595,7 +595,7 @@ $csrfToken = $isLoggedIn ? generateCSRFToken() : '';
                                     <input type="text" id="event-poster-url" name="event-poster-url" class="w-full mb-2"
                                         placeholder="Pega URL o sube archivo (uploads/...)">
                                     <input type="file" id="event-poster-upload" accept="image/*" class="w-full text-sm">
-                                    <p class="text-xs text-gray-400 mt-1">Sube una imagen (JPG, PNG, GIF, max 5MB). La
+                                    <p class="text-xs text-gray-400 mt-1">Sube una imagen (JPG, PNG, GIF, max 10MB). La
                                         subida rellena la URL por ti.</p>
                                 </div>
                             </div>
@@ -642,7 +642,7 @@ $csrfToken = $isLoggedIn ? generateCSRFToken() : '';
                                         <input type="text" id="app-logo-url" name="app-logo-url" class="w-full mb-2"
                                             placeholder="Pega URL o sube imagen (uploads/...)">
                                         <input type="file" id="app-logo-upload" accept="image/*" class="w-full text-sm">
-                                        <p class="text-xs text-gray-400 mt-1">Sube una imagen (max 5MB). Recomendado
+                                        <p class="text-xs text-gray-400 mt-1">Sube una imagen (max 10MB). Recomendado
                                             fondo transparente (PNG).</p>
                                     </div>
                                     <div class="space-y-2">
@@ -653,7 +653,7 @@ $csrfToken = $isLoggedIn ? generateCSRFToken() : '';
                                             class="w-full mb-2" placeholder="Pega URL o sube imagen (uploads/...)">
                                         <input type="file" id="ticket-logo-upload" accept="image/*"
                                             class="w-full text-sm">
-                                        <p class="text-xs text-gray-400 mt-1">Sube una imagen (max 5MB). Aparecerá en el
+                                        <p class="text-xs text-gray-400 mt-1">Sube una imagen (max 10MB). Aparecerá en el
                                             ticket descargable.</p>
                                     </div>
                                 </div>
@@ -671,7 +671,7 @@ $csrfToken = $isLoggedIn ? generateCSRFToken() : '';
                                         placeholder="Pega URL o sube archivo (imagen o vídeo)">
                                     <input type="file" id="banner-upload" accept="image/*,video/mp4,video/webm"
                                         class="w-full text-sm">
-                                    <p class="text-xs text-gray-400 mt-1">Sube imagen(5MB)/vídeo(10MB) o pega URL. La
+                                    <p class="text-xs text-gray-400 mt-1">Sube imagen(10MB)/vídeo(10MB) o pega URL. La
                                         subida rellena la URL.</p>
                                 </div>
                             </div>
@@ -805,7 +805,7 @@ $csrfToken = $isLoggedIn ? generateCSRFToken() : '';
                                     class="block text-sm font-pixel text-lg text-gray-300 mb-1">SUBIR NUEVAS
                                     IMÁGENES</label>
                                 <input type="file" id="gallery-upload" accept="image/*" multiple class="w-full text-sm">
-                                <p class="text-xs text-gray-400 mt-1">Sube una o varias imágenes (max 5MB c/u).
+                                <p class="text-xs text-gray-400 mt-1">Sube una o varias imágenes (max 10MB c/u).
                                     Aparecerán en la rejilla. Después pulsa "Guardar Galería".</p>
                             </div>
 
@@ -844,7 +844,7 @@ $csrfToken = $isLoggedIn ? generateCSRFToken() : '';
                                     <input type="text" id="drag-cover-url" name="drag-cover-url" class="w-full mb-2"
                                         placeholder="Pega URL o sube archivo (uploads/...)">
                                     <input type="file" id="drag-cover-upload" accept="image/*" class="w-full text-sm">
-                                    <p class="text-xs text-gray-400 mt-1">Sube una imagen (max 5MB). La subida rellena
+                                    <p class="text-xs text-gray-400 mt-1">Sube una imagen (max 10MB). La subida rellena
                                         la URL por ti.</p>
                                 </div>
 
@@ -863,7 +863,7 @@ $csrfToken = $isLoggedIn ? generateCSRFToken() : '';
                                         (Galería)</label>
                                     <input type="file" id="drag-gallery-upload" accept="image/*" multiple
                                         class="w-full text-sm">
-                                    <p class="text-xs text-gray-400 mt-1">Sube una o varias imágenes (max 5MB c/u).
+                                    <p class="text-xs text-gray-400 mt-1">Sube una o varias imágenes (max 10MB c/u).
                                         Aparecerán en la rejilla. Después pulsa "Guardar Drag".</p>
                                 </div>
                             </div>
@@ -918,7 +918,7 @@ $csrfToken = $isLoggedIn ? generateCSRFToken() : '';
                                             class="w-full mb-2" placeholder="Pega URL o sube archivo (uploads/...)">
                                         <input type="file" id="web-merch-image-upload" accept="image/*"
                                             class="w-full text-sm">
-                                        <p class="text-xs text-gray-400 mt-1">Sube una imagen (max 5MB).</p>
+                                        <p class="text-xs text-gray-400 mt-1">Sube una imagen (max 10MB).</p>
                                     </div>
                                 </div>
                                 <div class="flex gap-4 mt-6">
@@ -1001,7 +1001,7 @@ $csrfToken = $isLoggedIn ? generateCSRFToken() : '';
                                             class="w-full mb-2" placeholder="Pega URL o sube archivo (uploads/...)">
                                         <input type="file" id="drag-merch-image-upload" accept="image/*"
                                             class="w-full text-sm">
-                                        <p class="text-xs text-gray-400 mt-1">Sube una imagen (max 5MB).</p>
+                                        <p class="text-xs text-gray-400 mt-1">Sube una imagen (max 10MB).</p>
                                     </div>
                                 </div>
                                 <div class="flex gap-4 mt-6">
