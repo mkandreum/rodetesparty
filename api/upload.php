@@ -22,8 +22,14 @@ if (!validateCSRFToken($csrfToken)) {
 }
 
 // 2. Configuración
-$uploadDir = 'uploads/'; // Directorio relativo a este script
-$thumbnailDir = $uploadDir . 'thumbnails/'; // Directorio para miniaturas
+// IMPORTANTE: Usar ruta absoluta relativa a la raíz del proyecto (un nivel arriba de /api/)
+// para que los archivos se guarden en /uploads/ y no en /api/uploads/
+$projectRoot = realpath(__DIR__ . '/..') . '/';
+$uploadDir = $projectRoot . 'uploads/'; // Directorio absoluto: /ruta/proyecto/uploads/
+$thumbnailDir = $uploadDir . 'thumbnails/'; // Directorio absoluto: /ruta/proyecto/uploads/thumbnails/
+// Prefijo para URLs devueltas al frontend (rutas relativas desde la raíz web)
+$uploadUrlPrefix = 'uploads/';
+$thumbnailUrlPrefix = 'uploads/thumbnails/';
 if (!file_exists($uploadDir)) {
     mkdir($uploadDir, 0755, true);
 }
@@ -145,7 +151,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Validar tipo de archivo
         $allowedImages = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
         $allowedVideos = ['video/mp4', 'video/webm'];
-        
+
         $isAllowed = false;
         if ($uploadType === 'video') {
             $isAllowed = in_array($fileType, $allowedVideos);
@@ -179,16 +185,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Solo generar miniatura si es imagen
             if ($uploadType === 'image') {
                 $thumbResult = generateWebPThumbnail($destPath, $thumbnailDir);
-                $thumbnailPath = $thumbResult['path'];
+                // Convertir ruta absoluta del thumbnail a ruta URL relativa
+                if ($thumbResult['path']) {
+                    $thumbFileName = basename($thumbResult['path']);
+                    $thumbnailPath = $thumbnailUrlPrefix . $thumbFileName;
+                }
                 $thumbnailError = $thumbResult['error'];
             }
 
-            // Éxito
+            // Éxito - devolver rutas URL relativas (no absolutas del filesystem)
+            $urlPath = $uploadUrlPrefix . $newFileName;
             echo json_encode([
                 'success' => true,
                 'message' => 'Archivo subido correctamente.',
-                'url' => $destPath, // Ruta de imagen/video completa
-                'thumbnail' => $thumbnailPath, // Ruta de miniatura WebP (o null si no aplica/falló)
+                'url' => $urlPath, // Ruta URL relativa: uploads/img_xxx.jpg
+                'thumbnail' => $thumbnailPath, // Ruta URL relativa: uploads/thumbnails/img_xxx.webp (o null)
                 'thumbnail_error' => $thumbnailError // Debug info
             ]);
         } else {
