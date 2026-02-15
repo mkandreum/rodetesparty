@@ -2032,7 +2032,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 							<img src="${coverImage}" alt="${event.name || 'Evento'}" class="w-full" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/600x400/000/fff?text=Error&font=vt323';">
 						</div>
 						<div class="p-6">
-							<h3 class="text-3xl font-pixel text-white text-glow-white truncate glitch-hover">${event.name || 'Evento sin nombre'}</h3>
+							<h3 class="text-3xl font-pixel text-white text-glow-white break-words glitch-hover">${event.name || 'Evento sin nombre'}</h3>
 							 <p class="text-gray-400 font-pixel text-lg mt-1">${photoCount} FOTO${photoCount !== 1 ? 'S' : ''}</p>
 						</div>`;
 
@@ -2092,7 +2092,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 							<img src="${coverImage}" alt="${event.name || 'Evento'}" class="w-full" onerror="this.onerror=null;this.src='https://placehold.co/600x400/000/fff?text=Error&font=vt323';">
 						</div>
 						<div class="p-6">
-							<h3 class="text-3xl font-pixel text-white text-glow-white truncate glitch-hover">${event.name || 'Evento sin nombre'}</h3>
+							<h3 class="text-3xl font-pixel text-white text-glow-white break-words glitch-hover">${event.name || 'Evento sin nombre'}</h3>
 							<p class="text-sm text-gray-500 font-pixel">${eventDateStr || 'Fecha desconocida'}</p>
 							<p class="text-gray-400 font-pixel text-lg mt-1">${photoCount} FOTO${photoCount !== 1 ? 'S' : ''}</p>
 						</div>`;
