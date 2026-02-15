@@ -1040,7 +1040,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 		}
 
 		// Validar tamaño
-		const maxSizeMB = fileTypeForUpload === 'video' ? 10 : 5; // 10MB vídeo, 5MB imagen
+		const maxSizeMB = fileTypeForUpload === 'video' ? 10 : 10; // 10MB vídeo, 10MB imagen
 		const maxSizeBytes = maxSizeMB * 1024 * 1024;
 		if (file.size > maxSizeBytes) {
 			showInfoModal(`Archivo "${file.name}" demasiado grande (Máx ${maxSizeMB}MB).`, true);
@@ -6051,7 +6051,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 		}
 
 		// Validar tamaño
-		const maxSizeMB = fileTypeForUpload === 'video' ? 10 : 5; // 10MB vídeo, 5MB imagen
+		const maxSizeMB = fileTypeForUpload === 'video' ? 10 : 10; // 10MB vídeo, 10MB imagen
 		const maxSizeBytes = maxSizeMB * 1024 * 1024;
 		if (file.size > maxSizeBytes) {
 			showInfoModal(`Archivo "${file.name}" demasiado grande (Máx ${maxSizeMB}MB).`, true);
